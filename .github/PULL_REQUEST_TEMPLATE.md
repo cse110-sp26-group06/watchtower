@@ -45,15 +45,15 @@ I have tested that my changes fully resolve the linked issue ...
 
 # Definition of Done(DoD): you have checked that
 
-- [ ]Code works and is committed
-- [ ]Tests added (unit and/or E2E as appropriate) and passing
-- [ ]JSDoc on any new public surfaces
-- [ ]Linting passes locally and in CI
-- [ ]Docs updated (README, Wiki, this primer if relevant)
-- [ ]Commit messages follow Conventional Commits
-- [ ]PR description discloses any AI usage
-- [ ]If >300 LoC: reviewed by another human team member
-- [ ]Issue moved to Done on the project board
+- [ ] Code works and is committed
+- [ ] Tests added (unit and/or E2E as appropriate) and passing
+- [ ] JSDoc on any new public surfaces
+- [ ] Linting passes locally and in CI
+- [ ] Docs updated (README, Wiki, this primer if relevant)
+- [ ] Commit messages follow Conventional Commits
+- [ ] PR description discloses any AI usage
+- [ ] If >300 LoC: reviewed by another human team member
+- [ ] Issue moved to Done on the project board
 
 # Screenshots
 
