@@ -51,9 +51,9 @@ Larger or recurring issues can be escalated into GitHub Issues automatically, dr
 
 | Sub-team | Size | Members |
 |---|---|---|
-| Client SDK | 3 | Aidan, Maxime, Sean |
+| Client SDK | 2 | Aidan, Maxime |
 | Backend | 3 | Arpita, Kevin, Ethan |
-| Dashboard | 2 | Stephanie, Dishita |
+| Dashboard | 3 | Stephanie, Dishita, Sean |
 | Process / Docs | 2 | Zayn, Nicholas |
 
 ---
