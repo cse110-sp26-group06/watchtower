@@ -1,6 +1,6 @@
 # Info
 
-Closes **[ISSUE NUMBER]**. (If there is no issue for this pull request yet, please create one or
+Closes #[issue number]. (If there is no issue for this pull request yet, please create one or
 delete this line if the pull request is for a very minor tweak).
 
 # Description
