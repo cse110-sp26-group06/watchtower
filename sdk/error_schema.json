@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "properties": {
+    "event_type": { "const": "error" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "api_key": { "type": "string" },
+    "service": { "type": "string" },
+    "environment": { "type": "string" },
+
+    "payload": {
+      "type": "object",
+      "properties": {
+        "message": { "type": "string" },
+        "type": { "type": "string" },
+        "stack_trace": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "file": { "type": "string" },
+              "line": { "type": "number" },
+              "column": { "type": "number" }
+            },
+            "required": ["file", "line", "column"]
+          }
+        },
+        "lineno": { "type": "number" },
+        "colno": { "type": "number" },
+        "severity": { "type": "string" }
+      },
+      "required": ["message", "stack_trace"]
+    }
+  },
+  "required": ["event_type", "timestamp", "api_key", "service", "environment", "payload"]
+}
