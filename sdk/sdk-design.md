@@ -38,6 +38,7 @@
     - What does authentication look like?
     - Where do the POSTs go?
     - What does backend respond with?
+  - Tentative schemas for error, log, performance were made
 
 ### 5) Config and init
 ```
