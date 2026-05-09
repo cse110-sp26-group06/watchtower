@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "event_type": { "const": "log" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "api_key": { "type": "string" },
+    "service": { "type": "string" },
+    "environment": { "type": "string" },
+
+    "payload": {
+      "type": "object",
+      "properties": {
+        "level": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["level", "message", "timestamp"]
+    }
+  },
+  "required": ["event_type", "timestamp", "api_key", "service", "environment", "payload"]
+}
