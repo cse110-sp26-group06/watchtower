@@ -17,23 +17,13 @@
             "properties": {
               "message": { "type": "string" },
               "type": { "type": "string" },
-              "stack_trace": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "file": { "type": "string" },
-                    "line": { "type": "number" },
-                    "column": { "type": "number" }
-                  },
-                  "required": ["file", "line", "column"]
-                }
-              },
+              "stack_trace": {"type": "string"},
+              "file": {"type": "string"},
               "lineno": { "type": "number" },
               "colno": { "type": "number" },
               "severity": { "type": "string" }
             },
-            "required": ["message", "stack_trace"]
+            "required": ["message", "type", "stack_trace", "file", "lineno", "colno", "severity"]
           }
         },
         "required": ["event_type", "timestamp", "payload"]

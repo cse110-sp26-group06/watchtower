@@ -1,0 +1,31 @@
+import { ErrorBatch, LogBatch, SpanBatch } from "../types";
+
+/**
+ * Sends a batch of error events to the Watchtower ingestion API.
+ *
+ * This function accepts an EventBatch object that conforms to the
+ * JSON schema used by the backend. It serializes the batch into JSON
+ * and posts it to the configured ingestion endpoint.
+ *
+ * @param batch - A fully validated EventBatch containing one or more error events.
+ * @returns A Promise that resolves when the request completes.
+ */
+export async function sendErrorBatch(batch: ErrorBatch): Promise<void> { 
+    try {
+        const res = await fetch("ENDPOINT FOR ERROR", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + batch.api_key //FIGURE OUT API KEY
+            },
+            body: JSON.stringify(batch)
+        });
+
+        if (!res.ok) {
+            console.error("Failed to send event", await res.text());
+        }
+    } catch (err) {
+        console.error("Network error while sending batch:", err);
+    }
+}
+

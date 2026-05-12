@@ -1,0 +1,35 @@
+{
+  "api_key": "test_123",
+  "service": "checkout",
+  "environment": "production",
+  "events": [
+    {
+      "event_type": "error",
+      "timestamp": "2026-05-11T21:34:00Z",
+      "payload": {
+        "message": "TypeError: Cannot read properties of undefined (reading 'id')",
+        "type": "TypeError",
+        "stack_trace": [
+          { "file": "cart.js", "line": 88, "column": 22 }
+        ],
+        "lineno": 88,
+        "colno": 22,
+        "severity": "error"
+      }
+    },
+    {
+      "event_type": "error",
+      "timestamp": "2026-05-11T21:34:05Z",
+      "payload": {
+        "message": "NetworkError: Failed to fetch",
+        "type": "NetworkError",
+        "stack_trace": [
+          { "file": "api.js", "line": 12, "column": 9 }
+        ],
+        "lineno": 12,
+        "colno": 9,
+        "severity": "warning"
+      }
+    }
+  ]
+}
