@@ -64,6 +64,13 @@ Per the distribution ADR. If npm: publish package (private if appropriate) and v
 
 **Done when:** Someone outside the SDK sub-team can fetch, install, and use the SDK following only the README. Examples in the README run successfully against a deployed Backend.
 
+### SDK-6: Instrument testing app with SDK
+*(label: sub-team/sdk, type/feature)*
+ 
+Pairs with DOCS-6. Once the testing app is chosen and deployed, embed the SDK in it, verify events flow through to the deployed Backend, and add a few controlled error paths (intentional buttons or routes that throw known errors) so demos and the May 21 presentation have predictable events to surface.
+ 
+**Done when:** Testing app has the SDK embedded and is producing real events visible in the Dashboard. At least 2-3 controlled error paths exist and are documented for demo use.
+
 ---
 
 ## Backend
@@ -222,6 +229,13 @@ Pages: Home, Architecture Overview (placeholder), ADR Index, Contributor Guide s
 Review demos the spine end-to-end. Retro captures what went well, what didn't, and action items.
 
 **Done when:** Meeting held with all team members. Markdown at `/docs/retros/sprint-2.md`. Action items filed as Sprint 3 issues where applicable.
+
+### DOCS-6: Testing app ADR and traffic generation
+*(label: sub-team/docs, type/adr)*
+ 
+Write an ADR documenting the testing app choice. Options to consider: vibe-coding a small app from scratch, using the AI slot machine, or accepting an offering from CSE 135. Once the choice is locked, pair with SDK (SDK-6) to deploy the chosen app with the SDK instrumented, then circulate the deployed URL to classmates and friends to generate real traffic. Light synthetic traffic is fine to supplement, but mark it clearly as such.
+ 
+**Done when:** ADR merged. Testing app is deployed and sending events to the deployed Backend. External users (classmates/friends, not just team members) have visited the site and generated at least a handful of real events visible in the Dashboard.
 
 ---
 
