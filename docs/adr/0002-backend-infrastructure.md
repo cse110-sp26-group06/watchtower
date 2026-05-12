@@ -4,7 +4,7 @@
 
 - [ ] Pending
 - [ ] Rejected
-- [ ] Accepted
+- [x] Accepted
 
 ## Context and Problem Statement
 

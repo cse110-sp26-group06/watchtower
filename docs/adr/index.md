@@ -26,14 +26,8 @@ Each ADR carries one of the following statuses:
 
 | # | Title | Status | Date |
 |---|---|---|---|
-| *No ADRs yet — first ADRs will land in Sprint 1.* | | | |
-
-<!--
-As ADRs land, add rows like:
-
-| 0001 | [Infrastructure and storage](0001-infrastructure-and-storage.md) | Accepted | 2026-05-XX |
-| 0002 | [SDK distribution mechanism](0002-sdk-distribution-mechanism.md) | Accepted | 2026-05-XX |
--->
+| 0001 | [SDK distribution method](0001-sdk-distribution-method.md) | Accepted | 2026-05-11 |
+| 0002 | [Backend infrastructure](0002-backend-infrastructure.md) | Accepted | 2026-05-11 |
 
 ## Adding a New ADR
 

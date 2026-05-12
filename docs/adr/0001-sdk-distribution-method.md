@@ -2,9 +2,9 @@
 
 ## Status
 
-- [x] Pending
+- [ ] Pending
 - [ ] Rejected
-- [ ] Accepted
+- [x] Accepted
 
 ## Context and Problem Statement
 We need a way to package our software development kit (SDK) and a way to easily inject it into our user's project
