@@ -1,29 +1,11 @@
 {
   "name": "watchtower",
-  "type": "module",
   "version": "1.0.0",
-  "description": "> A lightweight observability tool for developers. Catch errors, surface performance issues, and collect user feedback — without the noise.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cse110-sp26-group06/watchtower.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/cse110-sp26-group06/watchtower/issues"
-  },
-  "homepage": "https://github.com/cse110-sp26-group06/watchtower#readme",
+  "type": "module", 
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@microsoft/eslint-formatter-sarif": "^3.1.0",
-    "eslint": "^10.3.0"
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0"
   }
 }
