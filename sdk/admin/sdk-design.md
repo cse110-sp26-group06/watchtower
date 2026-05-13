@@ -20,7 +20,7 @@
 - Performance Metrics
 - User Signals
 
-### 2) Event Normalization and Enrichment
+### 2) Event Normalization and Enrichment (Not Required)
 - Adds metadata to the captured event information
   - Stack trace
   - User/Session ID
@@ -28,8 +28,21 @@
 
 ### 3) Local Queue + Batching
 - Push events in a queue
-- Batch them every (# seconds or # events)
-- Compress
+  - Seperate queue for each event type
+- Post them once one of the two conditions are hit
+  - These conditions will have a base number but can also be changed on init by user
+  - They will also not be identical per event
+    - Errors need to be flushed quickly
+    - Logs have higher volume, flushed slowly
+    - Spans medium volume
+  - Conditions:
+    - Time based flush  
+    - Count-based flush 
+- Implement a batching engine which will:
+  - Maintain seperate queues for logs, errors, and spans
+  - Collect events as they occur
+  - Flush queues based on time or event count
+  - Send bacthes to the backend 
 
 ### 4) Transport Layer
 - HTTPS POST
