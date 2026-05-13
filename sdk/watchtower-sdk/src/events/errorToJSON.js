@@ -14,7 +14,7 @@ function handleError(event) {
       file: event.filename,
       lineno: event.lineno,
       colno: event.colno,
-      severity: "string", //TODO
+      severity: "UNDEFINED", //TODO
     }
   };
 }
