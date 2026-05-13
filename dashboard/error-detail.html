@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WatchTower — Error List</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/styles.css" />
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-name">WatchTower</span>
+      <span class="brand-sub">Observability Dashboard</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active">
+        <span class="nav-icon">⊙</span>
+        Error List
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⌇</span>
+        Performance
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">☐</span>
+        Feedback Inbox
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🔔</span>
+        Alert Settings
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚙</span>
+        Project Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-avatar">
+      <img src="https://api.dicebear.com/9.x/bottts/svg?seed=watchtower&backgroundColor=006af5" alt="avatar" />
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <div class="content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <h1 class="page-title">Error List</h1>
+      <button class="btn-configure">
+        <span>🔔</span> Configure Alerts
+      </button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label class="filter-label">[Filter: Severity]</label>
+        <select id="filterSeverity" class="filter-select">
+          <option value="">All Errors</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">[Filter: Time Range]</label>
+        <select id="filterSince" class="filter-select">
+          <option value="24h">Last 24h</option>
+          <option value="7d">Last 7d</option>
+          <option value="30d">Last 30d</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">[Filter: Status]</label>
+        <select id="filterStatus" class="filter-select">
+          <option value="unresolved">Unresolved</option>
+          <option value="resolved">Resolved</option>
+          <option value="">All</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Error list -->
+    <div id="listContainer"></div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination" style="display:none">
+      <span id="pageInfo" class="page-info"></span>
+      <div class="pagination-btns">
+        <button class="btn-page" id="prevBtn">← Prev</button>
+        <button class="btn-page" id="nextBtn">Next →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <script src="scripts/pages/errorList/errorList.js"></script>
+</body>
+</html>
