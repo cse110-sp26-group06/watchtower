@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="WatchTower — Error List. Monitor, filter, and triage application errors in real time." />
+  <title>Error List — WatchTower</title>
+
+  <link rel="stylesheet" href="styles/globals.css" />
+  <script src="scripts/pages/errorList/errorList.js" type="module"></script>
+</head>
+
+<body>
+  <!-- ── App Shell ──────────────────────────────────────────────── -->
+  <div id="app">
+
+    <!-- Left sidebar (injected by navbar.js) -->
+    <div id="navbar-root"></div>
+
+    <!-- ── Main Content ──────────────────────────────────────────── -->
+    <main id="main-content">
+
+      <!-- Page Header -->
+      <header class="page-header">
+        <h1 class="page-title">Error List</h1>
+        <a href="alerts.html" class="btn btn--outline" id="configure-alerts-btn">
+          <!-- bell icon inline -->
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M8.557 17.5a1.666 1.666 0 0 0 2.886 0" stroke="currentColor" stroke-width="1.667" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2.718 12.772A1.667 1.667 0 0 0 3.333 14.167h13.334a1.667 1.667 0 0 0 .615-3.228c-.968-.97-2.282-2.44-2.282-6.273a5 5 0 0 0-10 0c0 3.833-1.314 5.303-2.282 6.106Z" stroke="currentColor" stroke-width="1.667" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Configure Alerts
+        </a>
+      </header>
+
+      <!-- Filters -->
+      <section class="filters" aria-label="Error filters">
+        <div class="filter-group">
+          <label class="filter-label" for="filter-severity">Filter: Severity</label>
+          <select id="filter-severity" class="filter-select">
+            <option value="all">All Errors</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="filter-time">Filter: Time Range</label>
+          <select id="filter-time" class="filter-select">
+            <option value="24h">Last 24h</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" for="filter-status">Filter: Status</label>
+          <select id="filter-status" class="filter-select">
+            <option value="unresolved">Unresolved</option>
+            <option value="resolved">Resolved</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Error Cards List (populated by errorList.js) -->
+      <section id="error-list" class="error-list" aria-label="Error entries" aria-live="polite">
+        <!-- error cards rendered here -->
+      </section>
+
+    </main> 
+</div><!-- /#app -->
+<div id="toast"></div>
+
+<script src="scripts/pages/errorList/errorList.js" type="module"></script>
+</body>
+
+</html>
