@@ -1,10 +1,8 @@
-import { ErrorEvent, ErrorStackFrame } from "../types";
-
 window.addEventListener("error", (event) => {
   handleError(event);
 });
 
-function handleError(event): ErrorEvent {
+function handleError(event) {
 
   return {
     event_type: "error",
