@@ -30,7 +30,7 @@
 - Push events in a queue
   - Seperate queue for each event type
 - Post them once one of the two conditions are hit
-  - These conditions will have a base number but can also be changed on init by user
+  - These conditions will have a base number but maybe can also be changed on init by user
   - They will also not be identical per event
     - Errors need to be flushed quickly
     - Logs have higher volume, flushed slowly

@@ -7,7 +7,7 @@ import { sendErrorBatch, sendLogBatch, sendSpanBatch } from "../api";
  * @param {Array<Object>} batch - The array of events to send.
  * @returns {Promise<any>} The result of the underlying API call.
  */
-export const sendFn = async (type, batch) => {
+export const send = async (type, batch) => {
   const router = {
     error: sendErrorBatch,
     log: sendLogBatch,
