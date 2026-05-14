@@ -21,7 +21,8 @@ export default [
         rules: {
             "no-unused-vars": "warn",   // Warns if you leave variables unused
             "no-console": "off",        // Allows console.log
-            "semi": ["error", "always"] // Forces semicolons
+            "semi": ["error", "always"], // Forces semicolons
+            "browser" : true
         }
     },
     {
