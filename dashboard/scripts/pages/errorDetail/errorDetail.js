@@ -6,18 +6,17 @@
  * all detail sections into the page.
  */
 
-import { renderNavbar }   from '../../components/navbar.js';
-import { badgeClass }     from '../../components/errorCard.js';
+import { renderNavbar }     from '../../components/navbar.js';
+import { badgeClass }       from '../../components/errorCard.js';
 import { renderStackTrace } from './stackTrace.js';
-import { MOCK_ERRORS }    from '../../utils/constants.js';
-import { escHtml }        from '../../utils/dom.js';
-import { isErrorResolved, markErrorResolved, withResolvedStatus } from '../../utils/errorStatus.js';
-import { showToast }      from '../../utils/toast.js';
+import { MOCK_ERRORS, normalizeError } from '../../utils/constants.js';
+import { escHtml }          from '../../utils/dom.js';
+import { showToast }        from '../../utils/toast.js';
 
 renderNavbar('error-list');
 
 /* ── URL param ──────────────────────────────────────────────────── */
-const params = new URLSearchParams(window.location.search);
+const params  = new URLSearchParams(window.location.search);
 const errorId = params.get('id');
 
 /* ── DOM refs ───────────────────────────────────────────────────── */
@@ -25,9 +24,11 @@ const resolveBtn = document.getElementById('resolve-btn');
 
 /* ── Resolve button ─────────────────────────────────────────────── */
 /**
- * Updates the resolve button to match the current status.
+ * Updates the resolve button to reflect the error's current status.
+ * `status` is now the D1 column value ('resolved' | 'unresolved');
+ * no localStorage check needed — truth comes from the data.
+ *
  * @param {boolean} resolved
- * @returns {void}
  */
 function syncResolveButton(resolved) {
   if (!resolveBtn) return;
@@ -36,36 +37,71 @@ function syncResolveButton(resolved) {
   resolveBtn.disabled = resolved;
 }
 
-syncResolveButton(isErrorResolved(errorId));
+/**
+ * PATCHes the error status to 'resolved' on the backend,
+ * then updates the button on success.
+ */
+async function handleResolve() {
+  if (!errorId) return;
+  resolveBtn.disabled = true;
 
-resolveBtn?.addEventListener('click', () => {
-  if (!errorId || isErrorResolved(errorId)) return;
-  markErrorResolved(errorId);
-  syncResolveButton(true);
-  showToast('Error marked as resolved.');
-});
+  try {
+    // ── MOCK: remove this block when real API is ready ──────────
+    if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
+      await new Promise(r => setTimeout(r, 200));
+      syncResolveButton(true);
+      showToast('Error marked as resolved.');
+      return;
+    }
+    // ── END MOCK ─────────────────────────────────────────────────
+
+    const res = await fetch(`/api/errors/${encodeURIComponent(errorId)}`, {
+      method:  'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ status: 'resolved' }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+
+    syncResolveButton(true);
+    showToast('Error marked as resolved.');
+  } catch (err) {
+    console.error('[WatchTower] resolve failed:', err);
+    resolveBtn.disabled = false;          // let them retry
+    showToast('Could not resolve error: ' + err.message, true);
+  }
+}
+
+resolveBtn?.addEventListener('click', handleResolve);
 
 /* ── Fetch / mock ───────────────────────────────────────────────── */
 /**
- * Loads a single error from mock data or the API.
+ * Loads a single error by ID, normalizing the raw D1 row into the
+ * shape renderDetail() expects.
+ *
+ * Mock path  — finds the matching row in MOCK_ERRORS and normalizes it.
+ * Real path  — GETs /api/errors/:id and normalizes the returned row.
+ *
+ * `withResolvedStatus` is no longer called here: the D1 `status` column
+ * ('resolved' | 'unresolved') is preserved by normalizeError() as-is.
+ *
  * @param {string} id
- * @returns {Promise<object>}
+ * @returns {Promise<object>} Normalized error object
  */
 async function fetchError(id) {
-  // Mock path — remove when real API is ready
+  // ── MOCK: remove this block when real API is ready ──────────
   if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
     await new Promise(r => setTimeout(r, 300));
-    const found = MOCK_ERRORS.find(e => String(e.id) === String(id));
-    if (!found) throw new Error(`No error found with id "${id}"`);
-    return withResolvedStatus(found);
+    const raw = MOCK_ERRORS.find(e => String(e.id) === String(id));
+    if (!raw) throw new Error(`No error found with id "${id}"`);
+    return normalizeError(raw);
   }
+  // ── END MOCK ─────────────────────────────────────────────────
 
   const res = await fetch(`/api/errors/${encodeURIComponent(id)}`, {
     headers: { Accept: 'application/json' },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
-  const data = await res.json();
-  return withResolvedStatus(data);
+  return normalizeError(await res.json());
 }
 
 /* ── Timeline icon ──────────────────────────────────────────────── */
@@ -77,36 +113,47 @@ async function fetchError(id) {
 function timelineIcon(type) {
   switch (type) {
     case 'critical': return `<span class="timeline__dot timeline__dot--critical"></span>`;
-    case 'deploy': return `<span class="timeline__dot timeline__dot--deploy">⬆</span>`;
-    default: return `<span class="timeline__dot timeline__dot--info"></span>`;
+    case 'deploy':   return `<span class="timeline__dot timeline__dot--deploy">⬆</span>`;
+    default:         return `<span class="timeline__dot timeline__dot--info"></span>`;
   }
 }
 
 /* ── Render ─────────────────────────────────────────────────────── */
 /**
  * Renders the loaded error detail view.
- * @param {object} err
- * @returns {void}
+ *
+ * firstSeen / lastSeen are now ISO strings (from client_timestamp /
+ * server_timestamp). They're displayed as-is here; swap in a timeAgo()
+ * helper if you want relative formatting.
+ *
+ * @param {object} err  Normalized error object from normalizeError()
  */
 function renderDetail(err) {
-  const cls = badgeClass(err.severity);
-  const label = (err.severity ?? 'unknown').toUpperCase();
-  const message = escHtml(err.message ?? err.title ?? 'Unknown error');
+  // Initialise the resolve button from the data, not localStorage.
+  syncResolveButton(err.status === 'resolved');
+
+  const cls     = badgeClass(err.severity);
+  const label   = (err.severity ?? 'unknown').toUpperCase();
+  const message = escHtml(err.message ?? 'Unknown error');
 
   // Stats cards
   const stats = `
     <div class="detail-stats">
       <div class="detail-stat">
         <span class="detail-stat__label">Occurrences</span>
-        <span class="detail-stat__value">${(err.occurrences ?? '—').toLocaleString()}</span>
+        <span class="detail-stat__value">${(err.occurrences ?? 0).toLocaleString()}</span>
       </div>
       <div class="detail-stat">
         <span class="detail-stat__label">Affected Users</span>
-        <span class="detail-stat__value">${(err.affectedUsers ?? '—').toLocaleString()}</span>
+        <span class="detail-stat__value">${(err.affectedUsers ?? 0).toLocaleString()}</span>
       </div>
       <div class="detail-stat">
         <span class="detail-stat__label">First Seen</span>
         <span class="detail-stat__value detail-stat__value--text">${escHtml(err.firstSeen ?? '—')}</span>
+      </div>
+      <div class="detail-stat">
+        <span class="detail-stat__label">Last Seen</span>
+        <span class="detail-stat__value detail-stat__value--text">${escHtml(err.lastSeen ?? '—')}</span>
       </div>
     </div>`;
 
@@ -146,12 +193,13 @@ function renderDetail(err) {
 
   document.title = `${label}: ${err.message?.slice(0, 50)} — WatchTower`;
 
-  // Inject everything after the back-link / header block
   const detailRoot = document.getElementById('detail-root');
   detailRoot.innerHTML = `
     <div class="detail-card">
       <div class="detail-card__top">
         <span class="badge ${cls}">${label}</span>
+        ${err.service     ? `<span class="detail-meta">${escHtml(err.service)}</span>`     : ''}
+        ${err.environment ? `<span class="detail-meta">${escHtml(err.environment)}</span>` : ''}
       </div>
       <h1 class="detail-card__message">${message}</h1>
       ${stats}
@@ -163,15 +211,14 @@ function renderDetail(err) {
 
 /**
  * Renders the loading skeleton while detail data is fetched.
- * @returns {void}
  */
 function renderSkeleton() {
-  const detailRoot = document.getElementById('detail-root');
-  detailRoot.innerHTML = `
+  document.getElementById('detail-root').innerHTML = `
     <div class="detail-card">
       <div class="skeleton skeleton--badge"></div>
       <div class="skeleton skeleton--title"></div>
       <div class="detail-stats">
+        <div class="skeleton skeleton--stat"></div>
         <div class="skeleton skeleton--stat"></div>
         <div class="skeleton skeleton--stat"></div>
         <div class="skeleton skeleton--stat"></div>
@@ -184,11 +231,9 @@ function renderSkeleton() {
 /**
  * Renders a load failure state for the detail page.
  * @param {string} msg
- * @returns {void}
  */
 function renderError(msg) {
-  const detailRoot = document.getElementById('detail-root');
-  detailRoot.innerHTML = `
+  document.getElementById('detail-root').innerHTML = `
     <div class="detail-card" style="align-items:flex-start;gap:12px;">
       <span style="font-weight:600;color:var(--color-critical);">⚠ Could not load error</span>
       <span style="font-size:13px;color:var(--color-text-muted);">${escHtml(msg)}</span>
