@@ -2,6 +2,7 @@ import { renderNavbar }    from '../../components/navbar.js';
 import { renderErrorCard } from '../../components/errorCard.js';
 import { showToast }       from '../../utils/toast.js';
 import { MOCK_ERRORS, PAGE_LIMIT } from '../../utils/constants.js';
+import { withResolvedStatuses }    from '../../utils/errorStatus.js';
 import { buildUrl, initFilters }   from './errorFilter.js';
 
 renderNavbar('error-list');
@@ -17,6 +18,14 @@ const prevBtn    = document.getElementById('prevBtn');
 const nextBtn    = document.getElementById('nextBtn');
 
 /* ── Render helpers ─────────────────────────────────────────── */
+function applyClientFilters(errors) {
+  return errors.filter(err => {
+    const matchesSeverity = !state.severity || state.severity === 'all' || err.severity === state.severity;
+    const matchesStatus = !state.status || state.status === 'all' || err.status === state.status;
+    return matchesSeverity && matchesStatus;
+  });
+}
+
 function renderLoading() {
   listEl.innerHTML = `<div class="error-card" style="justify-content:center;gap:12px;">
     <div class="spinner"></div><span>Fetching errors…</span></div>`;
@@ -62,10 +71,11 @@ async function load() {
   // ── MOCK: remove this block when real API is ready ──
   if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
     await new Promise(r => setTimeout(r, 500));
-    const filtered = MOCK_ERRORS.filter(e =>
-      !state.severity || state.severity === 'all' || e.severity === state.severity
-    );
-    renderErrors(filtered, filtered.length);
+    const filtered = applyClientFilters(withResolvedStatuses(MOCK_ERRORS));
+    const start = (state.page - 1) * PAGE_LIMIT;
+    const paged = filtered.slice(start, start + PAGE_LIMIT);
+    state.total = filtered.length;
+    renderErrors(paged, filtered.length);
     state.loading = false;
     return;
   }
@@ -75,10 +85,11 @@ async function load() {
     const res = await fetch(buildUrl(state), { headers: { Accept: 'application/json' } });
     if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
     const data   = await res.json();
-    const errors = Array.isArray(data) ? data : (data.errors ?? data.data ?? data.items ?? []);
-    const total  = Array.isArray(data) ? data.length : (data.total ?? data.count ?? errors.length);
+    const errors = withResolvedStatuses(Array.isArray(data) ? data : (data.errors ?? data.data ?? data.items ?? []));
+    const filtered = applyClientFilters(errors);
+    const total  = filtered.length;
     state.total  = total;
-    renderErrors(errors, total);
+    renderErrors(filtered, total);
   } catch (err) {
     console.error('[WatchTower] fetch failed:', err);
     renderFetchError(err.message);
@@ -91,3 +102,6 @@ async function load() {
 /* ── Boot ───────────────────────────────────────────────────── */
 initFilters(state, load);
 load();
+window.addEventListener('pageshow', event => {
+  if (event.persisted) load();
+});

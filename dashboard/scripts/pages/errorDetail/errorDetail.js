@@ -11,24 +11,32 @@ import { badgeClass }     from '../../components/errorCard.js';
 import { renderStackTrace } from './stackTrace.js';
 import { MOCK_ERRORS }    from '../../utils/constants.js';
 import { escHtml }        from '../../utils/dom.js';
+import { isErrorResolved, markErrorResolved, withResolvedStatus } from '../../utils/errorStatus.js';
 import { showToast }      from '../../utils/toast.js';
 
 renderNavbar('error-list');
 
 /* ── URL param ──────────────────────────────────────────────────── */
-const params  = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
 const errorId = params.get('id');
 
 /* ── DOM refs ───────────────────────────────────────────────────── */
-const mainEl         = document.getElementById('main-content');
-const resolveBtn     = document.getElementById('resolve-btn');
-const backLink       = document.getElementById('back-link');
+const resolveBtn = document.getElementById('resolve-btn');
 
 /* ── Resolve button ─────────────────────────────────────────────── */
+function syncResolveButton(resolved) {
+  if (!resolveBtn) return;
+  resolveBtn.textContent = resolved ? '✓ Resolved' : 'Mark Resolved';
+  resolveBtn.classList.toggle('btn--resolved', resolved);
+  resolveBtn.disabled = resolved;
+}
+
+syncResolveButton(isErrorResolved(errorId));
+
 resolveBtn?.addEventListener('click', () => {
-  resolveBtn.textContent = '✓ Resolved';
-  resolveBtn.classList.add('btn--resolved');
-  resolveBtn.disabled = true;
+  if (!errorId || isErrorResolved(errorId)) return;
+  markErrorResolved(errorId);
+  syncResolveButton(true);
   showToast('Error marked as resolved.');
 });
 
@@ -39,29 +47,30 @@ async function fetchError(id) {
     await new Promise(r => setTimeout(r, 300));
     const found = MOCK_ERRORS.find(e => String(e.id) === String(id));
     if (!found) throw new Error(`No error found with id "${id}"`);
-    return found;
+    return withResolvedStatus(found);
   }
 
   const res = await fetch(`/api/errors/${encodeURIComponent(id)}`, {
     headers: { Accept: 'application/json' },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
-  return res.json();
+  const data = await res.json();
+  return withResolvedStatus(data);
 }
 
 /* ── Timeline icon ──────────────────────────────────────────────── */
 function timelineIcon(type) {
   switch (type) {
     case 'critical': return `<span class="timeline__dot timeline__dot--critical"></span>`;
-    case 'deploy':   return `<span class="timeline__dot timeline__dot--deploy">⬆</span>`;
-    default:         return `<span class="timeline__dot timeline__dot--info"></span>`;
+    case 'deploy': return `<span class="timeline__dot timeline__dot--deploy">⬆</span>`;
+    default: return `<span class="timeline__dot timeline__dot--info"></span>`;
   }
 }
 
 /* ── Render ─────────────────────────────────────────────────────── */
 function renderDetail(err) {
-  const cls     = badgeClass(err.severity);
-  const label   = (err.severity ?? 'unknown').toUpperCase();
+  const cls = badgeClass(err.severity);
+  const label = (err.severity ?? 'unknown').toUpperCase();
   const message = escHtml(err.message ?? err.title ?? 'Unknown error');
 
   // Stats cards
