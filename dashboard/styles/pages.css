@@ -1,0 +1,300 @@
+/* ================================================================
+   pages.css — Page-Specific Styles
+   ================================================================ */
+
+/* ── Error List ──────────────────────────────────────────────── */
+.error-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* ── Error Card ──────────────────────────────────────────────── */
+.error-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--space-lg) * 0.8) var(--space-xl);
+  cursor: pointer;
+  transition: box-shadow var(--transition), border-color var(--transition);
+  text-decoration: none;
+  color: inherit;
+}
+
+.error-card:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: #cbd5e1;
+}
+
+.error-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.error-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.error-card__deploy {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.error-card__message {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.error-card__occurrences {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.error-card__chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+/* ================================================================
+   Error Detail Page
+   ================================================================ */
+
+/* ── Detail Header ───────────────────────────────────────────────── */
+.detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.detail-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  transition: color var(--transition);
+  width: fit-content;
+}
+
+.detail-back-link:hover { color: var(--color-text); }
+
+.detail-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+/* ── Detail Card ─────────────────────────────────────────────────── */
+.detail-card {
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+.detail-card__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.detail-card__message {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--color-text);
+  line-height: 1.45;
+  letter-spacing: -0.2px;
+  /* Allow long error messages to wrap */
+  word-break: break-word;
+}
+
+/* ── Stats Grid ──────────────────────────────────────────────────── */
+.detail-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.detail-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.detail-stat__label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.45px;
+}
+
+.detail-stat__value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.detail-stat__value--text {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ── Detail Section ──────────────────────────────────────────────── */
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.detail-section__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.1px;
+}
+
+/* ── Deployment Box ──────────────────────────────────────────────── */
+.detail-box {
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.detail-box strong { color: var(--color-text); }
+.detail-box code   {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  background: var(--color-border);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ── Stack Trace ─────────────────────────────────────────────────── */
+.stack-trace {
+  background-color: #0f1117;
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  overflow-x: auto;
+  font-family: 'Courier New', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #a8ff78;
+  tab-size: 2;
+}
+
+.stack-trace code { display: block; }
+
+.stack-trace__at       { color: #6b7280; }
+.stack-trace__fn       { color: #a8ff78; font-weight: 600; }
+.stack-trace__loc      { color: #5b9bd5; }
+.stack-trace__ellipsis { color: #6b7280; font-style: italic; }
+
+/* ── Event Timeline ──────────────────────────────────────────────── */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.timeline__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition);
+}
+
+.timeline__item:last-child { border-bottom: none; }
+.timeline__item:hover { background-color: var(--color-surface); }
+
+.timeline__dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+}
+
+.timeline__dot--critical { background-color: var(--color-critical); }
+.timeline__dot--info     { background-color: #3b82f6; }
+.timeline__dot--deploy   {
+  background-color: #8b5cf6;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 9px;
+}
+
+.timeline__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timeline__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.timeline__time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── Responsiveness ──────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .detail-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .detail-stats .detail-stat:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .detail-card {
+    padding: var(--space-md);
+  }
+}

@@ -33,9 +33,10 @@ export function renderErrorCard(err, index, since = '24h') {
   const occ     = err.occurrences ?? err.count ?? '—';
 
   return `
-    <article class="error-card" tabindex="0"
-             data-id="${escHtml(String(err.id ?? index))}"
-             style="animation-delay:${index * 40}ms">
+    <a class="error-card" href="error-detail.html?id=${escHtml(String(err.id ?? index))}"
+       data-id="${escHtml(String(err.id ?? index))}"
+       style="animation-delay:${index * 40}ms"
+       aria-label="${label}: ${message}">
       <div class="error-card__body">
         <div class="error-card__meta">
           <span class="badge ${cls}">${label}</span>
@@ -48,5 +49,5 @@ export function renderErrorCard(err, index, since = '24h') {
         <path d="M7.5 5l5 5-5 5" stroke="currentColor" stroke-width="1.5"
               stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-    </article>`;
+    </a>`;
 }
