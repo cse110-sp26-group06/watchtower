@@ -1,8 +1,7 @@
 import { renderNavbar }    from '../../components/navbar.js';
 import { renderErrorCard } from '../../components/errorCard.js';
 import { showToast }       from '../../utils/toast.js';
-import { MOCK_ERRORS, PAGE_LIMIT } from '../../utils/constants.js';
-import { withResolvedStatuses }    from '../../utils/errorStatus.js';
+import { MOCK_ERRORS, PAGE_LIMIT, normalizeError } from '../../utils/constants.js';
 import { buildUrl, initFilters }   from './errorFilter.js';
 
 renderNavbar('error-list');
@@ -19,14 +18,20 @@ const nextBtn    = document.getElementById('nextBtn');
 
 /* ── Render helpers ─────────────────────────────────────────── */
 /**
- * Applies the current severity and status filters to a list of errors.
- * @param {object[]} errors
+ * Applies the current severity and status filters to a list of
+ * already-normalized errors.
+ *
+ * Both fields are top-level strings on the normalized shape, so no
+ * payload digging is needed here. The D1 `status` column value
+ * ('unresolved' | 'resolved') maps directly to the filter values.
+ *
+ * @param {object[]} errors  Normalized error objects
  * @returns {object[]}
  */
 function applyClientFilters(errors) {
   return errors.filter(err => {
     const matchesSeverity = !state.severity || state.severity === 'all' || err.severity === state.severity;
-    const matchesStatus = !state.status || state.status === 'all' || err.status === state.status;
+    const matchesStatus   = !state.status   || state.status   === 'all' || err.status   === state.status;
     return matchesSeverity && matchesStatus;
   });
 }
@@ -66,8 +71,8 @@ function renderFetchError(msg) {
 
 /**
  * Renders the current page of errors and updates pagination controls.
- * @param {object[]} errors
- * @param {number} total
+ * @param {object[]} errors  Normalized, filtered, paged error objects
+ * @param {number}   total   Total count after filtering (pre-paging)
  * @returns {void}
  */
 function renderErrors(errors, total) {
@@ -89,6 +94,16 @@ function renderErrors(errors, total) {
 /* ── Load ───────────────────────────────────────────────────── */
 /**
  * Fetches and renders the error list for the current filter state.
+ *
+ * Mock path  — normalizes D1-shaped MOCK_ERRORS rows via normalizeError()
+ *              before filtering, so the card layer always receives the
+ *              same shape regardless of data source.
+ *
+ * Real path  — the API is expected to return an array of raw D1 rows
+ *              (or a wrapper with an `errors` / `data` / `items` key).
+ *              Each row is passed through normalizeError() before any
+ *              client-side filtering or rendering.
+ *
  * @returns {Promise<void>}
  */
 async function load() {
@@ -96,28 +111,35 @@ async function load() {
   state.loading = true;
   renderLoading();
 
-  // ── MOCK: remove this block when real API is ready ──
+  // ── MOCK: remove this block when real API is ready ──────────
   if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
     await new Promise(r => setTimeout(r, 500));
-    const filtered = applyClientFilters(withResolvedStatuses(MOCK_ERRORS));
-    const start = (state.page - 1) * PAGE_LIMIT;
-    const paged = filtered.slice(start, start + PAGE_LIMIT);
-    state.total = filtered.length;
+
+    const normalized = MOCK_ERRORS.map(normalizeError);
+    const filtered   = applyClientFilters(normalized);
+    const start      = (state.page - 1) * PAGE_LIMIT;
+    const paged      = filtered.slice(start, start + PAGE_LIMIT);
+
+    state.total   = filtered.length;
     renderErrors(paged, filtered.length);
     state.loading = false;
     return;
   }
-  // ── END MOCK ─────────────────────────────────────────
+  // ── END MOCK ─────────────────────────────────────────────────
 
   try {
     const res = await fetch(buildUrl(state), { headers: { Accept: 'application/json' } });
     if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
-    const data   = await res.json();
-    const errors = withResolvedStatuses(Array.isArray(data) ? data : (data.errors ?? data.data ?? data.items ?? []));
-    const filtered = applyClientFilters(errors);
-    const total  = filtered.length;
-    state.total  = total;
-    renderErrors(filtered, total);
+
+    const data    = await res.json();
+    const rawRows = Array.isArray(data) ? data : (data.errors ?? data.data ?? data.items ?? []);
+
+    // Normalize every raw D1 row into the shape the card layer expects.
+    const normalized = rawRows.map(normalizeError);
+    const filtered   = applyClientFilters(normalized);
+
+    state.total = filtered.length;
+    renderErrors(filtered, filtered.length);
   } catch (err) {
     console.error('[WatchTower] fetch failed:', err);
     renderFetchError(err.message);
