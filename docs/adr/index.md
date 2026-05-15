@@ -29,6 +29,8 @@ Each ADR carries one of the following statuses:
 | 0001 | [SDK distribution method](0001-sdk-distribution-method.md) | Accepted | 2026-05-11 |
 | 0002 | [Backend infrastructure](0002-backend-infrastructure.md) | Accepted | 2026-05-11 |
 | 0003 | [Testing framework](0003-testing-framework.md) | Accepted | 2026-05-11 |
+| 0004 | [Linting framework](0004-linting-framework.md) | Accepted | 2026-05-13 |
+| 0005 | [Changelog and versioning approach](0005-changelog-and-versioning.md) | Accepted | 2026-05-15 |
 
 ## Adding a New ADR
 

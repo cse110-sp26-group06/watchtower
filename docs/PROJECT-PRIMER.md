@@ -155,7 +155,7 @@ Commit messages follow the [Conventional Commits](https://www.conventionalcommit
 - `test(backend): add ingestion endpoint coverage`
 - `refactor(dashboard): extract chart rendering into module`
 
-Consistent commit messages give us readable history, and they unlock the option to generate a changelog automatically later if we want to.
+Consistent commit messages keep history readable and leave the door open for automation if the team ever revisits the changelog/versioning decision.
 
 ### Linting and the question of pre-commit hooks
 
@@ -172,15 +172,13 @@ For now: run `npm run lint` locally before pushing. We'll revisit pre-commit hoo
 
 ### Changelog
 
-We will maintain a `CHANGELOG.md` file at the repo root, following the [Keep a Changelog](https://keepachangelog.com/) format. Every release bumps the SemVer version and adds a corresponding section to the changelog.
+We maintain a `CHANGELOG.md` file at the repo root, following the [Keep a Changelog](https://keepachangelog.com/) format.
 
-There are three ways teams typically maintain a changelog, and we'll pick one in an ADR:
+WatchTower uses **unified Semantic Versioning** for the whole repo: one `v0.x.y` version per release, shared across the SDK, Backend, and Dashboard. The SDK's published package version should mirror the repo version.
 
-- **Manual:** A developer edits `CHANGELOG.md` by hand in the same PR that bumps the version. Simple, full editorial control, easy to forget.
-- **Fully automated:** A tool like `release-please` or `standard-version` reads the Conventional Commits since the last release and generates the changelog automatically. Less work per release, but the output reflects raw commit history rather than user-facing impact.
-- **Hybrid:** A tool generates a draft, then a human edits it before release. Tools like `changesets` support this — developers add a small description file when they make a meaningful PR, and the tool aggregates them at release time.
+For this project, changelog maintenance is **manual**. At release time, a developer updates `CHANGELOG.md` in the same PR that bumps the version. This keeps the process simple and avoids depending on perfect Conventional Commit discipline or extra release automation.
 
-Manual works fine for a 10-week course project shipping a handful of releases. Automation pays off more for projects releasing weekly to real users. We'll start with whichever the team agrees on in our ADR and revisit if it's not working.
+See [ADR 0005](adr/0005-changelog-and-versioning.md) for the rationale.
 
 ### GenAI usage must be disclosed
 

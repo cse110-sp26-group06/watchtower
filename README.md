@@ -2,9 +2,6 @@
 
 > A lightweight observability tool for developers. Catch errors, surface performance issues, and collect user feedback — without the noise.
 
-<!-- Badges go here once CI is set up -->
-<!-- ![CI](https://github.com/cse110-sp26-group06/watchtower/actions/workflows/ci.yml/badge.svg) -->
-
 ## About
 
 WatchTower is a small observability platform: developers add an injectable JavaScript SDK to their site, and WatchTower captures runtime errors, performance metrics, and user feedback, surfacing them through a centralized dashboard. Think Sentry or LogRocket, but small enough that one person can understand the whole thing end to end.
