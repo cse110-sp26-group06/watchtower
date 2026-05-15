@@ -60,13 +60,15 @@ async function load() {
   renderLoading();
 
   // ── MOCK: remove this block when real API is ready ──
-  await new Promise(r => setTimeout(r, 500));
-  const filtered = MOCK_ERRORS.filter(e =>
-    !state.severity || state.severity === 'all' || e.severity === state.severity
-  );
-  renderErrors(filtered, filtered.length);
-  state.loading = false;
-  return;
+  if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
+    await new Promise(r => setTimeout(r, 500));
+    const filtered = MOCK_ERRORS.filter(e =>
+      !state.severity || state.severity === 'all' || e.severity === state.severity
+    );
+    renderErrors(filtered, filtered.length);
+    state.loading = false;
+    return;
+  }
   // ── END MOCK ─────────────────────────────────────────
 
   try {
