@@ -18,6 +18,11 @@ const prevBtn    = document.getElementById('prevBtn');
 const nextBtn    = document.getElementById('nextBtn');
 
 /* ── Render helpers ─────────────────────────────────────────── */
+/**
+ * Applies the current severity and status filters to a list of errors.
+ * @param {object[]} errors
+ * @returns {object[]}
+ */
 function applyClientFilters(errors) {
   return errors.filter(err => {
     const matchesSeverity = !state.severity || state.severity === 'all' || err.severity === state.severity;
@@ -26,18 +31,31 @@ function applyClientFilters(errors) {
   });
 }
 
+/**
+ * Renders the loading state for the error list.
+ * @returns {void}
+ */
 function renderLoading() {
   listEl.innerHTML = `<div class="error-card" style="justify-content:center;gap:12px;">
     <div class="spinner"></div><span>Fetching errors…</span></div>`;
   if (pagination) pagination.style.display = 'none';
 }
 
+/**
+ * Renders the empty state when no errors match the current filters.
+ * @returns {void}
+ */
 function renderEmpty() {
   listEl.innerHTML = `<div class="error-card" style="justify-content:center;">
     <span style="color:var(--color-text-muted)">No errors match your filters.</span></div>`;
   if (pagination) pagination.style.display = 'none';
 }
 
+/**
+ * Renders a fetch failure state for the error list.
+ * @param {string} msg
+ * @returns {void}
+ */
 function renderFetchError(msg) {
   listEl.innerHTML = `<div class="error-card" style="flex-direction:column;align-items:flex-start;gap:8px;">
     <span style="font-weight:600;color:var(--color-critical)">⚠ Failed to load errors</span>
@@ -46,6 +64,12 @@ function renderFetchError(msg) {
   if (pagination) pagination.style.display = 'none';
 }
 
+/**
+ * Renders the current page of errors and updates pagination controls.
+ * @param {object[]} errors
+ * @param {number} total
+ * @returns {void}
+ */
 function renderErrors(errors, total) {
   if (!errors.length) { renderEmpty(); return; }
   listEl.innerHTML = errors.map((err, i) => renderErrorCard(err, i, state.since)).join('');
@@ -63,6 +87,10 @@ function renderErrors(errors, total) {
 }
 
 /* ── Load ───────────────────────────────────────────────────── */
+/**
+ * Fetches and renders the error list for the current filter state.
+ * @returns {Promise<void>}
+ */
 async function load() {
   if (state.loading) return;
   state.loading = true;

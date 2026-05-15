@@ -24,6 +24,11 @@ const errorId = params.get('id');
 const resolveBtn = document.getElementById('resolve-btn');
 
 /* ── Resolve button ─────────────────────────────────────────────── */
+/**
+ * Updates the resolve button to match the current status.
+ * @param {boolean} resolved
+ * @returns {void}
+ */
 function syncResolveButton(resolved) {
   if (!resolveBtn) return;
   resolveBtn.textContent = resolved ? '✓ Resolved' : 'Mark Resolved';
@@ -41,6 +46,11 @@ resolveBtn?.addEventListener('click', () => {
 });
 
 /* ── Fetch / mock ───────────────────────────────────────────────── */
+/**
+ * Loads a single error from mock data or the API.
+ * @param {string} id
+ * @returns {Promise<object>}
+ */
 async function fetchError(id) {
   // Mock path — remove when real API is ready
   if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
@@ -59,6 +69,11 @@ async function fetchError(id) {
 }
 
 /* ── Timeline icon ──────────────────────────────────────────────── */
+/**
+ * Returns the timeline marker HTML for an event type.
+ * @param {string} type
+ * @returns {string}
+ */
 function timelineIcon(type) {
   switch (type) {
     case 'critical': return `<span class="timeline__dot timeline__dot--critical"></span>`;
@@ -68,6 +83,11 @@ function timelineIcon(type) {
 }
 
 /* ── Render ─────────────────────────────────────────────────────── */
+/**
+ * Renders the loaded error detail view.
+ * @param {object} err
+ * @returns {void}
+ */
 function renderDetail(err) {
   const cls = badgeClass(err.severity);
   const label = (err.severity ?? 'unknown').toUpperCase();
@@ -141,6 +161,10 @@ function renderDetail(err) {
     </div>`;
 }
 
+/**
+ * Renders the loading skeleton while detail data is fetched.
+ * @returns {void}
+ */
 function renderSkeleton() {
   const detailRoot = document.getElementById('detail-root');
   detailRoot.innerHTML = `
@@ -157,6 +181,11 @@ function renderSkeleton() {
     </div>`;
 }
 
+/**
+ * Renders a load failure state for the detail page.
+ * @param {string} msg
+ * @returns {void}
+ */
 function renderError(msg) {
   const detailRoot = document.getElementById('detail-root');
   detailRoot.innerHTML = `
