@@ -1,4 +1,5 @@
 import { handleIngest } from "./routes/ingest.js";
+import { generateApiKey } from './middleware/auth.js';
 
 export default {
   async fetch(request, env) {
@@ -13,6 +14,28 @@ export default {
       });
     }
 
+    // 
+    // Project creation — generates and stores a new API key
+    if (path === '/api/key_generate' && request.method === 'POST') {
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse({ status: 'error', message: 'Invalid JSON' }, 400);
+    }
+
+    if (!body.name) {
+      return jsonResponse({ status: 'error', message: 'Project name required' }, 400);
+    }
+
+    try {
+      const key = await generateApiKey(env, body.name);
+        return jsonResponse({ status: 'ok', project_id: key.id, api_key: key.api_key,}, 201);
+    } catch (err) {
+    console.error('Failed to create project:', err);
+    return jsonResponse({ status: 'error', message: 'Failed to create project' }, 500);
+  }
+}
     // Ingestion routes
     if (path.startsWith("/ingest/") && request.method === "POST") {
       return handleIngest(request, env, path);
@@ -20,6 +43,7 @@ export default {
 
     // Read API routes (BE-5 adds these)
     // if (path.startsWith("/api/")) { ... }
+
 
     return jsonResponse({ status: "error", message: "Not found" }, 404);
   },
