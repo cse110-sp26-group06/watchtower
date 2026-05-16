@@ -1,5 +1,8 @@
 import BatchingEngine from "./batching/BatchingEngine";
-import {send} from  "./transport/send.js"
+import { send } from  "./transport/send.js"
+import { handleError } from "./handler/parseError.js";
+
+let engine = null;
 
 /**
  * Initializes the WatchTower SDK and starts the global batching engine.
@@ -62,6 +65,14 @@ import {send} from  "./transport/send.js"
  * });
  */
 export function initWatchtower(config = {}) {
+  if (engine) {
+    throw new Error("WatchTower has already been initialized.");
+  }
+
+  if (!config.apiKey) {
+    throw new Error("WatchTower initialization failed: missing apiKey.");
+  }
+
   const thresholds = {
     error: {
       maxTimeMs: config.errorMaxTimeMs ?? 1000,
@@ -77,15 +88,52 @@ export function initWatchtower(config = {}) {
     }
   };
 
-  engine = new BatchingEngine({
+  const engine = new BatchingEngine({
     thresholds,
-    sendFn: sendFn,
+    sendFn: send,
     api_key: config.apiKey,
-    service: config.service,
-    environment: config.environment
+    service: config.service ?? "unknown-service",
+    environment: config.environment ?? "production"
   });
 
   engine.start();
+
+  // --- Global error handler ---
+  window.addEventListener("error", (event) => {
+    const parsed = handleError(event.error || event); // FIXED
+    engine.enqueue("error", parsed);
+  });
+
+  // --- Global unhandled promise rejection ---
+  window.addEventListener("unhandledrejection", (event) => {
+    const parsed = handleError(event.reason);
+    engine.enqueue("error", parsed);
+  });
+
+  process.on("uncaughtException", (err) => {
+    const parsed = handleError(err);
+    engine.enqueue("error", parsed);
+  });
+
+  process.on("unhandledRejection", (reason) => {
+    const parsed = handleError(reason);
+    engine.enqueue("error", parsed);
+  });
+
 }
 
+/**
+ * Manually capture an error and send it through the batching engine.
+ *
+ * @param {Error|any} error - The error or value to capture.
+ */
+export function captureError(error) {
+  if (!engine) {
+    console.warn("WatchTower not initialized. Call initWatchtower() first.");
+    return;
+  }
+
+  const parsed = handleError(error);
+  engine.enqueue("error", parsed);
+}
 
