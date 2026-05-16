@@ -14,7 +14,11 @@ CREATE TABLE IF NOT EXISTS errors (
     error_type TEXT,
     severity TEXT NOT NULL DEFAULT 'error',
 
-    stack_trace_json TEXT NOT NULL,
+    stack_trace TEXT NOT NULL,
+    file TEXT NOT NULL,
+    lineno INTEGER NOT NULL,
+    colno INTEGER NOT NULL,
+
     payload_json TEXT NOT NULL,
 
     client_timestamp TEXT NOT NULL,
@@ -31,3 +35,11 @@ ON errors (status);
 
 CREATE INDEX IF NOT EXISTS idx_errors_severity
 ON errors (severity);
+
+-- This is the authentication table which stores the authentication key for each 
+CREATE TABLE IF NOT EXISTS projects (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    api_key TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL
+);
