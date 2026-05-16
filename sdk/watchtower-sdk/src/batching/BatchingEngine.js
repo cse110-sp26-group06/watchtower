@@ -123,7 +123,8 @@ class BatchingEngine {
     const batch = this.createBatch(type);
     if (!batch) return;
 
-    this.sendFn(type, batch);
+    const res = await this.sendFn(type, batch);
+    console.log(res.status)
     this.queues[type] = [];
   }
 
@@ -184,7 +185,7 @@ class BatchingEngine {
       }
     });
 
-    // Optional: flush everything on stop
+    // Flush everything on stop
     this.flushAll();
   }
 }

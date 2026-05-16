@@ -54,51 +54,20 @@
   - Tentative schemas for error, log, performance were made
 
 ### 5) Config and init
-```
-WatchTower.init({
-  apiKey: "...",
-  service: "checkout-service",
-  environment: "production",
-  release: "v1.4.2",
-  capturePerformance: true,
-  captureErrors: true,
-});
-```
+We want the user to be able to call init once and have watchtower running within their codebase.
+Export an init function which takes as params the necessary variables. The default value is in parentheses:
+- api_key
+- service (test),
+- environment (testing),
+- thresholds:
+  - max error time (1000)
+  - max error count (10)
+  - max log time (3000)
+  - max log count (50)
+  - max span time (2000)
+  - max span count (25)
+- captureErrors (true) //can be implemented later
 
-# Required Keys
-| Key | Why it matters |
-| --- | --- |
-| **apiKey** | Authenticates the SDK with your backend |
-| **service** | Identifies the app/service (e.g., “checkout-service”) |
-| **environment** | prod / staging / dev |
-| **release** | Version or git SHA for error grouping |
-
-Feature Toggle
-| Key | Purpose |
-| --- | --- |
-| **captureErrors** | Enable automatic error capture |
-| **captureUnhandledRejections** | Toggle promise rejection capture |
-| **capturePerformance** | Enable performance instrumentation |
-| **captureNetwork** | Enable fetch/XHR instrumentation |
-| **captureConsole** | Capture console logs as breadcrumbs |
-
-Performance and Batching
-| Key | Purpose |
-| --- | --- |
-| **maxQueueSize** | Prevent memory blowups |
-| **flushInterval** | How often to send batches |
-| **maxBatchSize** | Limit batch payload size |
-| **retryBackoff** | Control retry behavior |
-
-Advanced Customization
-| Key | Purpose |
-| --- | --- |
-| **beforeSend(event)** | Modify or drop events before sending |
-| **sampleRate** | Keep only a percentage of events |
-| **integrations** | Framework-specific plugins |
-| **ignoreErrors** | Regex list of errors to ignore |
-| **ignoreUrls** | Ignore events from certain endpoints |
-| **user** | Attach user identity |
 
 
 # Resources:
