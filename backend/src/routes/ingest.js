@@ -1,3 +1,4 @@
+/* global crypto, console */
 import { jsonResponse } from '../index.js'; // imported function which is convenient for consistent response return
 import { storeError } from '../storage/d1.js'; // imported function from d1, link to d1.js
 import { validateApiKey } from '../middleware/auth.js';

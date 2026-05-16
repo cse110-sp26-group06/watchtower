@@ -1,3 +1,4 @@
+/* global console */
 import { handleIngest } from "./routes/ingest.js";
 import { generateApiKey } from './middleware/auth.js';
 

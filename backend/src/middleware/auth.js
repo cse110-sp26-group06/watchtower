@@ -1,3 +1,4 @@
+/* global crypto */
 /**
  * Authentication middleware for WatchTower Backend
  * Handles API key generation and validation
