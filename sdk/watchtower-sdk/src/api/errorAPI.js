@@ -10,11 +10,10 @@
  */
 export async function sendErrorBatch(batch) { 
     try {
-        const res = await fetch("ENDPOINT FOR ERROR", {
+        const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/error", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + batch.api_key //FIGURE OUT API KEY
             },
             body: JSON.stringify(batch)
         });
@@ -22,6 +21,7 @@ export async function sendErrorBatch(batch) {
         if (!res.ok) {
             console.error("Failed to send error batch", await res.text());
         }
+        return res;
     } catch (err) {
         console.error("Network error while sending error batch:", err);
     }

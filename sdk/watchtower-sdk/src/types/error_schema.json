@@ -23,7 +23,7 @@
               "colno": { "type": "number" },
               "severity": { "type": "string" }
             },
-            "required": ["message", "type", "stack_trace", "file", "lineno", "colno", "severity"]
+            "required": ["message", "type", "stack_trace", "file", "lineno", "colno"]
           }
         },
         "required": ["event_type", "timestamp", "payload"]

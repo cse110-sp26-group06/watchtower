@@ -2,7 +2,7 @@ window.addEventListener("error", (event) => {
   handleError(event);
 });
 
-function handleError(event) {
+export function handleError(event) {
 
   return {
     event_type: "error",
@@ -14,7 +14,6 @@ function handleError(event) {
       file: event.filename,
       lineno: event.lineno,
       colno: event.colno,
-      severity: "UNDEFINED", //TODO
     }
   };
 }

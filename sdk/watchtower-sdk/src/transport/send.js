@@ -1,4 +1,4 @@
-import { sendErrorBatch, sendLogBatch, sendSpanBatch } from "../api";
+import { sendErrorBatch, sendLogBatch, sendSpanBatch } from "../api/index.js";
 
 /**
  * Routes a batch of events to the correct API endpoint based on event type.

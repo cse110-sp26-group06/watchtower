@@ -10,11 +10,10 @@
  */
 export async function sendSpanBatch(batch) { 
     try {
-        const res = await fetch("ENDPOINT FOR ERROR", {
+        const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/span", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + batch.api_key //FIGURE OUT API KEY
             },
             body: JSON.stringify(batch)
         });
