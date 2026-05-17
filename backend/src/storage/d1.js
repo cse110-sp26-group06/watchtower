@@ -1,6 +1,6 @@
 // BE-3: D1 storage layer
 // TODO: implement write and read functions for events
-
+//pull
 export async function storeError(env, record) {
   await env.watchtower_db.prepare(`
     INSERT INTO errors (id, api_key, service, environment, message, error_type, severity, stack_trace, file, lineno, colno, payload_json, client_timestamp, server_timestamp, status)
