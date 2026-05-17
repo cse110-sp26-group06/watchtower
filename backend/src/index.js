@@ -1,6 +1,7 @@
 /* global console */
 import { handleIngest } from "./routes/ingest.js";
 import { generateApiKey } from './middleware/auth.js';
+import { handleGetErrors } from './routes/errors.js';
 
 export default {
   async fetch(request, env) {
@@ -44,7 +45,10 @@ export default {
 
     // Read API routes (BE-5 adds these)
     // if (path.startsWith("/api/")) { ... }
-
+    // Read API routes — Dashboard calls these to display errors
+  if (path === '/api/errors' && request.method === 'GET') {
+    return handleGetErrors(request, env);
+  }
 
     return jsonResponse({ status: "error", message: "Not found" }, 404);
   },

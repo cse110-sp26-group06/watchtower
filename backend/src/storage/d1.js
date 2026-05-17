@@ -23,3 +23,51 @@ export async function storeError(env, record) {
     record.status
   ).run();
 }
+
+/**
+ * Reads errors from D1 for a given project (identified by api_key).
+ * Called by handleGetErrors() in routes/errors.js.
+ * Supports filtering by time range, severity, and status.
+ * Results are paginated and sorted newest first.
+ *
+ * @param {object} env - Cloudflare Worker environment, contains D1 binding
+ * @param {string} api_key - the project's API key to filter errors by
+ * @param {object} params - optional query parameters for filtering
+ * @param {string} [params.since] - ISO timestamp, only return errors after this time
+ * @param {string} [params.severity] - filter by severity
+ * @param {string} [params.status] - filter by status (resolved/unresolved)
+ * @param {number} [params.page=1] - page number for pagination
+ * @param {number} [params.limit=20] - number of results per page
+ * @returns {object[]} array of error records from D1
+ */
+export async function getErrors(env, api_key, params = {}) {
+  const { since, severity, status, page = 1, limit = 20 } = params;
+
+  // calculate how many rows to skip based on current page
+  const offset = (page - 1) * limit;
+
+  // always filter by api_key so each project only sees their own errors
+  let query = 'SELECT * FROM errors WHERE api_key = ?';
+  const bindings = [api_key];
+
+  // add optional filters only if provided
+  if (since) {
+    query += ' AND server_timestamp >= ?';
+    bindings.push(since);
+  }
+  if (severity && severity !== 'all') {
+    query += ' AND severity = ?';
+    bindings.push(severity);
+  }
+  if (status && status !== 'all') {
+    query += ' AND status = ?';
+    bindings.push(status);
+  }
+
+  // sort newest first, then paginate
+  query += ' ORDER BY server_timestamp DESC LIMIT ? OFFSET ?';
+  bindings.push(limit, offset);
+
+  const result = await env.watchtower_db.prepare(query).bind(...bindings).run();
+  return result.results;
+}
