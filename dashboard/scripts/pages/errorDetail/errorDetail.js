@@ -10,10 +10,13 @@ import { renderNavbar }     from '../../components/navbar.js';
 import { badgeClass }       from '../../components/errorCard.js';
 import { renderStackTrace } from './stackTrace.js';
 import { MOCK_ERRORS, normalizeError } from '../../utils/constants.js';
+import { requireAuth } from '../../utils/auth.js';
 import { escHtml }          from '../../utils/dom.js';
+import { markErrorResolved, withResolvedStatus } from '../../utils/errorStatus.js';
 import { showToast }        from '../../utils/toast.js';
 
-renderNavbar('error-list');
+const session = requireAuth();
+if (session) renderNavbar('error-list');
 
 /* ── URL param ──────────────────────────────────────────────────── */
 const params  = new URLSearchParams(window.location.search);
@@ -49,6 +52,7 @@ async function handleResolve() {
     // ── MOCK: remove this block when real API is ready ──────────
     if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
       await new Promise(r => setTimeout(r, 200));
+      markErrorResolved(errorId);
       syncResolveButton(true);
       showToast('Error marked as resolved.');
       return;
@@ -93,7 +97,7 @@ async function fetchError(id) {
     await new Promise(r => setTimeout(r, 300));
     const raw = MOCK_ERRORS.find(e => String(e.id) === String(id));
     if (!raw) throw new Error(`No error found with id "${id}"`);
-    return normalizeError(raw);
+    return withResolvedStatus(normalizeError(raw));
   }
   // ── END MOCK ─────────────────────────────────────────────────
 
@@ -101,7 +105,7 @@ async function fetchError(id) {
     headers: { Accept: 'application/json' },
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
-  return normalizeError(await res.json());
+  return withResolvedStatus(normalizeError(await res.json()));
 }
 
 /* ── Timeline icon ──────────────────────────────────────────────── */
@@ -237,7 +241,7 @@ function renderError(msg) {
     <div class="detail-card" style="align-items:flex-start;gap:12px;">
       <span style="font-weight:600;color:var(--color-critical);">⚠ Could not load error</span>
       <span style="font-size:13px;color:var(--color-text-muted);">${escHtml(msg)}</span>
-      <a href="index.html" class="btn btn--outline" style="margin-top:4px;">← Back to Error List</a>
+      <a href="error-list.html" class="btn btn--outline" style="margin-top:4px;">← Back to Error List</a>
     </div>`;
 }
 

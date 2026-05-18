@@ -1,0 +1,66 @@
+/* ── Error List ──────────────────────────────────────────────── */
+.error-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* ── Error Card ──────────────────────────────────────────────── */
+.error-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--space-lg) * 0.8) var(--space-xl);
+  cursor: pointer;
+  transition: box-shadow var(--transition), border-color var(--transition);
+  text-decoration: none;
+  color: inherit;
+}
+
+.error-card:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: #cbd5e1;
+}
+
+.error-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.error-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.error-card__deploy {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.error-card__message {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.error-card__occurrences {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.error-card__chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
