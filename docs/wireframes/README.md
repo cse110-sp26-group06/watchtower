@@ -10,3 +10,6 @@
 - Feedback
 - Project Settings
 - Alerts Settings
+
+## Changelog
+- 5/17: added login page wireframe with modified nav bar
