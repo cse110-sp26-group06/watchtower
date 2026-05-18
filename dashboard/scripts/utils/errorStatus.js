@@ -53,7 +53,7 @@ export function markErrorResolved(id) {
  * @returns {Record<string, any> | null | undefined}
  */
 export function withResolvedStatus(error) {
-  if (!error) return error;
+  if (!error) {return error;}
   return {
     ...error,
     status: error.status === 'resolved' || isErrorResolved(error.id) ? 'resolved' : 'unresolved',

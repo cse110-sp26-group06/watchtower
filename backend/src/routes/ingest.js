@@ -1,4 +1,3 @@
-/* global crypto, console */
 import { jsonResponse } from '../index.js'; // imported function which is convenient for consistent response return
 import { storeError } from '../storage/d1.js'; // imported function from d1, link to d1.js
 import { validateApiKey } from '../middleware/auth.js';
@@ -35,10 +34,10 @@ export async function handleIngest(request, env, path) {
   }
 
   // Validate API key
-const checkAPI = await validateApiKey(env, data.api_key);
-if (!checkAPI) {
-  return jsonResponse({ status: 'error', message: 'Invalid API key' }, 401);
-}
+  const checkAPI = await validateApiKey(env, data.api_key);
+  if (!checkAPI) {
+    return jsonResponse({ status: 'error', message: 'Invalid API key' }, 401);
+  }
 
   // Validate required envelope fields
   if (!data.service || !data.environment) {

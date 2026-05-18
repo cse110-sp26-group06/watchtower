@@ -1,32 +1,70 @@
-import js from "@eslint/js";
-import globals from "globals";
+import js from '@eslint/js';
+import globals from 'globals';
+
+// Keep the shared rule set intentionally small and readability-focused.
+const sharedRules = {
+  'no-unused-vars': 'warn',
+  'no-console': 'off',
+  semi: ['error', 'always'],
+  indent: ['error', 2],
+  eqeqeq: ['error', 'always'],
+  curly: ['error', 'all'],
+  'object-curly-spacing': ['error', 'always'],
+  'space-before-blocks': ['error', 'always'],
+  'keyword-spacing': ['error', { before: true, after: true }],
+};
 
 export default [
-    js.configs.recommended, 
-    {
-        // Only json files
-        files: ["**/*.{js}"],
-        
-        // Define the environment
-        languageOptions: {
-            ecmaVersion: "latest",
-            sourceType: "module",
-            globals: {
-                ...globals.browser,
-                ...globals.node
-            }
-        },
-
-        //Default rules
-        rules: {
-            "no-unused-vars": "warn",   // Warns if you leave variables unused
-            "no-console": "off",        // Allows console.log
-            "semi": ["error", "always"], // Forces semicolons
-            "browser" : true
-        }
+  {
+    // Ignore generated output files.
+    ignores: ['eslint-results.sarif'],
+  },
+  js.configs.recommended,
+  {
+    // Baseline config for all JavaScript files in the repo.
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
     },
-    {
-        //Files to ignore
-        ignores: ["eslint-results.sarif"]
-    }
+    rules: sharedRules,
+  },
+  {
+    // Browser globals for dashboard code and SDK browser fixtures.
+    files: ['dashboard/**/*.js', 'sdk/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+  {
+    // Cloudflare Worker runtime globals for backend source files.
+    files: ['backend/src/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.serviceworker,
+      },
+    },
+  },
+  {
+    // Node globals for local tests, Playwright specs, and the ESLint config itself.
+    files: ['e2e/**/*.js', 'dashboard/tests/**/*.js', 'eslint.config.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
+    // Playwright's config file is CommonJS even though the repo otherwise uses ESM.
+    files: ['playwright.config.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: sharedRules,
+  },
 ];

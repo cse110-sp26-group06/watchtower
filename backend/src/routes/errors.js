@@ -1,5 +1,3 @@
-/* global console */
-//pull
 /**
  * routes/errors.js
  * Handles all read API requests for the Dashboard.

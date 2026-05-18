@@ -21,7 +21,7 @@ if (getSession()) {
 function setFieldError(input, errorNode, message) {
   input.setAttribute('aria-invalid', message ? 'true' : 'false');
   input.setCustomValidity(message);
-  if (errorNode) errorNode.textContent = message;
+  if (errorNode) {errorNode.textContent = message;}
 }
 
 /**
@@ -40,11 +40,11 @@ function validateForm() {
 }
 
 emailInput?.addEventListener('input', () => {
-  if (emailInput.getAttribute('aria-invalid') === 'true') validateForm();
+  if (emailInput.getAttribute('aria-invalid') === 'true') {validateForm();}
 });
 
 passwordInput?.addEventListener('input', () => {
-  if (passwordInput.getAttribute('aria-invalid') === 'true') validateForm();
+  if (passwordInput.getAttribute('aria-invalid') === 'true') {validateForm();}
 });
 
 form?.addEventListener('submit', event => {

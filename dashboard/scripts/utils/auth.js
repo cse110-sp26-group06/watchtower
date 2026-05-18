@@ -41,7 +41,7 @@ export function validateCredentials(email, password) {
 export function getSession() {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
+    if (!raw) {return null;}
 
     const session = JSON.parse(raw);
     if (!session || typeof session.email !== 'string' || !isValidEmail(session.email)) {
@@ -80,14 +80,14 @@ export function clearSession() {
  */
 export function getRedirectTarget() {
   const rawTarget = new URLSearchParams(window.location.search).get(NEXT_QUERY_PARAM);
-  if (!rawTarget) return DASHBOARD_HOME;
+  if (!rawTarget) {return DASHBOARD_HOME;}
 
   try {
     const url = new URL(rawTarget, window.location.href);
-    if (url.origin !== window.location.origin) return DASHBOARD_HOME;
+    if (url.origin !== window.location.origin) {return DASHBOARD_HOME;}
 
     const file = url.pathname.split('/').pop();
-    if (!ALLOWED_TARGETS.has(file)) return DASHBOARD_HOME;
+    if (!ALLOWED_TARGETS.has(file)) {return DASHBOARD_HOME;}
 
     return `${file}${url.search}${url.hash}`;
   } catch {

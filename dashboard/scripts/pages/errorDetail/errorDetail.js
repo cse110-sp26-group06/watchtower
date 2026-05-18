@@ -16,7 +16,7 @@ import { markErrorResolved, withResolvedStatus } from '../../utils/errorStatus.j
 import { showToast }        from '../../utils/toast.js';
 
 const session = requireAuth();
-if (session) renderNavbar('error-list');
+if (session) {renderNavbar('error-list');}
 
 /* ── URL param ──────────────────────────────────────────────────── */
 const params  = new URLSearchParams(window.location.search);
@@ -34,7 +34,7 @@ const resolveBtn = document.getElementById('resolve-btn');
  * @param {boolean} resolved
  */
 function syncResolveButton(resolved) {
-  if (!resolveBtn) return;
+  if (!resolveBtn) {return;}
   resolveBtn.textContent = resolved ? '✓ Resolved' : 'Mark Resolved';
   resolveBtn.classList.toggle('btn--resolved', resolved);
   resolveBtn.disabled = resolved;
@@ -45,7 +45,7 @@ function syncResolveButton(resolved) {
  * then updates the button on success.
  */
 async function handleResolve() {
-  if (!errorId) return;
+  if (!errorId) {return;}
   resolveBtn.disabled = true;
 
   try {
@@ -64,7 +64,7 @@ async function handleResolve() {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ status: 'resolved' }),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+    if (!res.ok) {throw new Error(`HTTP ${res.status} — ${res.statusText}`);}
 
     syncResolveButton(true);
     showToast('Error marked as resolved.');
@@ -96,7 +96,7 @@ async function fetchError(id) {
   if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
     await new Promise(r => setTimeout(r, 300));
     const raw = MOCK_ERRORS.find(e => String(e.id) === String(id));
-    if (!raw) throw new Error(`No error found with id "${id}"`);
+    if (!raw) {throw new Error(`No error found with id "${id}"`);}
     return withResolvedStatus(normalizeError(raw));
   }
   // ── END MOCK ─────────────────────────────────────────────────
@@ -104,7 +104,7 @@ async function fetchError(id) {
   const res = await fetch(`/api/errors/${encodeURIComponent(id)}`, {
     headers: { Accept: 'application/json' },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+  if (!res.ok) {throw new Error(`HTTP ${res.status} — ${res.statusText}`);}
   return withResolvedStatus(normalizeError(await res.json()));
 }
 
@@ -116,9 +116,9 @@ async function fetchError(id) {
  */
 function timelineIcon(type) {
   switch (type) {
-    case 'critical': return `<span class="timeline__dot timeline__dot--critical"></span>`;
-    case 'deploy':   return `<span class="timeline__dot timeline__dot--deploy">⬆</span>`;
-    default:         return `<span class="timeline__dot timeline__dot--info"></span>`;
+  case 'critical': return `<span class="timeline__dot timeline__dot--critical"></span>`;
+  case 'deploy':   return `<span class="timeline__dot timeline__dot--deploy">⬆</span>`;
+  default:         return `<span class="timeline__dot timeline__dot--info"></span>`;
   }
 }
 

@@ -20,11 +20,11 @@ import { API_BASE, PAGE_LIMIT } from '../../utils/constants.js';
  * @returns {string|null} ISO timestamp string, or null when since === 'all'
  */
 export function sinceToIso(since) {
-  if (!since || since === 'all') return null;
+  if (!since || since === 'all') {return null;}
 
   const units = { h: 60 * 60 * 1000, d: 24 * 60 * 60 * 1000 };
   const match = since.match(/^(\d+)([hd])$/);
-  if (!match) return null;
+  if (!match) {return null;}
 
   const ms = parseInt(match[1], 10) * units[match[2]];
   return new Date(Date.now() - ms).toISOString();
@@ -53,10 +53,10 @@ export function buildUrl(state) {
   });
 
   const sinceIso = sinceToIso(state.since);
-  if (sinceIso) params.set('since', sinceIso);
+  if (sinceIso) {params.set('since', sinceIso);}
 
-  if (state.severity && state.severity !== 'all') params.set('severity', state.severity);
-  if (state.status   && state.status   !== 'all') params.set('status',   state.status);
+  if (state.severity && state.severity !== 'all') {params.set('severity', state.severity);}
+  if (state.status   && state.status   !== 'all') {params.set('status',   state.status);}
 
   return `${API_BASE}?${params}`;
 }

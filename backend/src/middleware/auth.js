@@ -1,4 +1,3 @@
-/* global crypto */
 /**
  * Authentication middleware for WatchTower Backend
  * Handles API key generation and validation
@@ -29,7 +28,7 @@ export async function generateApiKey(env, name) {
  * @returns {object|null} - project record if valid, null if invalid
  */
 export async function validateApiKey(env, api_key) {
-  if (!api_key) return null;
+  if (!api_key) {return null;}
 
   const project = await env.watchtower_db.prepare(
     'SELECT * FROM projects WHERE api_key = ?'
