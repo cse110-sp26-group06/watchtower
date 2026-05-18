@@ -14,7 +14,7 @@ let toastTimer;
  */
 export function showToast(msg, isError = false) {
   const toast = document.getElementById('toast');
-  if (!toast) return;
+  if (!toast) {return;}
   toast.textContent = msg;
   toast.className   = isError ? 'show error' : 'show';
   clearTimeout(toastTimer);

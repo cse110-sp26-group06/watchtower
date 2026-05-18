@@ -31,6 +31,8 @@ Each ADR carries one of the following statuses:
 | 0003 | [Testing framework](0003-testing-framework.md) | Accepted | 2026-05-11 |
 | 0004 | [Linting framework](0004-linting-framework.md) | Accepted | 2026-05-13 |
 | 0005 | [Changelog and versioning approach](0005-changelog-and-versioning.md) | Accepted | 2026-05-15 |
+| 0006 | [Testing traffic generation](0006-testing-traffic-generation.md) | Accepted | 2026-05-17 |
+| 0007 | [JavaScript style guide](0007-javascript-style-guide.md) | Accepted | 2026-05-18 |
 
 ## Adding a New ADR
 

@@ -34,7 +34,7 @@ async function fetchSVG(path) {
  */
 export async function renderNavbar(activeId = '') {
   const session = getSession();
-  if (!session) return;
+  if (!session) {return;}
 
   // Auto-detect from URL if not provided
   if (!activeId) {
@@ -97,7 +97,7 @@ export async function renderNavbar(activeId = '') {
     </div>`;
 
   const root = document.getElementById('navbar-root');
-  if (!root) return;
+  if (!root) {return;}
   root.replaceChildren(nav);
 
   const trigger = document.getElementById('navbar-account-trigger');
@@ -127,11 +127,11 @@ export async function renderNavbar(activeId = '') {
   });
 
   document.addEventListener('click', event => {
-    if (!nav.contains(event.target)) setMenuOpen(false);
+    if (!nav.contains(event.target)) {setMenuOpen(false);}
   });
 
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') setMenuOpen(false);
+    if (event.key === 'Escape') {setMenuOpen(false);}
   });
 }
 

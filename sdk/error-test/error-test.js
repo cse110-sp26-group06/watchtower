@@ -13,8 +13,8 @@ window.addEventListener("error", (event) => {
 //For testing purposes: trigger an error on click
 button.addEventListener("click", () => {
   //throw uncaught error 
-  if(selector.value == "script-error"){
-        throw new Error("This is a script error");
+  if (selector.value === "script-error") {
+    throw new Error("This is a script error");
   } else {
     log.textContent = `${log.textContent}No error!\n`;
   }

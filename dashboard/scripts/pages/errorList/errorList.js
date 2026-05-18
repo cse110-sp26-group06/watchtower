@@ -7,7 +7,7 @@ import { withResolvedStatuses } from '../../utils/errorStatus.js';
 import { buildUrl, initFilters }   from './errorFilter.js';
 
 const session = requireAuth();
-if (session) renderNavbar('error-list');
+if (session) {renderNavbar('error-list');}
 
 /* ── State ──────────────────────────────────────────────────── */
 const state = { severity: '', since: '24h', status: 'unresolved', page: 1, total: 0, loading: false };
@@ -46,7 +46,7 @@ function applyClientFilters(errors) {
 function renderLoading() {
   listEl.innerHTML = `<div class="error-card" style="justify-content:center;gap:12px;">
     <div class="spinner"></div><span>Fetching errors…</span></div>`;
-  if (pagination) pagination.style.display = 'none';
+  if (pagination) {pagination.style.display = 'none';}
 }
 
 /**
@@ -56,7 +56,7 @@ function renderLoading() {
 function renderEmpty() {
   listEl.innerHTML = `<div class="error-card" style="justify-content:center;">
     <span style="color:var(--color-text-muted)">No errors match your filters.</span></div>`;
-  if (pagination) pagination.style.display = 'none';
+  if (pagination) {pagination.style.display = 'none';}
 }
 
 /**
@@ -69,7 +69,7 @@ function renderFetchError(msg) {
     <span style="font-weight:600;color:var(--color-critical)">⚠ Failed to load errors</span>
     <span style="font-size:13px;color:var(--color-text-muted)">${msg}</span>
     <button class="btn btn--outline" onclick="load()" style="margin-top:4px">Try again</button></div>`;
-  if (pagination) pagination.style.display = 'none';
+  if (pagination) {pagination.style.display = 'none';}
 }
 
 /**
@@ -87,9 +87,9 @@ function renderErrors(errors, total) {
     const show = totalPages > 1;
     pagination.style.display = show ? 'flex' : 'none';
     if (show) {
-      if (pageInfo) pageInfo.textContent = `Page ${state.page} of ${totalPages}`;
-      if (prevBtn)  prevBtn.disabled = state.page <= 1;
-      if (nextBtn)  nextBtn.disabled = state.page >= totalPages;
+      if (pageInfo) {pageInfo.textContent = `Page ${state.page} of ${totalPages}`;}
+      if (prevBtn)  {prevBtn.disabled = state.page <= 1;}
+      if (nextBtn)  {nextBtn.disabled = state.page >= totalPages;}
     }
   }
 }
@@ -110,7 +110,7 @@ function renderErrors(errors, total) {
  * @returns {Promise<void>}
  */
 async function load() {
-  if (state.loading) return;
+  if (state.loading) {return;}
   state.loading = true;
   renderLoading();
 
@@ -132,7 +132,7 @@ async function load() {
 
   try {
     const res = await fetch(buildUrl(state), { headers: { Accept: 'application/json' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+    if (!res.ok) {throw new Error(`HTTP ${res.status} — ${res.statusText}`);}
 
     const data    = await res.json();
     const rawRows = Array.isArray(data) ? data : (data.errors ?? data.data ?? data.items ?? []);
@@ -156,5 +156,5 @@ async function load() {
 initFilters(state, load);
 load();
 window.addEventListener('pageshow', event => {
-  if (event.persisted) load();
+  if (event.persisted) {load();}
 });

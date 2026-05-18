@@ -12,7 +12,7 @@ import { escHtml } from '../../utils/dom.js';
  * @returns {string} HTML string.
  */
 export function renderStackTrace(frames = []) {
-  if (!frames.length) return '';
+  if (!frames.length) {return '';}
 
   const lines = frames
     .map(frame => {
