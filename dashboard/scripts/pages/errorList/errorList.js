@@ -2,9 +2,12 @@ import { renderNavbar }    from '../../components/navbar.js';
 import { renderErrorCard } from '../../components/errorCard.js';
 import { showToast }       from '../../utils/toast.js';
 import { MOCK_ERRORS, PAGE_LIMIT, normalizeError } from '../../utils/constants.js';
+import { requireAuth } from '../../utils/auth.js';
+import { withResolvedStatuses } from '../../utils/errorStatus.js';
 import { buildUrl, initFilters }   from './errorFilter.js';
 
-renderNavbar('error-list');
+const session = requireAuth();
+if (session) renderNavbar('error-list');
 
 /* ── State ──────────────────────────────────────────────────── */
 const state = { severity: '', since: '24h', status: 'unresolved', page: 1, total: 0, loading: false };
@@ -115,7 +118,7 @@ async function load() {
   if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
     await new Promise(r => setTimeout(r, 500));
 
-    const normalized = MOCK_ERRORS.map(normalizeError);
+    const normalized = withResolvedStatuses(MOCK_ERRORS.map(normalizeError));
     const filtered   = applyClientFilters(normalized);
     const start      = (state.page - 1) * PAGE_LIMIT;
     const paged      = filtered.slice(start, start + PAGE_LIMIT);
@@ -135,7 +138,7 @@ async function load() {
     const rawRows = Array.isArray(data) ? data : (data.errors ?? data.data ?? data.items ?? []);
 
     // Normalize every raw D1 row into the shape the card layer expects.
-    const normalized = rawRows.map(normalizeError);
+    const normalized = withResolvedStatuses(rawRows.map(normalizeError));
     const filtered   = applyClientFilters(normalized);
 
     state.total = filtered.length;

@@ -56,7 +56,7 @@ export function withResolvedStatus(error) {
   if (!error) return error;
   return {
     ...error,
-    status: isErrorResolved(error.id) ? 'resolved' : 'unresolved',
+    status: error.status === 'resolved' || isErrorResolved(error.id) ? 'resolved' : 'unresolved',
   };
 }
 
