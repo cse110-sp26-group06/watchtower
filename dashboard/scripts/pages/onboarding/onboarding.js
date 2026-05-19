@@ -1,3 +1,9 @@
+/**
+ * Logic for the onboarding page. Handles project name validation, 
+ * communicating with the backend to generate API keys, and managing the UI states 
+ * (create, loading, ready).
+ */
+
 import { requireAuth } from '../../utils/auth.js';
 import {
   addStoredProject,
@@ -29,6 +35,11 @@ const snippetApiKey = document.getElementById('snippet-api-key');
 const copyBtn = document.getElementById('copy-btn');
 const continueBtn = document.getElementById('continue-btn');
 
+/**
+ * Toggles visibility among the onboarding view states.
+ * @param {HTMLElement} stateToShow - The state container to display.
+ * @returns {void}
+ */
 function showState(stateToShow) {
   [createState, loadingState, readyState].forEach((state) => {
     state.classList.add('onboarding-state--hidden');
@@ -37,14 +48,30 @@ function showState(stateToShow) {
   stateToShow.classList.remove('onboarding-state--hidden');
 }
 
+/**
+ * Sets or clears the error message for the project name input.
+ * @param {string} [message=''] - The error message to display.
+ * @returns {void}
+ */
 function setProjectNameError(message = '') {
   projectNameError.textContent = message;
 }
 
+/**
+ * Sets or clears the status message for the project creation form.
+ * @param {string} [message=''] - The status message to display.
+ * @returns {void}
+ */
 function setProjectFormStatus(message = '') {
   projectFormStatus.textContent = message;
 }
 
+/**
+ * Makes an API request to generate a new API key for the project,
+ * stores the result locally, and updates the UI to show the setup snippet.
+ * @param {string} projectName - The valid name of the new project.
+ * @returns {Promise<void>}
+ */
 async function generateProject(projectName) {
   try {
     const response = await fetch('https://watchtower-backend.group6.workers.dev/api/key_generate', {

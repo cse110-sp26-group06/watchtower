@@ -1,3 +1,9 @@
+/**
+ * Logic for the projects dashboard. Handles fetching the user's
+ * projects, rendering the project cards, and managing project actions like 
+ * renaming and deleting.
+ */
+
 import { requireAuth } from '../../utils/auth.js';
 import { escHtml } from '../../utils/dom.js';
 import {
@@ -22,11 +28,21 @@ const projectsList = document.getElementById('projects-list');
 const newProjectBtn = document.getElementById('new-project-btn');
 let openMenuButton = null;
 
+/**
+ * Sets the active project in session storage and redirects to the error list.
+ * @param {Object} project - The project to open.
+ * @returns {void}
+ */
 function openProject(project) {
   setCurrentProject(project);
   window.location.assign('error-list.html');
 }
 
+/**
+ * Prompts the user for a new project name, updates storage, and re-renders the list.
+ * @param {Object} project - The project to rename.
+ * @returns {void}
+ */
 function handleRenameProject(project) {
   const nextName = window.prompt('Rename project', project.name);
   if (nextName === null) {
@@ -42,6 +58,11 @@ function handleRenameProject(project) {
   }
 }
 
+/**
+ * Prompts the user to confirm deletion, removes the project from storage, and re-renders the list.
+ * @param {Object} project - The project to delete.
+ * @returns {void}
+ */
 function handleDeleteProject(project) {
   const confirmed = window.confirm(`Delete "${project.name}"?`);
   if (!confirmed) {
@@ -57,6 +78,11 @@ function handleDeleteProject(project) {
   }
 }
 
+/**
+ * Closes the action menu for a specific project item.
+ * @param {HTMLButtonElement|null} button - The menu trigger button.
+ * @returns {void}
+ */
 function closeProjectMenu(button) {
   if (!button) {
     return;
@@ -70,6 +96,11 @@ function closeProjectMenu(button) {
   }
 }
 
+/**
+ * Opens the action menu for a specific project item, closing any other open menu first.
+ * @param {HTMLButtonElement} button - The menu trigger button.
+ * @returns {void}
+ */
 function openProjectMenu(button) {
   if (openMenuButton && openMenuButton !== button) {
     closeProjectMenu(openMenuButton);
@@ -81,6 +112,11 @@ function openProjectMenu(button) {
   openMenuButton = button;
 }
 
+/**
+ * Toggles the expanded state of a project item's action menu.
+ * @param {HTMLButtonElement} button - The menu trigger button.
+ * @returns {void}
+ */
 function toggleProjectMenu(button) {
   const isExpanded = button.getAttribute('aria-expanded') === 'true';
 
@@ -92,6 +128,11 @@ function toggleProjectMenu(button) {
   openProjectMenu(button);
 }
 
+/**
+ * Reads stored projects and populates the projects list grid in the UI.
+ * Redirects to onboarding if no projects exist.
+ * @returns {void}
+ */
 function renderProjects() {
   const projects = getStoredProjects();
 
