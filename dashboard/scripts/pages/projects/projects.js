@@ -133,7 +133,7 @@ function toggleProjectMenu(button) {
  * Redirects to onboarding if no projects exist.
  * @returns {void}
  */
-function renderProjects() {
+function renderProjects() { 
   const projects = getStoredProjects();
 
   if (projects.length === 0) {
