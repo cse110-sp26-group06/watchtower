@@ -1,29 +1,33 @@
 // api.js
 // DASH-3: Centralized API client for WatchTower dashboard read endpoints.
-// Handles auth (X-Api-Key), network failures, 4xx, and 5xx error states.
-// All other api/* modules must go through apiGet() — never call fetch() directly.
+// Handles auth (api_key query param), network failures, 4xx, and 5xx error states.
+// All other modules must go through apiGet() — never call fetch() directly.
+//
+// Auth note: X-Api-Key header is NOT used — backend CORS only allows
+// Content-Type as a custom header. Auth is injected as api_key query param.
 
-import { API_BASE } from '../utils/constants.js';
+import { API_BASE, API_KEY } from '../utils/constants.js';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 /**
- * Retrieves the WatchTower API key.
- * Swap implementation to pull from a meta tag, config object, or env injection.
+ * Retrieves the WatchTower API key from constants.
+ * Swap for runtime injection (meta tag, config object) when multi-project
+ * support is needed.
  * @returns {string | null}
  */
 function getApiKey() {
-  return window.__WATCHTOWER_API_KEY__ ?? null;
+  return API_KEY ?? null;
 }
 
 // ─── Core Fetch Wrapper ───────────────────────────────────────────────────────
 
 /**
- * Central fetch wrapper. Attaches auth headers and normalizes all error states.
+ * Central fetch wrapper. Normalizes all error states into a consistent shape.
  *
  * Returns one of two shapes — callers must always check `success`:
- *   { success: true,  data:  any       }
- *   { success: false, error: ApiError  }
+ *   { success: true,  data:  any      }
+ *   { success: false, error: ApiError }
  *
  * @typedef {"network"|"client"|"server"} ErrorType
  * @typedef {{ type: ErrorType, status?: number, message: string }} ApiError
@@ -33,12 +37,9 @@ function getApiKey() {
  * @returns {Promise<{ success: boolean, data?: any, error?: ApiError }>}
  */
 async function apiFetch(url, options = {}) {
-  const apiKey = getApiKey();
-
   const headers = {
     "Accept": "application/json",
     "Content-Type": "application/json",
-    ...(apiKey ? { "X-Api-Key": apiKey } : {}),
     ...(options.headers ?? {}),
   };
 
@@ -123,14 +124,21 @@ async function apiFetch(url, options = {}) {
 
 /**
  * Perform a GET request to a WatchTower read endpoint.
- * Params are appended as a query string via URLSearchParams.
+ * api_key is automatically injected as a query param on every request.
+ * Additional params are merged alongside it.
  *
- * @param {string}              endpoint - Path relative to API_BASE (e.g. "/errors")
- * @param {Record<string,string>} [params] - Query parameters
+ * @param {string}                  [endpoint] - Path appended to API_BASE (e.g. '' or '/stats')
+ * @param {Record<string, string>}  [params]   - Additional query parameters
  * @returns {Promise<{ success: boolean, data?: any, error?: ApiError }>}
  */
-async function apiGet(endpoint, params = {}) {
-  const query = new URLSearchParams(params).toString();
+async function apiGet(endpoint = '', params = {}) {
+  const apiKey = getApiKey();
+
+  const query = new URLSearchParams({
+    ...(apiKey ? { api_key: apiKey } : {}),
+    ...params,
+  }).toString();
+
   const url = query
     ? `${API_BASE}${endpoint}?${query}`
     : `${API_BASE}${endpoint}`;

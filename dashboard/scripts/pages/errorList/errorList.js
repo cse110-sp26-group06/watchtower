@@ -1,16 +1,21 @@
-import { renderNavbar }    from '../../components/navbar.js';
-import { renderErrorCard } from '../../components/errorCard.js';
-import { showToast }       from '../../utils/toast.js';
+import { renderNavbar }              from '../../components/navbar.js';
+import { renderErrorCard }           from '../../components/errorCard.js';
+import { showToast }                 from '../../utils/toast.js';
 import { MOCK_ERRORS, PAGE_LIMIT, normalizeError } from '../../utils/constants.js';
-import { requireAuth } from '../../utils/auth.js';
-import { withResolvedStatuses } from '../../utils/errorStatus.js';
-import { buildUrl, initFilters }   from './errorFilter.js';
+import { requireAuth }               from '../../utils/auth.js';
+import { withResolvedStatuses }      from '../../utils/errorStatus.js';
+import { initFilters, sinceToIso }   from './errorFilter.js';
+import { apiGet }                    from '../../api/api.js';
 
 const session = requireAuth();
-if (session) {renderNavbar('error-list');}
+if (session) { renderNavbar('error-list'); }
+
+// Expose load() to window so onclick="load()" in renderFetchError works
+// ES modules are scoped and don't attach to window automatically
+window.load = load;
 
 /* ── State ──────────────────────────────────────────────────── */
-const state = { severity: '', since: '24h', status: 'unresolved', page: 1, total: 0, loading: false };
+const state = { severity: '', since: '30d', status: 'unresolved', page: 1, total: 0, loading: false };
 
 /* ── DOM refs ───────────────────────────────────────────────── */
 const listEl     = document.getElementById('error-list');
@@ -20,6 +25,7 @@ const prevBtn    = document.getElementById('prevBtn');
 const nextBtn    = document.getElementById('nextBtn');
 
 /* ── Render helpers ─────────────────────────────────────────── */
+
 /**
  * Applies the current severity and status filters to a list of
  * already-normalized errors.
@@ -46,7 +52,7 @@ function applyClientFilters(errors) {
 function renderLoading() {
   listEl.innerHTML = `<div class="error-card" style="justify-content:center;gap:12px;">
     <div class="spinner"></div><span>Fetching errors…</span></div>`;
-  if (pagination) {pagination.style.display = 'none';}
+  if (pagination) { pagination.style.display = 'none'; }
 }
 
 /**
@@ -56,7 +62,7 @@ function renderLoading() {
 function renderEmpty() {
   listEl.innerHTML = `<div class="error-card" style="justify-content:center;">
     <span style="color:var(--color-text-muted)">No errors match your filters.</span></div>`;
-  if (pagination) {pagination.style.display = 'none';}
+  if (pagination) { pagination.style.display = 'none'; }
 }
 
 /**
@@ -69,7 +75,7 @@ function renderFetchError(msg) {
     <span style="font-weight:600;color:var(--color-critical)">⚠ Failed to load errors</span>
     <span style="font-size:13px;color:var(--color-text-muted)">${msg}</span>
     <button class="btn btn--outline" onclick="load()" style="margin-top:4px">Try again</button></div>`;
-  if (pagination) {pagination.style.display = 'none';}
+  if (pagination) { pagination.style.display = 'none'; }
 }
 
 /**
@@ -87,14 +93,15 @@ function renderErrors(errors, total) {
     const show = totalPages > 1;
     pagination.style.display = show ? 'flex' : 'none';
     if (show) {
-      if (pageInfo) {pageInfo.textContent = `Page ${state.page} of ${totalPages}`;}
-      if (prevBtn)  {prevBtn.disabled = state.page <= 1;}
-      if (nextBtn)  {nextBtn.disabled = state.page >= totalPages;}
+      if (pageInfo) { pageInfo.textContent = `Page ${state.page} of ${totalPages}`; }
+      if (prevBtn)  { prevBtn.disabled = state.page <= 1; }
+      if (nextBtn)  { nextBtn.disabled = state.page >= totalPages; }
     }
   }
 }
 
 /* ── Load ───────────────────────────────────────────────────── */
+
 /**
  * Fetches and renders the error list for the current filter state.
  *
@@ -102,19 +109,19 @@ function renderErrors(errors, total) {
  *              before filtering, so the card layer always receives the
  *              same shape regardless of data source.
  *
- * Real path  — the API is expected to return an array of raw D1 rows
- *              (or a wrapper with an `errors` / `data` / `items` key).
- *              Each row is passed through normalizeError() before any
- *              client-side filtering or rendering.
+ * Real path  — routes through api.js (apiGet) for centralized auth
+ *              (api_key query param) and error handling (network/4xx/5xx).
+ *              Each raw D1 row is passed through normalizeError() before
+ *              any client-side filtering or rendering.
  *
  * @returns {Promise<void>}
  */
 async function load() {
-  if (state.loading) {return;}
+  if (state.loading) { return; }
   state.loading = true;
   renderLoading();
 
-  // ── MOCK: remove this block when real API is ready ──────────
+  // ── MOCK: set MOCK_ERRORS to [] in constants.js to disable ──
   if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
     await new Promise(r => setTimeout(r, 500));
 
@@ -130,23 +137,30 @@ async function load() {
   }
   // ── END MOCK ─────────────────────────────────────────────────
 
+  // ── Real API via api.js ───────────────────────────────────────
+  const params = {};
+  const sinceIso = sinceToIso(state.since);
+  if (sinceIso) { params.since = sinceIso; }
+  if (state.status && state.status !== 'all') { params.status = state.status; }
+
   try {
-    const res = await fetch(buildUrl(state), { headers: { Accept: 'application/json' } });
-    if (!res.ok) {throw new Error(`HTTP ${res.status} — ${res.statusText}`);}
+    const result = await apiGet('', params);
 
-    const data    = await res.json();
-    const rawRows = Array.isArray(data) ? data : (data.errors ?? data.data ?? data.items ?? []);
+    if (!result.success) {
+      console.error(`[WatchTower] ${result.error.type} error:`, result.error.message);
+      renderFetchError(result.error.message);
+      showToast('Could not fetch errors: ' + result.error.message, true);
+      return;
+    }
 
-    // Normalize every raw D1 row into the shape the card layer expects.
+    // Backend responds with { status: "ok", errors: [...] }
+    const rawRows    = result.data?.errors ?? [];
     const normalized = withResolvedStatuses(rawRows.map(normalizeError));
     const filtered   = applyClientFilters(normalized);
 
     state.total = filtered.length;
     renderErrors(filtered, filtered.length);
-  } catch (err) {
-    console.error('[WatchTower] fetch failed:', err);
-    renderFetchError(err.message);
-    showToast('Could not fetch errors: ' + err.message, true);
+
   } finally {
     state.loading = false;
   }
@@ -156,5 +170,5 @@ async function load() {
 initFilters(state, load);
 load();
 window.addEventListener('pageshow', event => {
-  if (event.persisted) {load();}
+  if (event.persisted) { load(); }
 });

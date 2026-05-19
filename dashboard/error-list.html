@@ -46,7 +46,7 @@
           <select id="filter-time" class="filter-select">
             <option value="24h">Last 24h</option>
             <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
+            <option value="30d" selected>Last 30 days</option>
           </select>
         </div>
         <div class="filter-group">
@@ -60,6 +60,12 @@
       </section>
 
       <section id="error-list" class="error-list" aria-label="Error entries" aria-live="polite"></section>
+
+      <div id="pagination" style="display:none;">
+        <button id="prevBtn" class="btn btn--outline">← Prev</button>
+        <span id="pageInfo"></span>
+        <button id="nextBtn" class="btn btn--outline">Next →</button>
+      </div>
     </main>
 
     <div id="toast"></div>
