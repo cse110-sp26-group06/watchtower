@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="WatchTower Projects. Manage your observability projects." />
+  <title>WatchTower Projects</title>
+
+  <link rel="stylesheet" href="styles/globals.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+  <link rel="stylesheet" href="styles/layout.css" />
+  <link rel="stylesheet" href="styles/pages/projects.css" />
+  <script src="scripts/pages/projects/projects.js" type="module"></script>
+</head>
+
+<body class="projects-page">
+  <main class="projects-shell">
+    <header class="projects-header">
+      <h1 class="projects-header__title">WatchTower</h1>
+      <p class="projects-header__subtitle">Select a project or create a new one</p>
+    </header>
+
+    <div class="projects-card">
+      <div class="projects-card__header">
+        <h2 class="projects-card__title">Your Projects</h2>
+        <button id="new-project-btn" class="btn btn--dark">+ New Project</button>
+      </div>
+
+      <div id="projects-list" class="projects-list">
+        <!-- Project cards will be rendered here via JS -->
+      </div>
+    </div>
+  </main>
+
+  <footer class="session-footer">
+    <p id="user-email-display"></p>
+  </footer>
+  <div id="toast" aria-live="polite" aria-atomic="true"></div>
+</body>
+
+</html>

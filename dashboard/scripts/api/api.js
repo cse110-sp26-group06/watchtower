@@ -107,7 +107,7 @@ async function apiFetch(url, options = {}) {
     const data = await response.json();
     return { success: true, data };
 
-  } catch (err) {
+  } catch {
     // ── Network Failure (offline, DNS failure, CORS, etc.) ─────────────────
     return {
       success: false,

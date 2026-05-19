@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="WatchTower onboarding. Generate your API key and setup the SDK." />
+  <title>WatchTower Onboarding</title>
+
+  <link rel="stylesheet" href="styles/globals.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+  <link rel="stylesheet" href="styles/layout.css" />
+  <link rel="stylesheet" href="styles/pages/onboarding.css" />
+  <script src="scripts/pages/onboarding/onboarding.js" type="module"></script>
+</head>
+
+<body class="onboarding-page">
+  <main class="onboarding-shell">
+    <header class="onboarding-header">
+      <h1 class="onboarding-header__title">WatchTower</h1>
+      <p class="onboarding-header__subtitle">Get your SDK Snippet & API Key</p>
+    </header>
+
+    <div class="onboarding-card">
+      <div id="create-state" class="onboarding-state">
+        <h2 class="onboarding-card__title">Name Your Project</h2>
+        <p class="onboarding-card__subtitle">Choose a unique project name, then generate your API key and SDK snippet.</p>
+
+        <form id="project-form" class="project-form" novalidate>
+          <label class="project-field" for="project-name-input">
+            <span class="project-field__label">Project Name</span>
+            <input id="project-name-input" class="project-field__input" type="text" name="projectName" maxlength="80" autocomplete="off" required />
+          </label>
+          <p id="project-name-error" class="project-field__error" role="alert"></p>
+          <p id="project-form-status" class="project-form__status" role="status" aria-live="polite"></p>
+          <button id="generate-project-btn" type="submit" class="btn btn--dark continue-btn">Generate API Key</button>
+        </form>
+      </div>
+
+      <div id="loading-state" class="onboarding-state onboarding-state--loading onboarding-state--hidden">
+        <div class="spinner" aria-label="Generating API Key"></div>
+        <h2>Generating your project...</h2>
+        <p>Please wait while we set up your WatchTower project.</p>
+      </div>
+
+      <div id="ready-state" class="onboarding-state onboarding-state--hidden">
+        <h2 class="onboarding-card__title">Your Project is Ready!</h2>
+        <p class="onboarding-card__subtitle">Follow these steps to integrate WatchTower into your application</p>
+
+        <section class="step-section">
+          <h3 class="step-section__title"><span class="step-number">1</span> Copy Your API Key</h3>
+          <div class="api-key-container">
+            <input id="api-key-input" type="text" readonly aria-label="API Key" />
+            <button id="copy-btn" class="btn btn--outline">Copy</button>
+          </div>
+          <p class="step-section__hint">Keep this API key secure. You'll need it to connect your application to WatchTower.</p>
+        </section>
+
+        <section class="step-section">
+          <h3 class="step-section__title"><span class="step-number">2</span> Install the SDK</h3>
+          <div class="code-block">
+            <code>npm install @watchtower/sdk</code>
+          </div>
+        </section>
+
+        <section class="step-section">
+          <h3 class="step-section__title"><span class="step-number">3</span> Add to Your Application</h3>
+          <div class="code-block code-block--multiline">
+            <pre><code>import WatchTower from '@watchtower/sdk';
+
+WatchTower.init({
+  apiKey: '<span id="snippet-api-key">your-api-key</span>',
+  environment: 'production'
+});</code></pre>
+          </div>
+        </section>
+
+        <div class="info-alert">
+          <div class="info-alert__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </div>
+          <div class="info-alert__content">
+            <strong>You can skip this for now</strong>
+            <p>You can access your API key and SDK instructions anytime from the Project Settings page.</p>
+          </div>
+        </div>
+
+        <button id="continue-btn" class="btn btn--dark continue-btn">Continue to Dashboard</button>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="session-footer">
+    <p id="user-email-display"></p>
+  </footer>
+  <div id="toast" aria-live="polite" aria-atomic="true"></div>
+</body>
+
+</html>

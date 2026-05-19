@@ -1,15 +1,17 @@
 const STORAGE_KEY = 'watchtower:session';
 const NEXT_QUERY_PARAM = 'next';
 
-export const DASHBOARD_HOME = 'error-list.html';
+export const DASHBOARD_HOME = 'projects.html';
 
 const ALLOWED_TARGETS = new Set([
   DASHBOARD_HOME,
+  'error-list.html',
   'error-detail.html',
   'performance.html',
   'feedback.html',
   'alerts.html',
   'settings.html',
+  'onboarding.html',
 ]);
 
 /**
