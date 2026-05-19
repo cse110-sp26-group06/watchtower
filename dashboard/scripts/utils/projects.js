@@ -98,6 +98,17 @@ export function renameStoredProject(projectId, nextName) {
   return renamedProject;
 }
 
+export function deleteStoredProject(projectId) {
+  const projects = getStoredProjects();
+  const nextProjects = projects.filter((project) => project.id !== projectId);
+
+  if (nextProjects.length === projects.length) {
+    throw new Error('Project not found.');
+  }
+
+  saveStoredProjects(nextProjects);
+}
+
 export function setCurrentProject(project) {
   window.sessionStorage.setItem(CURRENT_PROJECT_STORAGE_KEY, JSON.stringify(project));
 }

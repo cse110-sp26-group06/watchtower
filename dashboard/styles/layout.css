@@ -105,6 +105,38 @@
   overflow-y: auto;
 }
 
+.navbar__projects-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin-bottom: 18px;
+  padding: 6px 2px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition), background-color var(--transition);
+}
+
+.navbar__projects-back:hover {
+  color: var(--color-text);
+  background-color: #f3f4f6;
+}
+
+.navbar__projects-back-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.navbar__projects-back-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
 .navbar__brand {
   display: flex;
   flex-direction: column;

@@ -52,6 +52,14 @@ export async function renderNavbar(activeId = '') {
   nav.id = 'navbar';
   nav.setAttribute('aria-label', 'Main navigation');
   nav.innerHTML = `
+    <a class="navbar__projects-back" href="${DASHBOARD_HOME}" aria-label="Back to all projects">
+      <span class="navbar__projects-back-icon" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none">
+          <path d="M11.667 5.833 7.5 10l4.167 4.167" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span>All Projects</span>
+    </a>
     <a class="navbar__brand" href="${DASHBOARD_HOME}" aria-label="WatchTower home">
       <span class="navbar__brand-title">WatchTower</span>
       <span class="navbar__brand-subtitle">Observability Dashboard</span>
