@@ -1,3 +1,4 @@
+/* global window */
 import { test, expect } from '@playwright/test';
 
 async function signIn(page, email = 'user@example.com', password = 'password123') {
