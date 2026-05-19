@@ -22,7 +22,22 @@
     </header>
 
     <div class="onboarding-card">
-      <div id="loading-state" class="onboarding-state onboarding-state--loading">
+      <div id="create-state" class="onboarding-state">
+        <h2 class="onboarding-card__title">Name Your Project</h2>
+        <p class="onboarding-card__subtitle">Choose a unique project name, then generate your API key and SDK snippet.</p>
+
+        <form id="project-form" class="project-form" novalidate>
+          <label class="project-field" for="project-name-input">
+            <span class="project-field__label">Project Name</span>
+            <input id="project-name-input" class="project-field__input" type="text" name="projectName" maxlength="80" autocomplete="off" required />
+          </label>
+          <p id="project-name-error" class="project-field__error" role="alert"></p>
+          <p id="project-form-status" class="project-form__status" role="status" aria-live="polite"></p>
+          <button id="generate-project-btn" type="submit" class="btn btn--dark continue-btn">Generate API Key</button>
+        </form>
+      </div>
+
+      <div id="loading-state" class="onboarding-state onboarding-state--loading onboarding-state--hidden">
         <div class="spinner" aria-label="Generating API Key"></div>
         <h2>Generating your project...</h2>
         <p>Please wait while we set up your WatchTower project.</p>
@@ -78,6 +93,7 @@ WatchTower.init({
   <footer class="session-footer">
     <p id="user-email-display"></p>
   </footer>
+  <div id="toast" aria-live="polite" aria-atomic="true"></div>
 </body>
 
 </html>

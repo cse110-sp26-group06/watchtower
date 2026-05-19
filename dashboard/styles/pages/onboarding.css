@@ -76,6 +76,57 @@
   line-height: 1.5;
 }
 
+.project-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.project-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-field__label {
+  color: var(--color-text);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.project-field__input {
+  width: 100%;
+  border: 1px solid #d9dee7;
+  border-radius: 12px;
+  background: #fbfbfc;
+  padding: 15px 16px;
+  color: var(--color-text);
+  font-size: 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.project-field__input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.project-field__error,
+.project-form__status {
+  min-height: 20px;
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.project-field__error {
+  color: #b42318;
+}
+
+.project-form__status {
+  color: #667085;
+}
+
 .step-section {
   display: flex;
   flex-direction: column;
@@ -252,6 +303,10 @@
 
   .onboarding-card {
     padding: 24px 18px;
+  }
+
+  .project-field__input {
+    padding: 14px 15px;
   }
 
   .api-key-container {
