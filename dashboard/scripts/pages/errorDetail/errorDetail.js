@@ -10,7 +10,7 @@ import { renderNavbar }     from '../../components/navbar.js';
 import { badgeClass }       from '../../components/errorCard.js';
 import { renderStackTrace } from './stackTrace.js';
 import { MOCK_ERRORS, normalizeError } from '../../utils/constants.js';
-import { apiGet } from '../../api/api.js';
+import { apiGet, apiPatch } from '../../api/api.js';
 import { requireAuth } from '../../utils/auth.js';
 import { escHtml }          from '../../utils/dom.js';
 import { markErrorResolved, withResolvedStatus } from '../../utils/errorStatus.js';
@@ -60,11 +60,8 @@ async function handleResolve() {
     }
     // ── END MOCK ─────────────────────────────────────────────────
 
-  const res = await fetch(
-    `https://watchtower-backend.group6.workers.dev/api/errors/${encodeURIComponent(errorId)}?api_key=wt_e5432da49ac342e6979f901324dae034`,
-    { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'resolved' }) }
-  );
-    if (!res.ok) {throw new Error(`HTTP ${res.status} — ${res.statusText}`);}
+    const result = await apiPatch(`/${errorId}`, { status: 'resolved' });
+    if (!result.success) throw new Error(result.error.message);
 
     syncResolveButton(true);
     showToast('Error marked as resolved.');

@@ -52,7 +52,6 @@ export function buildUrl(state) {
 
   const sinceIso = sinceToIso(state.since);
   if (sinceIso) { params.set('since', sinceIso); }
-	//if (state.severity && state.severity !== 'all') {params.set('severity', state.severity);}
   if (state.status && state.status !== 'all') { params.set('status', state.status); }
 
   return `${API_BASE}?${params}`;

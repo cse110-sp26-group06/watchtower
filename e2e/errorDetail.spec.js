@@ -11,11 +11,21 @@ test.describe('Error Detail page', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
+      // eslint-disable-next-line no-undef
       localStorage.setItem(
         'watchtower:session',
         JSON.stringify({ email: 'test@ucsd.edu' })
       );
     });
+  });
+
+  test('redirects to login when no session', async ({ page }) => {
+    await page.addInitScript(() => {
+      // eslint-disable-next-line no-undef
+      localStorage.removeItem('watchtower:session');
+    });
+    await page.goto(`/error-detail.html?id=${REAL_ID}`);
+    await expect(page).toHaveURL(/login\.html/);
   });
 
   test('page loads without JS errors', async ({ page }) => {
@@ -92,13 +102,7 @@ test.describe('Error Detail page', () => {
     await page.waitForLoadState('networkidle');
     const title = await page.title();
     expect(title).toMatch(/WatchTower/);
-    expect(title).not.toBe('Error Detail'); // default title should be overwritten
-  });
-
-  test('redirects to login when no session', async ({ page }) => {
-    // No session injected — requireAuth() should redirect
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await expect(page).toHaveURL(/login\.html/);
+    expect(title).not.toBe('Error Detail');
   });
 
 });

@@ -123,6 +123,19 @@ async function apiFetch(url, options = {}) {
 // ─── Public Interface ─────────────────────────────────────────────────────────
 
 /**
+ * Make an authenticated PATCH request to the backend.
+ * @param {string} endpoint
+ * @param {object} body
+ * @returns {Promise<{success: true, data: any} | {success: false, error: object}>}
+ */
+export async function apiPatch(endpoint, body = {}) {
+  return apiFetch(endpoint, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+/**
  * Perform a GET request to a WatchTower read endpoint.
  * api_key is automatically injected as a query param on every request.
  * Additional params are merged alongside it.
