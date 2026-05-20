@@ -10,6 +10,7 @@ import { renderNavbar }     from '../../components/navbar.js';
 import { badgeClass }       from '../../components/errorCard.js';
 import { renderStackTrace } from './stackTrace.js';
 import { MOCK_ERRORS, normalizeError } from '../../utils/constants.js';
+import { apiGet, apiPatch } from '../../api/api.js';
 import { requireAuth } from '../../utils/auth.js';
 import { escHtml }          from '../../utils/dom.js';
 import { markErrorResolved, withResolvedStatus } from '../../utils/errorStatus.js';
@@ -59,12 +60,8 @@ async function handleResolve() {
     }
     // ── END MOCK ─────────────────────────────────────────────────
 
-    const res = await fetch(`/api/errors/${encodeURIComponent(errorId)}`, {
-      method:  'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ status: 'resolved' }),
-    });
-    if (!res.ok) {throw new Error(`HTTP ${res.status} — ${res.statusText}`);}
+    const result = await apiPatch(`/${errorId}`, { status: 'resolved' });
+    if (!result.success) throw new Error(result.error.message);
 
     syncResolveButton(true);
     showToast('Error marked as resolved.');
@@ -99,14 +96,15 @@ async function fetchError(id) {
     if (!raw) {throw new Error(`No error found with id "${id}"`);}
     return withResolvedStatus(normalizeError(raw));
   }
-  // ── END MOCK ─────────────────────────────────────────────────
 
-  const res = await fetch(`/api/errors/${encodeURIComponent(id)}`, {
-    headers: { Accept: 'application/json' },
-  });
-  if (!res.ok) {throw new Error(`HTTP ${res.status} — ${res.statusText}`);}
-  return withResolvedStatus(normalizeError(await res.json()));
+  const result = await apiGet('', { status: 'all' });
+  if (!result.success) {throw new Error(result.error.message);}
+  const errors = result.data?.errors ?? [];
+  const row = errors.find(e => String(e.id) === String(id));
+  if (!row) {throw new Error('No error found with that ID.');}
+  return withResolvedStatus(normalizeError(row));
 }
+
 
 /* ── Timeline icon ──────────────────────────────────────────────── */
 /**
@@ -173,10 +171,11 @@ function renderDetail(err) {
     </section>` : '';
 
   // Stack trace
-  const stack = err.stackTrace?.length ? `
+  const stackFrames = err.stackTrace ? [err.stackTrace] : [];
+  const stack = stackFrames.length ? `
     <section class="detail-section" aria-labelledby="stack-heading">
       <h2 class="detail-section__title" id="stack-heading">Stack Trace</h2>
-      ${renderStackTrace(err.stackTrace)}
+      ${renderStackTrace(stackFrames)}
     </section>` : '';
 
   // Event timeline
