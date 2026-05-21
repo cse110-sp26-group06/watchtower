@@ -3,6 +3,8 @@ name = "watchtower-backend"
 main = "src/index.js"
 compatibility_date = "2026-05-12"
 
+[observability]
+enabled = true
 
 [[d1_databases]]
 binding = "watchtower_db"
