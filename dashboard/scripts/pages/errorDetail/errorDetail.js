@@ -61,7 +61,7 @@ async function handleResolve() {
     // ── END MOCK ─────────────────────────────────────────────────
 
     const result = await apiPatch(`/${errorId}`, { status: 'resolved' });
-    if (!result.success) throw new Error(result.error.message);
+    if (!result.success) {throw new Error(result.error.message);}
 
     syncResolveButton(true);
     showToast('Error marked as resolved.');
