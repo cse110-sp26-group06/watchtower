@@ -1,5 +1,5 @@
 import BatchingEngine from "./batching/BatchingEngine";
-import { send } from  "./transport/send.js"
+import { send } from  "./transport/send.js";
 import { handleError } from "./handler/parseError.js";
 
 let engine = null;
@@ -109,17 +109,6 @@ export function initWatchtower(config = {}) {
     const parsed = handleError(event.reason);
     engine.enqueue("error", parsed);
   });
-
-  process.on("uncaughtException", (err) => {
-    const parsed = handleError(err);
-    engine.enqueue("error", parsed);
-  });
-
-  process.on("unhandledRejection", (reason) => {
-    const parsed = handleError(reason);
-    engine.enqueue("error", parsed);
-  });
-
 }
 
 /**

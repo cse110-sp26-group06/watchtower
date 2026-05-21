@@ -9,21 +9,21 @@
  * @returns A Promise that resolves when the request completes.
  */
 export async function sendErrorBatch(batch) { 
-    try {
-        const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/error", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(batch)
-        });
+  try {
+    const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/error", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(batch)
+    });
 
-        if (!res.ok) {
-            console.error("Failed to send error batch", await res.text());
-        }
-        return res;
-    } catch (err) {
-        console.error("Network error while sending error batch:", err);
+    if (!res.ok) {
+      console.error("Failed to send error batch", await res.text());
     }
+    return res;
+  } catch (err) {
+    console.error("Network error while sending error batch:", err);
+  }
 }
 

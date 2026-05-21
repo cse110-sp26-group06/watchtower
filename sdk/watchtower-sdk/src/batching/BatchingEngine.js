@@ -45,8 +45,9 @@ class BatchingEngine {
    * @param {Object} event - The event payload to store in the queue.
    */
   enqueue(type, event) {
-    if (!this.running) return;
-
+    if (!this.running) {
+      return;
+    }
     const queue = this.queues[type];
     queue.push(event);
 
@@ -72,7 +73,9 @@ class BatchingEngine {
    */
   startTimer(type) {
     // If timer already exists, do nothing
-    if (this.timers[type]) return;
+    if (this.timers[type]) {
+      return;
+    }
 
     const { maxTimeMs } = this.thresholds[type];
 
@@ -94,8 +97,10 @@ class BatchingEngine {
    */
   createBatch(type) {
     const events = this.queues[type];
-    if (events.length === 0) return null;
-
+    if (events.length === 0) {
+      return null;
+    }
+    
     return {
       api_key: this.api_key,
       service: this.service,
@@ -113,7 +118,7 @@ class BatchingEngine {
    * @method
    * @param {("log"|"error"|"span")} type - The event type whose queue should be flushed.
    */
-  flush(type) {
+  async flush(type) {
     // Clear timer if active
     if (this.timers[type]) {
       clearTimeout(this.timers[type]);
@@ -121,10 +126,13 @@ class BatchingEngine {
     }
 
     const batch = this.createBatch(type);
-    if (!batch) return;
+    if (!batch) {
+      return;
+    }
+      
 
     const res = await this.sendFn(type, batch);
-    console.log(res.status)
+    console.log(res.status);
     this.queues[type] = [];
   }
 

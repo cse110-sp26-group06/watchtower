@@ -9,20 +9,20 @@
  * @returns A Promise that resolves when the request completes.
  */
 export async function sendLogBatch(batch) { 
-    try {
-        const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/log", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(batch)
-        });
+  try {
+    const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/log", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(batch)
+    });
 
-        if (!res.ok) {
-            console.error("Failed to send log batch", await res.text());
-        }
-    } catch (err) {
-        console.error("Network error while sending log batch:", err);
+    if (!res.ok) {
+      console.error("Failed to send log batch", await res.text());
     }
+  } catch (err) {
+    console.error("Network error while sending log batch:", err);
+  }
 }
 
