@@ -4,10 +4,10 @@
   "type": "module",
   "description": "Agile error and performance monitoring tool",
   "homepage": "https://github.com/cse110-sp26-group06/watchtower#readme",
-  "main": "index.js",
+  "main": "sdk/index.js",
 
   "files": [
-        "watchtower/"
+        "sdk/"
     ],
    
   "repository": {
