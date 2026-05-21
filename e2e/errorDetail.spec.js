@@ -25,7 +25,7 @@ test.describe('Error Detail page', () => {
       localStorage.removeItem('watchtower:session');
     });
     await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await expect(page).toHaveURL(/login\.html/);
+    await expect(page).toHaveURL(/index\.html/);
   });
 
   test('page loads without JS errors', async ({ page }) => {
