@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Versioning will be as follows:
 
-0.1.0 → error pipeline end-to-end 
-0.2.0 → performance capture
-0.3.0 → feedback widgets
+0.1.0 → error pipeline end-to-end \
+0.2.0 → performance capture \
+0.3.0 → feedback widgets \
 0.4.0 → notifications + build signals
 
 ## [Unreleased]
