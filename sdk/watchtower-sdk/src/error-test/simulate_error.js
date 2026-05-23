@@ -1,7 +1,7 @@
 import { send } from "../transport/send.js";
 
 const error = {
-  "api_key": "wt_e5432da49ac342e6979f901324dae034",
+  "api_key": "INSERT_API_KEY",
   "service": "sdk test 3",
   "environment": "production",
   "events": [
