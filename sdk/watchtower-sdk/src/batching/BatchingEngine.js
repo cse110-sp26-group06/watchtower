@@ -132,7 +132,7 @@ class BatchingEngine {
       
 
     const res = await this.sendFn(type, batch);
-    console.log(res.status);
+    // console.log(res.status);
     this.queues[type] = [];
   }
 
