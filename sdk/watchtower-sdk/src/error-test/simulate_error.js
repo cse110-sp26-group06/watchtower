@@ -1,7 +1,8 @@
 import { send } from "../transport/send.js";
+import { API_KEY } from '../secret.js';
 
 const error = {
-  "api_key": "INSERT_API_KEY",
+  "api_key": API_KEY,
   "service": "sdk test 3",
   "environment": "production",
   "events": [
