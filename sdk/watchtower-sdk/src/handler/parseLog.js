@@ -1,3 +1,14 @@
+
+/**
+ * Converts a captured console call into a WatchTower log event.
+ *
+ * The returned event matches the schema defined in
+ * sdk/watchtower-sdk/src/types/log_schema.json.
+ *
+ * @param {string} level - Console severity level for the log event.
+ * @param {any[]} [args=[]] - Raw console arguments captured by the wrapper.
+ * @returns {{ event_type: "log", timestamp: string, payload: { level: string, message: string, file?: string, lineno?: number, colno?: number } }} A normalized log event.
+ */
 export function parseLog(level, args = []) {
   const message = formatConsoleMessage(args);
 
@@ -16,6 +27,14 @@ export function parseLog(level, args = []) {
   };
 }
 
+/**
+ * Converts console arguments into a single human-readable message string.
+ *
+ * Strings are preserved as-is. Non-string values are serialized safely.
+ *
+ * @param {any[]} args - Raw console arguments to serialize.
+ * @returns {string} The formatted log message.
+ */
 function formatConsoleMessage(args) {
   if (!args || args.length === 0) {
     return "";
@@ -48,6 +67,15 @@ function formatConsoleMessage(args) {
     .join(" ");
 }
 
+/**
+ * Attempts to infer the source file and line/column information from the
+ * current stack trace.
+ *
+ * The helper skips internal WatchTower frames so only the caller's location
+ * is reported when possible.
+ *
+ * @returns {{ file?: string, lineno?: number, colno?: number }} Source location info if available.
+ */
 function getSourceLocationFromStack() {
   const stack = new Error().stack ?? "";
   const lines = stack.split("\n");
