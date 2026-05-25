@@ -1,6 +1,10 @@
 node_modules/
 .wrangler/
 
+# for harrdcoded api key
+.env
+dashboard/scripts/utils/env.js
+
 # Playwright
 /test-results/
 /playwright-report/

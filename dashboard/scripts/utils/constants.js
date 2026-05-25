@@ -1,6 +1,9 @@
 /* ── API ─────────────────────────────────────────────────────── */
+// API_KEY is loaded from env.js (gitignored).  
+import { WATCHTOWER_API_KEY } from './env.js';
+
 export const API_BASE   = 'https://watchtower-backend.group6.workers.dev/api/errors';
-export const API_KEY    = 'wt_e5432da49ac342e6979f901324dae034';
+export const API_KEY    = WATCHTOWER_API_KEY;
 export const PAGE_LIMIT = 20;
 
 /**
