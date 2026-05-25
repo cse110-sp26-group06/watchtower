@@ -48,7 +48,7 @@ export default {
       return handleGetErrorById(request, env, id);
     }
 
-  // Error list
+    // Error list
     if (path === '/api/errors' && request.method === 'GET') {
       return handleGetErrors(request, env);
     }
