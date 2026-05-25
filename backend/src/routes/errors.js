@@ -12,7 +12,7 @@
  */
 
 import { jsonResponse } from '../index.js';
-import { getErrors } from '../storage/d1.js';
+import { getErrors, getErrorById } from '../storage/d1.js';
 import { validateApiKey } from '../middleware/auth.js';
 
 /**
@@ -64,5 +64,30 @@ export async function handleGetErrors(request, env) {
   } catch (err) {
     console.error('Failed to fetch errors:', err);
     return jsonResponse({ status: 'error', message: 'Failed to fetch errors' }, 500);
+  }
+}
+
+/**
+ * Handles GET /api/errors/:id
+ * Returns a single error by id for the Dashboard error detail page
+ * @param {Request} request - incoming GET request
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} id - error id from URL
+ * @returns {Response} JSON response with single error or error message
+ */
+export async function handleGetErrorById(request, env, id) {
+  try {
+    // look up the error by id in D1
+    const error = await getErrorById(env, id);
+
+    // return 404 if not found
+    if (!error) {
+      return jsonResponse({ status: 'error', message: 'Error not found' }, 404);
+    }
+
+    return jsonResponse({ status: 'ok', error }, 200);
+  } catch (err) {
+    console.error('Failed to fetch error by id:', err);
+    return jsonResponse({ status: 'error', message: 'Failed to fetch error' }, 500);
   }
 }

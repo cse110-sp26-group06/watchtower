@@ -1,6 +1,6 @@
 import { handleIngest } from "./routes/ingest.js";
 import { generateApiKey } from './middleware/auth.js';
-import { handleGetErrors } from './routes/errors.js';
+import { handleGetErrors, handleGetErrorById } from './routes/errors.js';
 
 export default {
   async fetch(request, env) {
@@ -42,6 +42,16 @@ export default {
       return handleIngest(request, env, path);
     }
 
+    // Single error detail — must be before /api/errors route
+  if (path.startsWith('/api/errors/') && request.method === 'GET') {
+    const id = path.replace('/api/errors/', '');
+    return handleGetErrorById(request, env, id);
+  }
+
+  // Error list
+  if (path === '/api/errors' && request.method === 'GET') {
+    return handleGetErrors(request, env);
+  }
     // Read API routes (BE-5 adds these)
     // if (path.startsWith("/api/")) { ... }
     // Read API routes — Dashboard calls these to display errors
