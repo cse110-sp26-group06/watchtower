@@ -1,6 +1,15 @@
 /* ── API ─────────────────────────────────────────────────────── */
+// API_KEY is loaded from env.js when present. Will have it fall back to null if no key found
+let WATCHTOWER_API_KEY = null;
+
+try {
+  ({ WATCHTOWER_API_KEY } = await import('./env.js'));
+} catch {
+  WATCHTOWER_API_KEY = null;
+}
+
 export const API_BASE   = 'https://watchtower-backend.group6.workers.dev/api/errors';
-export const API_KEY    = 'wt_e5432da49ac342e6979f901324dae034';
+export const API_KEY    = WATCHTOWER_API_KEY;
 export const PAGE_LIMIT = 20;
 
 /**
