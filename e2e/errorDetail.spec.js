@@ -1,3 +1,4 @@
+/* global window */
 /**
  * errorDetail.spec.js — deterministic Playwright tests for error-detail.html
  */
@@ -33,7 +34,7 @@ const mockError = {
 };
 
 function seedSession() {
-  localStorage.setItem(
+  window.localStorage.setItem(
     'watchtower:session',
     JSON.stringify({ email: 'test@ucsd.edu' })
   );
