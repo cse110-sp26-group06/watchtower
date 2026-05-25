@@ -43,15 +43,15 @@ export default {
     }
 
     // Single error detail — must be before /api/errors route
-  if (path.startsWith('/api/errors/') && request.method === 'GET') {
-    const id = path.replace('/api/errors/', '');
-    return handleGetErrorById(request, env, id);
-  }
+    if (path.startsWith('/api/errors/') && request.method === 'GET') {
+      const id = path.replace('/api/errors/', '');
+      return handleGetErrorById(request, env, id);
+    }
 
   // Error list
-  if (path === '/api/errors' && request.method === 'GET') {
-    return handleGetErrors(request, env);
-  }
+    if (path === '/api/errors' && request.method === 'GET') {
+      return handleGetErrors(request, env);
+    }
     // Read API routes (BE-5 adds these)
     // if (path.startsWith("/api/")) { ... }
     // Read API routes — Dashboard calls these to display errors
