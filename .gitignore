@@ -10,3 +10,4 @@ dashboard/scripts/utils/env.js
 /playwright-report/
 /blob-report/
 /playwright/.auth/
+secret.js
