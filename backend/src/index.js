@@ -1,6 +1,6 @@
 import { handleIngest } from "./routes/ingest.js";
 import { generateApiKey } from './middleware/auth.js';
-import { handleGetErrors, handleGetErrorById } from './routes/errors.js';
+import { handleGetErrors, handleGetErrorById, handleResolveError } from './routes/errors.js';
 
 export default {
   async fetch(request, env) {
@@ -47,7 +47,11 @@ export default {
       const id = path.replace('/api/errors/', '');
       return handleGetErrorById(request, env, id);
     }
-
+    // Mark error as resolved
+    if (path.startsWith('/api/errors/') && request.method === 'PATCH') {
+        const id = path.replace('/api/errors/', '');
+        return handleResolveError(request, env, id);
+    }
     // Error list
     if (path === '/api/errors' && request.method === 'GET') {
       return handleGetErrors(request, env);

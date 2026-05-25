@@ -84,3 +84,18 @@ export async function getErrorById(env, id) {
   ).bind(id).first();
   return result || null;
 }
+
+/**
+ * Updates an error's status to 'resolved' in D1
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} id - the error's unique id
+ * @returns {boolean} - true if updated, false if not found
+ */
+export async function resolveError(env, id) {
+  const result = await env.watchtower_db.prepare(
+    'UPDATE errors SET status = ? WHERE id = ?'
+  ).bind('resolved', id).run();
+
+  // returns true if a row was actually updated
+  return result.meta.changes > 0;
+}
