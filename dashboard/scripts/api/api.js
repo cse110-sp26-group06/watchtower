@@ -20,6 +20,24 @@ function getApiKey() {
   return API_KEY ?? null;
 }
 
+/**
+ * Builds a backend API URL, injecting api_key when available.
+ * @param {string} endpoint
+ * @param {Record<string, string>} [params]
+ * @returns {string}
+ */
+function buildApiUrl(endpoint = '', params = {}) {
+  const apiKey = getApiKey();
+  const query = new URLSearchParams({
+    ...(apiKey ? { api_key: apiKey } : {}),
+    ...params,
+  }).toString();
+
+  return query
+    ? `${API_BASE}${endpoint}?${query}`
+    : `${API_BASE}${endpoint}`;
+}
+
 // ─── Core Fetch Wrapper ───────────────────────────────────────────────────────
 
 /**
@@ -129,7 +147,7 @@ async function apiFetch(url, options = {}) {
  * @returns {Promise<{success: true, data: any} | {success: false, error: object}>}
  */
 export async function apiPatch(endpoint, body = {}) {
-  return apiFetch(endpoint, {
+  return apiFetch(buildApiUrl(endpoint), {
     method: 'PATCH',
     body: JSON.stringify(body),
   });
@@ -145,18 +163,7 @@ export async function apiPatch(endpoint, body = {}) {
  * @returns {Promise<{ success: boolean, data?: any, error?: ApiError }>}
  */
 async function apiGet(endpoint = '', params = {}) {
-  const apiKey = getApiKey();
-
-  const query = new URLSearchParams({
-    ...(apiKey ? { api_key: apiKey } : {}),
-    ...params,
-  }).toString();
-
-  const url = query
-    ? `${API_BASE}${endpoint}?${query}`
-    : `${API_BASE}${endpoint}`;
-
-  return apiFetch(url, { method: "GET" });
+  return apiFetch(buildApiUrl(endpoint, params), { method: "GET" });
 }
 
 export { apiGet };
