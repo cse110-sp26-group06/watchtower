@@ -42,11 +42,26 @@ function seedSession() {
 
 async function mockErrorApi(page, errors = [mockError]) {
   await page.route(`${API_BASE}**`, async (route) => {
-    if (route.request().method() === 'GET') {
+    const request = route.request();
+
+    if (request.method() === 'GET') {
+      const url = new URL(request.url());
+      const id = url.pathname.split('/').pop();
+      const error = errors.find((item) => String(item.id) === String(id));
+
+      if (!error) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ status: 'error', message: 'Error not found' }),
+        });
+        return;
+      }
+
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ errors }),
+        body: JSON.stringify({ status: 'ok', error }),
       });
       return;
     }

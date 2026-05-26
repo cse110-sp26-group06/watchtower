@@ -2,8 +2,8 @@
  * errorDetail.js — page script for error-detail.html
  *
  * Reads ?id= from the URL, looks up the error in MOCK_ERRORS
- * (or fetches from the real API when available), and renders
- * all detail sections into the page.
+ * (or fetches a single event from the real API when available),
+ * and renders all detail sections into the page.
  */
 
 import { renderNavbar }     from '../../components/navbar.js';
@@ -97,10 +97,15 @@ async function fetchError(id) {
     return withResolvedStatus(normalizeError(raw));
   }
 
-  const result = await apiGet('', { status: 'all' });
-  if (!result.success) {throw new Error(result.error.message);}
-  const errors = result.data?.errors ?? [];
-  const row = errors.find(e => String(e.id) === String(id));
+  const result = await apiGet(`/${encodeURIComponent(id)}`);
+  if (!result.success) {
+    if (result.error.status === 404) {
+      throw new Error('No error found with that ID.');
+    }
+    throw new Error(result.error.message);
+  }
+
+  const row = result.data?.error;
   if (!row) {throw new Error('No error found with that ID.');}
   return withResolvedStatus(normalizeError(row));
 }
