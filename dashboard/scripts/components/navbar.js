@@ -91,12 +91,14 @@ export async function renderNavbar(activeId = '') {
       </span>
       <span>All Projects</span>
     </a>
+  </div>
+  <div class="navbar__brand-row">
+    <span class="navbar__brand-name">WatchTower</span>
     <a href="${DASHBOARD_HOME}" class="navbar__brand-icon" aria-label="WatchTower home">
-      <img src="assets/images/light-logo.png" class="navbar__logo navbar__logo--light" alt="WatchTower" />
-      <img src="assets/images/dark-logo.png"  class="navbar__logo navbar__logo--dark"  alt="WatchTower" />
+      <img src="assets/images/light-logo.png" class="navbar__logo navbar__logo--light" alt="" />
+      <img src="assets/images/dark-logo.png"  class="navbar__logo navbar__logo--dark"  alt="" />
     </a>
   </div>
-  <div class="navbar__brand-name">WatchTower</div>
 </div>
   
     <div class="navbar__panel">

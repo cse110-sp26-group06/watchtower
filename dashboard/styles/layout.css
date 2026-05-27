@@ -182,11 +182,17 @@
 }
 
 .navbar__brand-name {
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 700;
   letter-spacing: -0.02em;
   padding-top: 8px;
   color: var(--color-brown); 
+}
+.navbar__brand-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
 .navbar__brand-icon .navbar__logo {
