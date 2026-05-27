@@ -1,33 +1,99 @@
 {
-  "type": "object",
+  "required": ["event_type", "timestamp", "payload"],
   "properties": {
-    "api_key": { "type": "string" },
-    "service": { "type": "string" },
-    "environment": { "type": "string" },
+    "event_type": { "type": "string", "const": "performance" },
+    "timestamp": { "type": "string", "format": "date-time" },
 
-    "events": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "event_type": { "const": "span" },
-          "timestamp": { "type": "string", "format": "date-time" },
-          "payload": {
-            "type": "object",
-            "properties": {
-              "span_id": { "type": "string" },
-              "trace_id": { "type": "string" },
-              "name": { "type": "string" },
-              "start_timestamp": { "type": "string", "format": "date-time" },
-              "end_timestamp": { "type": "string", "format": "date-time" },
-              "duration_ms": { "type": "number" }
-            },
-            "required": ["name", "start_timestamp", "end_timestamp", "duration_ms"]
-          }
-        },
-        "required": ["event_type", "timestamp", "payload"]
-      }
+    "payload": {
+      "name": { "type": "string" },
+      "entryType": { "type": "string" },
+      "time": { "type": "number" },
+      "duration": { "type": "number" },
+      "oneOf": [
+        { "$ref": "#/definitions/ResourcePayload" },
+        { "$ref": "#/definitions/PaintPayload" },
+        { "$ref": "#/definitions/NavigationPayload" }
+      ]
     }
   },
-  "required": ["api_key", "service", "environment", "events"]
+
+  "definitions": {
+
+    "ResourcePayload": {
+      "allOf": [
+        { "$ref": "#/definitions/BasePayload" },
+        {
+          "type": "object",
+          "properties": {
+            "entryType": { "type": "string", "const": "resource" },
+            "secureConnectionStart": { "type": "number" },
+            "connectStart": { "type": "number" },
+            "connectEnd": { "type": "number" },
+            "domainLookupStart": { "type": "number" },
+            "domainLookupEnd": { "type": "number" },
+            "redirectStart": { "type": "number" },
+            "redirectEnd": { "type": "number" },
+            "workerStart": { "type": "number" },
+            "fetchStart": { "type": "number" },
+            "requestStart": { "type": "number" },
+            "responseStart": { "type": "number" },
+            "responseEnd": { "type": "number" },
+            "firstInterimResponseStart": { "type": "number" },
+            "finalResponseHeadersStart": { "type": "number" },
+            "contentType": { "type": "string" },
+            "deliveryType": { "type": "string" },
+            "initiatorType": { "type": "string" },
+            "nextHopProtocol": { "type": "string" },
+            "renderBlockingStatus": { "type": "string" },
+            "responseStatus": { "type": "number" },
+            "transferSize": { "type": "number" }
+          }
+        }
+      ]
+    },
+
+    "PaintPayload": {
+      "allOf": [
+        { "$ref": "#/definitions/BasePayload" },
+        {
+          "type": "object",
+          "properties": {
+            "entryType": { "type": "string", "const": "paint" },
+            "paintTime": { "type": "number" },
+            "presentationTime": { "type": "number" }
+          }
+        }
+      ]
+    },
+
+    "NavigationPayload": {
+      "allOf": [
+        { "$ref": "#/definitions/BasePayload" },
+        {
+          "type": "object",
+          "properties": {
+            "entryType": { "type": "string", "const": "navigation" },
+            "initiatorType": { "type": "string" },
+            "activationStart": { "type": "number" },
+            "confidence": { "type": "string" },
+            "criticalCHRestart": { "type": "number" },
+            "domComplete": { "type": "number" },
+            "domContentLoadedEventStart": { "type": "number" },
+            "domContentLoadedEventEnd": { "type": "number" },
+            "loadEventStart": { "type": "number" },
+            "loadEventEnd": { "type": "number" },
+            "domInteractive": { "type": "number" },
+            "notRestoredReasons": { "type": ["object", "null"] },
+            "redirectCount": { "type": "number" },
+            "type": {
+              "type": "string",
+              "enum": ["navigate", "reload", "back_forward"]
+            },
+            "unloadEventStart": { "type": "number" },
+            "unloadEventEnd": { "type": "number" }
+          }
+        }
+      ]
+    }
+  }
 }
