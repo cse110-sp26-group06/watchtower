@@ -1,15 +1,36 @@
 /* ── API ─────────────────────────────────────────────────────── */
 // API_KEY is loaded from env.js when present. Will have it fall back to null if no key found
 let WATCHTOWER_API_KEY = null;
+let API_KEY_CONFIG_ERROR = null;
 
 try {
-  ({ WATCHTOWER_API_KEY } = await import('./env.js'));
-} catch {
+  // Use a stable query string so browsers don't reuse an old cached 404
+  // from before env.js existed locally.
+  ({ WATCHTOWER_API_KEY } = await import('./env.js?watchtower-local-config'));
+} catch (error) {
+  try {
+    // Some local static servers behave differently with module URLs that
+    // include a query string, so fall back to the plain path.
+    ({ WATCHTOWER_API_KEY } = await import('./env.js'));
+  } catch (fallbackError) {
+    API_KEY_CONFIG_ERROR = 'Could not load dashboard/scripts/utils/env.js. Check that the file exists and exports WATCHTOWER_API_KEY.';
+    console.error('[WatchTower] Failed to load dashboard API key config:', error);
+    console.error('[WatchTower] Fallback import without query string also failed:', fallbackError);
+  }
+}
+
+if (typeof WATCHTOWER_API_KEY === 'string') {
+  WATCHTOWER_API_KEY = WATCHTOWER_API_KEY.trim();
+}
+
+if (!WATCHTOWER_API_KEY) {
   WATCHTOWER_API_KEY = null;
+  API_KEY_CONFIG_ERROR ??= 'WATCHTOWER_API_KEY is missing or empty in dashboard/scripts/utils/env.js.';
 }
 
 export const API_BASE   = 'https://watchtower-backend.group6.workers.dev/api/errors';
 export const API_KEY    = WATCHTOWER_API_KEY;
+export const API_KEY_ERROR = API_KEY_CONFIG_ERROR;
 export const PAGE_LIMIT = 20;
 
 /**
