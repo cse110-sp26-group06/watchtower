@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="styles/components.css" />
   <link rel="stylesheet" href="styles/layout.css" />
   <link rel="stylesheet" href="styles/pages/login.css" />
-  <script src="scripts/pages/login/login.js" type="module"></script>
+  <script src="scripts/pages/login/login.js?v=login-ready" type="module"></script>
 </head>
 
 <body class="login-page">
@@ -58,7 +58,7 @@
           <p id="password-error" class="login-field__error" aria-live="polite"></p>
         </div>
 
-        <button id="login-submit" type="submit" class="btn btn--dark login-card__submit">Sign In</button>
+        <button id="login-submit" type="submit" class="btn btn--dark login-card__submit" disabled>Sign In</button>
       </form>
     </section>
   </main>
