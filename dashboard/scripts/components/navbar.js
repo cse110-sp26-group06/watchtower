@@ -47,7 +47,7 @@ function setTheme(theme) {
 /** Update the toggle button text/icon to reflect current theme */
 function updateToggleLabel() {
   const btn = document.getElementById('navbar-theme-toggle');
-  if (!btn){
+  if (!btn) {
     return;
   } 
   const isDark = getTheme() === 'dark';

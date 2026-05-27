@@ -8,17 +8,18 @@
   
   /* Apply saved theme immediately to avoid flash */
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-  
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
   function getTheme() {
     return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   }
   
   function setTheme(theme) {
     if (theme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
     } else {
-        document.documentElement.removeAttribute('data-theme');
+      document.documentElement.removeAttribute('data-theme');
     }
     localStorage.setItem(STORAGE_KEY, theme);
   }
@@ -30,7 +31,7 @@
   /* Attach listener to any .theme-toggle button already/later in DOM */
   function attachToggleButtons() {
     document.querySelectorAll('.theme-toggle').forEach(btn => {
-      if (btn.dataset.wtBound){
+      if (btn.dataset.wtBound) {
         return;
       } 
       btn.dataset.wtBound = '1';
