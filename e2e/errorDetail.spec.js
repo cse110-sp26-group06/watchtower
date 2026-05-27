@@ -1,108 +1,134 @@
+/* global window */
 /**
- * errorDetail.spec.js — Playwright tests for error-detail.html
+ * errorDetail.spec.js — deterministic Playwright tests for error-detail.html
  */
 
 import { test, expect } from '@playwright/test';
 
-// Real ID from confirmed live data
-const REAL_ID = 'a32f9624-0574-44a7-b236-9ac27025d515';
+const ERROR_ID = 'err_1';
+const API_BASE = 'https://watchtower-backend.group6.workers.dev/api/errors';
+
+test.describe.configure({ mode: 'serial' });
+
+const mockError = {
+  id: ERROR_ID,
+  service: 'web',
+  environment: 'production',
+  error_type: 'TypeError',
+  severity: 'critical',
+  status: 'unresolved',
+  message: 'Cannot read properties of undefined',
+  file: 'app.js',
+  lineno: 42,
+  colno: 7,
+  stack_trace: 'TypeError: Cannot read properties of undefined\n    at renderUser (app.js:42:7)',
+  client_timestamp: '2026-05-20T00:00:00.000Z',
+  server_timestamp: '2026-05-20T00:05:00.000Z',
+  payload_json: JSON.stringify({
+    occurrences: 3,
+    affectedUsers: 2,
+    timeline: [
+      { type: 'critical', label: 'Error captured', time: '2026-05-20T00:00:00.000Z' },
+    ],
+  }),
+};
+
+function seedSession() {
+  window.localStorage.setItem(
+    'watchtower:session',
+    JSON.stringify({ email: 'test@ucsd.edu' })
+  );
+}
+
+async function mockErrorApi(page, errors = [mockError]) {
+  await page.route(`${API_BASE}**`, async (route) => {
+    const request = route.request();
+
+    if (request.method() === 'GET') {
+      const url = new URL(request.url());
+      const id = url.pathname.split('/').pop();
+      const error = errors.find((item) => String(item.id) === String(id));
+
+      if (!error) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ status: 'error', message: 'Error not found' }),
+        });
+        return;
+      }
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'ok', error }),
+      });
+      return;
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true }),
+    });
+  });
+}
 
 test.describe('Error Detail page', () => {
+  test.describe('authenticated', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(seedSession);
+      await mockErrorApi(page);
+    });
 
-  test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      // eslint-disable-next-line no-undef
-      localStorage.setItem(
-        'watchtower:session',
-        JSON.stringify({ email: 'test@ucsd.edu' })
-      );
+    test('renders error detail data from the API', async ({ page }) => {
+      const errors = [];
+      page.on('pageerror', (err) => errors.push(err.message));
+
+      await page.goto(`/error-detail.html?id=${ERROR_ID}`);
+      await expect(page.locator('.detail-card')).toBeVisible();
+      await expect(page.locator('.detail-card__message')).toHaveText(mockError.message);
+      await expect(page.locator('.badge')).toHaveText('CRITICAL');
+      await expect(page.locator('.detail-stat')).toHaveCount(4);
+      await expect(page.locator('.stack-trace')).toBeVisible();
+      await expect(page.locator('#resolve-btn')).toHaveText('Mark Resolved');
+      await expect(page).toHaveTitle(/WatchTower/);
+      await expect(page).not.toHaveTitle('Error Detail');
+
+      await expect(page.locator('#navbar-root #navbar')).toBeVisible();
+      await expect(page.locator('#nav-error-list')).toBeVisible();
+      expect(errors).toHaveLength(0);
+    });
+
+    test('back link navigates to error-list.html', async ({ page }) => {
+      await page.goto(`/error-detail.html?id=${ERROR_ID}`);
+
+      await page.locator('#back-link').click();
+      await expect(page).toHaveURL(/error-list\.html/);
     });
   });
 
   test('redirects to login when no session', async ({ page }) => {
-    await page.addInitScript(() => {
-      // eslint-disable-next-line no-undef
-      localStorage.removeItem('watchtower:session');
-    });
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await expect(page).toHaveURL(/index\.html/);
-  });
+    await page.goto(`/error-detail.html?id=${ERROR_ID}`);
 
-  test('page loads without JS errors', async ({ page }) => {
-    const errors = [];
-    page.on('pageerror', err => errors.push(err.message));
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await page.waitForLoadState('networkidle');
-    expect(errors).toHaveLength(0);
-  });
-
-  test('renders navbar', async ({ page }) => {
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await expect(page.locator('#navbar-root')).not.toBeEmpty();
-  });
-
-  test('renders detail card with message', async ({ page }) => {
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('.detail-card')).toBeVisible();
-    await expect(page.locator('.detail-card__message')).not.toBeEmpty();
-  });
-
-  test('renders severity badge', async ({ page }) => {
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('.badge')).toBeVisible();
-  });
-
-  test('renders stats cards', async ({ page }) => {
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await page.waitForLoadState('networkidle');
-    const stats = page.locator('.detail-stat');
-    await expect(stats).toHaveCount(4);
-  });
-
-  test('renders stack trace section when stackTrace is present', async ({ page }) => {
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await page.waitForLoadState('networkidle');
-    const stack = page.locator('.stack-trace');
-    const count = await stack.count();
-    if (count > 0) {
-      await expect(stack).toBeVisible();
-    }
-  });
-
-  test('resolve button is present and labeled correctly', async ({ page }) => {
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await page.waitForLoadState('networkidle');
-    const btn = page.locator('#resolve-btn');
-    await expect(btn).toBeVisible();
-    await expect(btn).toHaveText(/Mark Resolved|✓ Resolved/);
-  });
-
-  test('back link navigates to error-list.html', async ({ page }) => {
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await page.locator('#back-link').click();
-    await expect(page).toHaveURL(/error-list\.html/);
+    await expect(page).toHaveURL(/index\.html\?next=/);
   });
 
   test('no ID in URL renders error state', async ({ page }) => {
+    await page.addInitScript(seedSession);
     await page.goto('/error-detail.html');
     await page.waitForLoadState('networkidle');
+
     await expect(page.locator('#detail-root')).toContainText('No error ID specified');
   });
 
   test('invalid ID renders error state', async ({ page }) => {
+    await page.addInitScript(seedSession);
+    await mockErrorApi(page, []);
     await page.goto('/error-detail.html?id=does-not-exist');
     await page.waitForLoadState('networkidle');
+
     await expect(page.locator('#detail-root')).toContainText('Could not load error');
+    await expect(page.locator('#detail-root')).toContainText('No error found with that ID.');
   });
-
-  test('document title updates with error severity and message', async ({ page }) => {
-    await page.goto(`/error-detail.html?id=${REAL_ID}`);
-    await page.waitForLoadState('networkidle');
-    const title = await page.title();
-    expect(title).toMatch(/WatchTower/);
-    expect(title).not.toBe('Error Detail');
-  });
-
 });

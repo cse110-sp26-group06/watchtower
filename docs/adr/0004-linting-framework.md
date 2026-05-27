@@ -51,4 +51,10 @@ This section will be updated with the current linting rules that will be checked
 1. No unused variables
 2. Console log is allowed
 3. Semicolons at the end of every non control flow statement
+4. Require indent of 2 spaces 
+5. Enforce strict equality (except null)
+6. Control statements wrapped in curly braces
+7. Indentation for code inside control statements
+8. New code blocks have to space out the braces from the function signature
+9. Keywords have at least one space before and after
 

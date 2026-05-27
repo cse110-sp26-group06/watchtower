@@ -13,7 +13,7 @@ function mockFetch(status, body, throws = false) {
   };
 }
 
-const { apiGet } = await import('../scripts/api/api.js');
+const { apiGet, apiPatch } = await import('../scripts/api/api.js');
 
 // ── Tests ────────────────────────────────────────────────────────
 
@@ -72,6 +72,16 @@ test('apiGet always injects api_key as a query param', async () => {
   assert.ok(capturedUrl.includes('api_key='), 'api_key must be present in URL');
 });
 
+test('apiGet preserves endpoint paths for detail requests', async () => {
+  let capturedUrl = '';
+  globalThis.fetch = async (url) => {
+    capturedUrl = url;
+    return { ok: true, status: 200, json: async () => ({ status: 'ok', error: {} }) };
+  };
+  await apiGet('/event-123', {});
+  assert.ok(capturedUrl.includes('/api/errors/event-123'), 'detail endpoint path must be present in URL');
+});
+
 test('apiGet does not send X-Api-Key header that triggers CORS preflight', async () => {
   let capturedHeaders = {};
   globalThis.fetch = async (url, opts) => {
@@ -82,4 +92,17 @@ test('apiGet does not send X-Api-Key header that triggers CORS preflight', async
   const keys = Object.keys(capturedHeaders).map(k => k.toLowerCase());
   assert.ok(!keys.includes('x-api-key'), 'must not send X-Api-Key header');
   assert.ok(!keys.includes('authorization'), 'must not send Authorization header');
+});
+
+test('apiPatch targets the backend API endpoint', async () => {
+  let capturedUrl = '';
+  let capturedMethod = '';
+  globalThis.fetch = async (url, opts) => {
+    capturedUrl = url;
+    capturedMethod = opts?.method ?? '';
+    return { ok: true, status: 200, json: async () => ({ status: 'ok' }) };
+  };
+  await apiPatch('/event-123', { status: 'resolved' });
+  assert.ok(capturedUrl.includes('/api/errors/event-123'), 'patch URL must target the backend API');
+  assert.equal(capturedMethod, 'PATCH');
 });

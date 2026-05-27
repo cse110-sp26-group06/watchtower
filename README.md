@@ -30,7 +30,7 @@ Plus shared concerns:
 | Doc | Purpose |
 |---|---|
 | [Project Primer](docs/PROJECT-PRIMER.md) | Architecture, sub-teams, working agreements, glossary. **Read this first.** |
-| [Design Brief](docs/DESIGN-BRIEF.md) | MVP, target users, scope. |
+| [Design Brief](docs/ucd/DESIGN-BRIEF.md) | MVP, target users, scope. |
 | [ADR Index](docs/adr/index.md) | All architectural decision records. |
 | [Sprint Overviews](docs/sprints/) | Per-sprint goals and sub-team deliverables. |
 | [Changelog](CHANGELOG.md) | Notable changes per version. |

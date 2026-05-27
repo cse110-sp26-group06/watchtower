@@ -12,7 +12,7 @@
  */
 
 import { jsonResponse } from '../index.js';
-import { getErrors } from '../storage/d1.js';
+import { getErrors, getErrorById, resolveError } from '../storage/d1.js';
 import { validateApiKey } from '../middleware/auth.js';
 
 /**
@@ -64,5 +64,56 @@ export async function handleGetErrors(request, env) {
   } catch (err) {
     console.error('Failed to fetch errors:', err);
     return jsonResponse({ status: 'error', message: 'Failed to fetch errors' }, 500);
+  }
+}
+
+/**
+ * Handles GET /api/errors/:id
+ * Returns a single error by id for the Dashboard error detail page
+ * @param {Request} request - incoming GET request
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} id - error id from URL
+ * @returns {Response} JSON response with single error or error message
+ */
+export async function handleGetErrorById(request, env, id) {
+  try {
+    // look up the error by id in D1
+    const error = await getErrorById(env, id);
+
+    // return 404 if not found
+    if (!error) {
+      return jsonResponse({ status: 'error', message: 'Error not found' }, 404);
+    }
+
+    return jsonResponse({ status: 'ok', error }, 200);
+  } catch (err) {
+    console.error('Failed to fetch error by id:', err);
+    return jsonResponse({ status: 'error', message: 'Failed to fetch error' }, 500);
+  }
+}
+
+/**
+ * Handles PATCH /api/errors/:id
+ * Marks a single error as resolved in D1
+ * Called when developer clicks "Mark Resolved" on Dashboard
+ *
+ * @param {Request} request - incoming PATCH request
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} id - error id from URL
+ * @returns {Response} JSON response confirming update or error message
+ */
+export async function handleResolveError(request, env, id) {
+  try {
+    // update status to resolved in D1
+    const updated = await resolveError(env, id);
+
+    if (!updated) {
+      return jsonResponse({ status: 'error', message: 'Error not found' }, 404);
+    }
+
+    return jsonResponse({ status: 'ok', message: 'Error marked as resolved' }, 200);
+  } catch (err) {
+    console.error('Failed to resolve error:', err);
+    return jsonResponse({ status: 'error', message: 'Failed to resolve error' }, 500);
   }
 }

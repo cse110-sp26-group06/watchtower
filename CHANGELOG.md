@@ -15,26 +15,22 @@ Versioning will be as follows:
 ## [Unreleased]
 
 ### Added
-- Initial repository structure and project documentation.
-- Project Primer (`docs/PROJECT-PRIMER.md`) covering architecture, sub-teams, working agreements, and glossary.
-- Design Brief (`docs/DESIGN-BRIEF.md`) covering MVP and target users.
-- Sprint 1 overview (`docs/sprints/sprint-1-overview.md`).
-- Sprint 2 overview (`docs/sprints/sprint-2-overview.md`).
-- ADR index and scaffolding (`docs/adr/`).
-- Pull request template (`.github/PULL_REQUEST_TEMPLATE.md`).
-- Linting setup with ESLint + ADR.
-- Playwright E2E foundation.
-- SDK API design document defining the public surface of `watchtower.init(...)` and related methods.
-- SDK Distribution ADR — npm with `github:` install for development, structured npm releases for production.
-- Infrastructure ADR — Cloudflare Workers backend with D1.
-- Testing Frameworks ADR — Vitest for Backend, node:test for SDK and Dashboard, Playwright for E2E.
-- cse135.site research note.
-- Ingestion contract between SDK and Backend (`docs/contracts/ingestion.md`).
-- Dashboard wireframes for core views and notification configuration (`docs/wireframes/`).
-- Dashboard API requirements document (`docs/dashboard-api-needs.md`).
+- Dashboard API client module.
+- Backend `GET /api/errors` endpoint for listing project errors with query-based filtering.
+- Backend endpoints for single-error detail and persisted error resolution:
+  - `GET /api/errors/:id`
+  - `PATCH /api/errors/:id`
+- SDK initialization API (`initWatchtower(...)`) and manual error capture entrypoint.
+- SDK batching engine and transport layer for sending error, log, and span batches to the backend.
+- Additional dashboard/API test coverage for the error detail flow.
+- Dashboard onboarding/projects flow for generating API keys and managing project selection.
 
 ### Changed
-- API endpoints were changed from 3 to 1? (double check with backend & sdk teams to make sure)
+- SDK event schemas for errors, logs, and spans were revised during implementation to remove redundant fields and better match accessible runtime data.
+- The SDK pipeline is now structured as: data capture -> data parsing -> batching -> API call.
+- Dashboard authentication direction changed from hardcoded accounts and shared access toward a basic authentication flow that can map users to their own projects.
+- Dashboard error views were expanded from mock-first prototypes toward real backend-backed list/detail flows, including filtering and per-error resolution.
+- Dashboard error detail flow was updated to load individual events by ID through the backend API rather than deriving detail data only from the error list.
 
 ### Deprecated
 -
@@ -43,7 +39,7 @@ Versioning will be as follows:
 -
 
 ### Fixed
--
+- Dashboard can now request a single error's detail view through a dedicated backend endpoint instead of relying only on list data.
 
 ### Security
 -
