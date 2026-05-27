@@ -12,6 +12,11 @@
   <link rel="stylesheet" href="styles/layout.css" />
   <link rel="stylesheet" href="styles/pages/projects.css" />
   <script src="scripts/pages/projects/projects.js" type="module"></script>
+  <script>
+    if (localStorage.getItem('wt-theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
 </head>
 
 <body class="projects-page">
@@ -37,6 +42,7 @@
     <p id="user-email-display"></p>
   </footer>
   <div id="toast" aria-live="polite" aria-atomic="true"></div>
+  <script src="scripts/utils/themeToggle.js"></script>
 </body>
 
 </html>

@@ -1,324 +1,330 @@
-.onboarding-page {
-  background-color: #fafafa;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 24px 20px;
-}
+/* ================================================================
+   onboarding.css — WatchTower Onboarding Page
+   ================================================================ */
 
-.onboarding-shell {
-  width: 100%;
-  max-width: 676px;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 34px;
-}
-
-.onboarding-header {
-  padding-top: 4px;
-  text-align: center;
-}
-
-.onboarding-header__title {
-  margin-bottom: 10px;
-  color: var(--color-text);
-  font-size: clamp(2.5rem, 5vw, 3.25rem);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.02;
-}
-
-.onboarding-header__subtitle {
-  color: #667085;
-  font-size: 1.15rem;
-  line-height: 1.4;
-}
-
-.onboarding-card {
-  border: 1px solid #d9dee7;
-  border-radius: 14px;
-  background: #fff;
-  padding: 30px 31px;
-}
-
-.onboarding-state {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.onboarding-state--hidden {
-  display: none !important;
-}
-
-.onboarding-state--loading {
-  min-height: 420px;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 0;
-  text-align: center;
-}
-
-.onboarding-card__title {
-  margin-bottom: 4px;
-  color: var(--color-text);
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-.onboarding-card__subtitle {
-  margin-bottom: 2px;
-  color: #667085;
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.project-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.project-field {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.project-field__label {
-  color: var(--color-text);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.project-field__input {
-  width: 100%;
-  border: 1px solid #d9dee7;
-  border-radius: 12px;
-  background: #fbfbfc;
-  padding: 15px 16px;
-  color: var(--color-text);
-  font-size: 1rem;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.project-field__input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.project-field__error,
-.project-form__status {
-  min-height: 20px;
-  margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.4;
-}
-
-.project-field__error {
-  color: #b42318;
-}
-
-.project-form__status {
-  color: #667085;
-}
-
-.step-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.step-section__title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--color-text);
-  font-size: 1.12rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.step-number {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  border-radius: 999px;
-  background: var(--color-text);
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-.api-key-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-height: 68px;
-  border: 1px solid #d9dee7;
-  border-radius: 12px;
-  background-color: #fbfbfc;
-  padding: 12px 14px;
-}
-
-.api-key-container input {
-  min-width: 0;
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 0;
-  color: var(--color-text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 1rem;
-  outline: none;
-}
-
-.api-key-container .btn {
-  min-width: 82px;
-  justify-content: center;
-  border: 1px solid #d9dee7;
-  border-radius: 8px;
-  background: #fff;
-  padding: 10px 18px;
-  color: var(--color-text);
-}
-
-.api-key-container .btn:hover {
-  background: #f5f5f5;
-}
-
-.api-key-container .btn.is-copied {
-  border-color: var(--color-text);
-  background: var(--color-text);
-  color: #fff;
-}
-
-.step-section__hint {
-  color: #667085;
-  font-size: 0.92rem;
-  line-height: 1.45;
-}
-
-.code-block {
-  overflow-x: auto;
-  border-radius: 12px;
-  background: #1f1f1f;
-  padding: 16px 18px;
-}
-
-.code-block code {
-  color: #18d26e;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-size: 0.98rem;
-  line-height: 1.55;
-}
-
-.code-block pre {
-  margin: 0;
-}
-
-.code-block code span#snippet-api-key {
-  color: #34e28d;
-}
-
-.info-alert {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  border: 2px solid #4f90ff;
-  border-radius: 12px;
-  background-color: #f7fbff;
-  padding: 16px 18px;
-  color: #1d4ed8;
-}
-
-.info-alert__icon svg {
-  margin-top: 1px;
-  flex-shrink: 0;
-  color: #2563eb;
-}
-
-.info-alert__content strong {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.info-alert__content p {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.45;
-}
-
-.continue-btn {
-  width: 100%;
-  min-height: 54px;
-  justify-content: center;
-  border-radius: 4px;
-  margin-top: 2px;
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.session-footer {
-  margin-top: auto;
-  padding-top: 24px;
-  text-align: center;
-  color: #98a2b3;
-  font-size: 0.92rem;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 16px;
-  border: 3px solid #d9dee7;
-  border-top-color: var(--color-text);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+   .onboarding-page {
+    background-color: var(--color-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 24px 20px;
   }
-}
-
-@media (max-width: 720px) {
-  .onboarding-page {
-    padding: 18px 16px;
-  }
-
+  
   .onboarding-shell {
+    width: 100%;
+    max-width: 676px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 34px;
+  }
+  
+  .onboarding-header {
+    padding-top: 4px;
+    text-align: center;
+  }
+  
+  .onboarding-header__title {
+    margin-bottom: 10px;
+    color: var(--color-text);
+    font-size: clamp(2.5rem, 5vw, 3.25rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.02;
+  }
+  
+  .onboarding-header__subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.15rem;
+    line-height: 1.4;
+  }
+  
+  .onboarding-card {
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-surface);
+    padding: 30px 31px;
+  }
+  
+  .onboarding-state {
+    display: flex;
+    flex-direction: column;
     gap: 24px;
   }
-
-  .onboarding-card {
-    padding: 24px 18px;
+  
+  .onboarding-state--hidden {
+    display: none !important;
   }
-
-  .project-field__input {
-    padding: 14px 15px;
-  }
-
-  .api-key-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .api-key-container .btn {
-    width: 100%;
-  }
-
+  
   .onboarding-state--loading {
-    min-height: 320px;
+    min-height: 420px;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    text-align: center;
   }
-}
+  
+  .onboarding-card__title {
+    margin-bottom: 4px;
+    color: var(--color-text);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+  
+  .onboarding-card__subtitle {
+    margin-bottom: 2px;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .project-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .project-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .project-field__label {
+    color: var(--color-text);
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  
+  .project-field__input {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+    padding: 15px 16px;
+    color: var(--color-text);
+    font-size: 1rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+  
+  .project-field__input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-subtle);
+  }
+  
+  .project-field__error,
+  .project-form__status {
+    min-height: 20px;
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+  
+  .project-field__error {
+    color: var(--color-critical);
+  }
+  
+  .project-form__status {
+    color: var(--color-text-muted);
+  }
+  
+  .step-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .step-section__title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--color-text);
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  
+  .step-number {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: var(--color-accent);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+  
+  .api-key-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 68px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background-color: var(--color-surface);
+    padding: 12px 14px;
+  }
+  
+  .api-key-container input {
+    min-width: 0;
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: var(--color-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 1rem;
+    outline: none;
+  }
+  
+  .api-key-container .btn {
+    min-width: 82px;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface-raised);
+    padding: 10px 18px;
+    color: var(--color-text);
+    transition: background-color var(--transition), border-color var(--transition);
+  }
+  
+  .api-key-container .btn:hover {
+    background: var(--color-accent-subtle);
+    border-color: var(--color-accent-border);
+  }
+  
+  .api-key-container .btn.is-copied {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: #fff;
+  }
+  
+  .step-section__hint {
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  
+  .code-block {
+    overflow-x: auto;
+    border-radius: 12px;
+    background: #1f1f1f;
+    padding: 16px 18px;
+  }
+  
+  .code-block code {
+    color: #18d26e;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+  
+  .code-block pre {
+    margin: 0;
+  }
+  
+  .code-block code span#snippet-api-key {
+    color: #34e28d;
+  }
+  
+  .info-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 2px solid var(--color-accent-border);
+    border-radius: 12px;
+    background-color: var(--color-accent-subtle);
+    padding: 16px 18px;
+    color: var(--color-brown);
+  }
+  
+  .info-alert__icon svg {
+    margin-top: 1px;
+    flex-shrink: 0;
+    color: var(--color-accent);
+  }
+  
+  .info-alert__content strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .info-alert__content p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+  
+  .continue-btn {
+    width: 100%;
+    min-height: 54px;
+    justify-content: center;
+    border-radius: 4px;
+    margin-top: 2px;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  .session-footer {
+    margin-top: auto;
+    padding-top: 24px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 16px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @media (max-width: 720px) {
+    .onboarding-page {
+      padding: 18px 16px;
+    }
+  
+    .onboarding-shell {
+      gap: 24px;
+    }
+  
+    .onboarding-card {
+      padding: 24px 18px;
+    }
+  
+    .project-field__input {
+      padding: 14px 15px;
+    }
+  
+    .api-key-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .api-key-container .btn {
+      width: 100%;
+    }
+  
+    .onboarding-state--loading {
+      min-height: 320px;
+    }
+  }
