@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.16.10",
+    "vitest": "^4.1.7",
     "wrangler": "^4.86.0"
   }
 }
