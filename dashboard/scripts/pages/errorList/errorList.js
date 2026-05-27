@@ -5,6 +5,7 @@ import { PAGE_LIMIT, normalizeError } from '../../utils/constants.js';
 import { requireAuth }               from '../../utils/auth.js';
 import { initFilters, sinceToIso }   from './errorFilter.js';
 import { apiGet }                    from '../../api/api.js';
+import { withResolvedStatuses }      from '../../utils/errorStatus.js';
 
 const session = requireAuth();
 if (session) { renderNavbar('error-list'); }
@@ -133,7 +134,7 @@ async function load() {
 
     // Backend responds with { status: "ok", errors: [...] }
     const rawRows    = result.data?.errors ?? [];
-    const normalized = rawRows.map(normalizeError);
+    const normalized = withResolvedStatuses(rawRows.map(normalizeError));
     const filtered   = applyClientFilters(normalized);
 
     state.total = filtered.length;
@@ -147,6 +148,6 @@ async function load() {
 /* ── Boot ───────────────────────────────────────────────────── */
 initFilters(state, load);
 load();
-window.addEventListener('pageshow', event => {
-  if (event.persisted) { load(); }
+window.addEventListener('pageshow', () => {
+  load();
 });

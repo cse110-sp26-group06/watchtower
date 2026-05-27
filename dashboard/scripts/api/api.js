@@ -17,7 +17,15 @@ import { API_BASE, API_KEY, API_KEY_ERROR } from '../utils/constants.js';
  * @returns {string | null}
  */
 function getApiKey() {
-  return API_KEY ?? null;
+  if (API_KEY) { return API_KEY; }
+
+  try {
+    const projects = JSON.parse(window.localStorage.getItem('watchtower:projects') ?? '[]');
+    const project = Array.isArray(projects) ? projects.find(item => item?.apiKey) : null;
+    return project?.apiKey ?? null;
+  } catch {
+    return null;
+  }
 }
 
 function getApiKeyError() {
@@ -151,7 +159,7 @@ async function apiFetch(url, options = {}) {
  * @returns {Promise<{success: true, data: any} | {success: false, error: object}>}
  */
 export async function apiPatch(endpoint, body = {}) {
-  if (!getApiKey()) {
+  if (!getApiKey() && endpoint === '') {
     return {
       success: false,
       error: {
@@ -178,7 +186,7 @@ export async function apiPatch(endpoint, body = {}) {
  * @returns {Promise<{ success: boolean, data?: any, error?: ApiError }>}
  */
 async function apiGet(endpoint = '', params = {}) {
-  if (!getApiKey()) {
+  if (!getApiKey() && endpoint === '') {
     return {
       success: false,
       error: {

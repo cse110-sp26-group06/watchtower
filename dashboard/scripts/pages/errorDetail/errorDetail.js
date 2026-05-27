@@ -13,6 +13,7 @@ import { apiGet, apiPatch } from '../../api/api.js';
 import { requireAuth } from '../../utils/auth.js';
 import { escHtml }          from '../../utils/dom.js';
 import { showToast }        from '../../utils/toast.js';
+import { markErrorResolved } from '../../utils/errorStatus.js';
 
 const session = requireAuth();
 if (session) {renderNavbar('error-list');}
@@ -59,6 +60,7 @@ async function handleResolve() {
     }
 
     syncResolveButton(true);
+    markErrorResolved(errorId);
     showToast('Error marked as resolved.');
   } catch (err) {
     console.error('[WatchTower] resolve failed:', err);
