@@ -47,7 +47,9 @@ function setTheme(theme) {
 /** Update the toggle button text/icon to reflect current theme */
 function updateToggleLabel() {
   const btn = document.getElementById('navbar-theme-toggle');
-  if (!btn) return;
+  if (!btn){
+    return;
+  } 
   const isDark = getTheme() === 'dark';
   btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
   btn.querySelector('.theme-toggle__moon').style.display = isDark ? 'none'  : 'block';
