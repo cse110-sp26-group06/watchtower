@@ -17,9 +17,11 @@
             "properties": {
               "level": { "type": "string" },
               "message": { "type": "string" },
-              "timestamp": { "type": "string", "format": "date-time" }
+              "file": {"type": "string"},
+              "lineno": { "type": "number" },
+              "colno": { "type": "number" }
             },
-            "required": ["level", "message", "timestamp"]
+            "required": ["level", "message"]
           }
         },
         "required": ["event_type", "timestamp", "payload"]
