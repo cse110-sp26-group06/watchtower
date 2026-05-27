@@ -1,9 +1,8 @@
 import { renderNavbar }              from '../../components/navbar.js';
 import { renderErrorCard }           from '../../components/errorCard.js';
 import { showToast }                 from '../../utils/toast.js';
-import { MOCK_ERRORS, PAGE_LIMIT, normalizeError } from '../../utils/constants.js';
+import { PAGE_LIMIT, normalizeError } from '../../utils/constants.js';
 import { requireAuth }               from '../../utils/auth.js';
-import { withResolvedStatuses }      from '../../utils/errorStatus.js';
 import { initFilters, sinceToIso }   from './errorFilter.js';
 import { apiGet }                    from '../../api/api.js';
 
@@ -105,11 +104,7 @@ function renderErrors(errors, total) {
 /**
  * Fetches and renders the error list for the current filter state.
  *
- * Mock path  — normalizes D1-shaped MOCK_ERRORS rows via normalizeError()
- *              before filtering, so the card layer always receives the
- *              same shape regardless of data source.
- *
- * Real path  — routes through api.js (apiGet) for centralized auth
+ * Routes through api.js (apiGet) for centralized auth
  *              (api_key query param) and error handling (network/4xx/5xx).
  *              Each raw D1 row is passed through normalizeError() before
  *              any client-side filtering or rendering.
@@ -121,23 +116,6 @@ async function load() {
   state.loading = true;
   renderLoading();
 
-  // ── MOCK: set MOCK_ERRORS to [] in constants.js to disable ──
-  if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
-    await new Promise(r => setTimeout(r, 500));
-
-    const normalized = withResolvedStatuses(MOCK_ERRORS.map(normalizeError));
-    const filtered   = applyClientFilters(normalized);
-    const start      = (state.page - 1) * PAGE_LIMIT;
-    const paged      = filtered.slice(start, start + PAGE_LIMIT);
-
-    state.total   = filtered.length;
-    renderErrors(paged, filtered.length);
-    state.loading = false;
-    return;
-  }
-  // ── END MOCK ─────────────────────────────────────────────────
-
-  // ── Real API via api.js ───────────────────────────────────────
   const params = {};
   const sinceIso = sinceToIso(state.since);
   if (sinceIso) { params.since = sinceIso; }
@@ -155,7 +133,7 @@ async function load() {
 
     // Backend responds with { status: "ok", errors: [...] }
     const rawRows    = result.data?.errors ?? [];
-    const normalized = withResolvedStatuses(rawRows.map(normalizeError));
+    const normalized = rawRows.map(normalizeError);
     const filtered   = applyClientFilters(normalized);
 
     state.total = filtered.length;

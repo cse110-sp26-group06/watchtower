@@ -1,19 +1,17 @@
 /**
  * errorDetail.js — page script for error-detail.html
  *
- * Reads ?id= from the URL, looks up the error in MOCK_ERRORS
- * (or fetches a single event from the real API when available),
+ * Reads ?id= from the URL, fetches a single event from the API,
  * and renders all detail sections into the page.
  */
 
 import { renderNavbar }     from '../../components/navbar.js';
 import { badgeClass }       from '../../components/errorCard.js';
 import { renderStackTrace } from './stackTrace.js';
-import { MOCK_ERRORS, normalizeError } from '../../utils/constants.js';
+import { normalizeError } from '../../utils/constants.js';
 import { apiGet, apiPatch } from '../../api/api.js';
 import { requireAuth } from '../../utils/auth.js';
 import { escHtml }          from '../../utils/dom.js';
-import { markErrorResolved, withResolvedStatus } from '../../utils/errorStatus.js';
 import { showToast }        from '../../utils/toast.js';
 
 const session = requireAuth();
@@ -36,32 +34,29 @@ const resolveBtn = document.getElementById('resolve-btn');
  */
 function syncResolveButton(resolved) {
   if (!resolveBtn) {return;}
-  resolveBtn.textContent = resolved ? '✓ Resolved' : 'Mark Resolved';
+  resolveBtn.textContent = resolved ? 'Resolved' : 'Mark Resolved';
+  resolveBtn.setAttribute(
+    'aria-label',
+    resolved ? 'Error resolved' : 'Mark this error as resolved'
+  );
   resolveBtn.classList.toggle('btn--resolved', resolved);
   resolveBtn.disabled = resolved;
 }
 
 /**
- * PATCHes the error status to 'resolved' on the backend,
- * then updates the button on success.
+ * PATCHes the error status to 'resolved' on the backend, then updates the
+ * button only after the persisted update succeeds.
  */
 async function handleResolve() {
   if (!errorId) {return;}
   resolveBtn.disabled = true;
 
   try {
-    // ── MOCK: remove this block when real API is ready ──────────
-    if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
-      await new Promise(r => setTimeout(r, 200));
-      markErrorResolved(errorId);
-      syncResolveButton(true);
-      showToast('Error marked as resolved.');
-      return;
-    }
-    // ── END MOCK ─────────────────────────────────────────────────
-
-    const result = await apiPatch(`/${errorId}`, { status: 'resolved' });
+    const result = await apiPatch(`/${encodeURIComponent(errorId)}`, { status: 'resolved' });
     if (!result.success) {throw new Error(result.error.message);}
+    if (result.data?.status !== 'ok') {
+      throw new Error(result.data?.message ?? 'Backend did not confirm the error was resolved.');
+    }
 
     syncResolveButton(true);
     showToast('Error marked as resolved.');
@@ -74,29 +69,15 @@ async function handleResolve() {
 
 resolveBtn?.addEventListener('click', handleResolve);
 
-/* ── Fetch / mock ───────────────────────────────────────────────── */
+/* ── Fetch ──────────────────────────────────────────────────────── */
 /**
  * Loads a single error by ID, normalizing the raw D1 row into the
  * shape renderDetail() expects.
- *
- * Mock path  — finds the matching row in MOCK_ERRORS and normalizes it.
- * Real path  — GETs /api/errors/:id and normalizes the returned row.
- *
- * `withResolvedStatus` is no longer called here: the D1 `status` column
- * ('resolved' | 'unresolved') is preserved by normalizeError() as-is.
  *
  * @param {string} id
  * @returns {Promise<object>} Normalized error object
  */
 async function fetchError(id) {
-  // ── MOCK: remove this block when real API is ready ──────────
-  if (Array.isArray(MOCK_ERRORS) && MOCK_ERRORS.length) {
-    await new Promise(r => setTimeout(r, 300));
-    const raw = MOCK_ERRORS.find(e => String(e.id) === String(id));
-    if (!raw) {throw new Error(`No error found with id "${id}"`);}
-    return withResolvedStatus(normalizeError(raw));
-  }
-
   const result = await apiGet(`/${encodeURIComponent(id)}`);
   if (!result.success) {
     if (result.error.status === 404) {
@@ -107,7 +88,7 @@ async function fetchError(id) {
 
   const row = result.data?.error;
   if (!row) {throw new Error('No error found with that ID.');}
-  return withResolvedStatus(normalizeError(row));
+  return normalizeError(row);
 }
 
 

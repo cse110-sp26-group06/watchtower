@@ -98,3 +98,95 @@ export function normalizeError(row) {
  * Set MOCK_ERRORS to [] to disable and use the real API.
  * ─────────────────────────────────────────────────────────────── */
 export const MOCK_ERRORS = [];
+
+/* Temporarily disabled mock errors.
+const DISABLED_MOCK_ERRORS = [
+  {
+    id: 'err_1',
+    service: 'checkout-web',
+    environment: 'production',
+    error_type: 'TypeError',
+    severity: 'critical',
+    status: 'unresolved',
+    message: "Cannot read properties of undefined (reading 'user')",
+    file: 'src/pages/Checkout.jsx',
+    lineno: 128,
+    colno: 17,
+    stack_trace: [
+      "TypeError: Cannot read properties of undefined (reading 'user')",
+      '    at renderCheckout (src/pages/Checkout.jsx:128:17)',
+      '    at CheckoutPage (src/pages/Checkout.jsx:84:9)',
+      '    at RouterView (src/router.js:42:5)',
+    ].join('\n'),
+    client_timestamp: '2026-05-26T15:31:00.000Z',
+    server_timestamp: '2026-05-26T15:31:03.000Z',
+    payload_json: JSON.stringify({
+      occurrences: 18,
+      affectedUsers: 7,
+      deployment: {
+        version: 'web-2026.05.26.2',
+        deployedAt: '2026-05-26T14:52:00.000Z',
+        commit: '8f3c2a1',
+      },
+      timeline: [
+        { type: 'deploy', label: 'Deployment completed', time: '2026-05-26T14:52:00.000Z' },
+        { type: 'critical', label: 'Error first seen', time: '2026-05-26T15:31:00.000Z' },
+        { type: 'critical', label: 'Error repeated 18 times', time: '2026-05-26T15:46:00.000Z' },
+      ],
+    }),
+  },
+  {
+    id: 'err_2',
+    service: 'billing-api',
+    environment: 'staging',
+    error_type: 'ReferenceError',
+    severity: 'warning',
+    status: 'unresolved',
+    message: 'promoCodeValidator is not defined',
+    file: 'src/billing/promotions.js',
+    lineno: 64,
+    colno: 11,
+    stack_trace: [
+      'ReferenceError: promoCodeValidator is not defined',
+      '    at applyPromotion (src/billing/promotions.js:64:11)',
+      '    at createInvoice (src/billing/invoices.js:212:19)',
+    ].join('\n'),
+    client_timestamp: '2026-05-26T12:08:00.000Z',
+    server_timestamp: '2026-05-26T12:08:01.000Z',
+    payload_json: JSON.stringify({
+      occurrences: 5,
+      affectedUsers: 2,
+      timeline: [
+        { type: 'info', label: 'Staging test started', time: '2026-05-26T12:02:00.000Z' },
+        { type: 'critical', label: 'Error captured', time: '2026-05-26T12:08:00.000Z' },
+      ],
+    }),
+  },
+  {
+    id: 'err_3',
+    service: 'auth-worker',
+    environment: 'production',
+    error_type: 'Error',
+    severity: 'info',
+    status: 'resolved',
+    message: 'Session refresh token expired',
+    file: 'workers/auth/session.js',
+    lineno: 39,
+    colno: 5,
+    stack_trace: [
+      'Error: Session refresh token expired',
+      '    at refreshSession (workers/auth/session.js:39:5)',
+    ].join('\n'),
+    client_timestamp: '2026-05-25T22:14:00.000Z',
+    server_timestamp: '2026-05-25T22:14:02.000Z',
+    payload_json: JSON.stringify({
+      occurrences: 11,
+      affectedUsers: 4,
+      timeline: [
+        { type: 'critical', label: 'Error captured', time: '2026-05-25T22:14:00.000Z' },
+        { type: 'info', label: 'Marked resolved', time: '2026-05-25T23:03:00.000Z' },
+      ],
+    }),
+  },
+];
+*/
