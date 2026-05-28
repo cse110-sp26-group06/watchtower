@@ -41,5 +41,17 @@ CREATE TABLE IF NOT EXISTS projects (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     api_key TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL,
+    owner_id TEXT 
+);
+
+-- This is the users table which stores the user information for each project. Each user can have multiple projects, but each project can only have one user (the owner).
+-- Sprint 4 stub: no password yet — callers identify themselves with a user_id query param. Real auth (password_hash, sessions) deferred to next sprint.
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
     created_at TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_projects_owner
+ON projects (owner_id);
