@@ -64,3 +64,6 @@ form?.addEventListener('submit', event => {
   const target = getRedirectTarget();
   window.location.replace(target);
 });
+
+form?.setAttribute('data-ready', 'true');
+submitButton.disabled = false;
