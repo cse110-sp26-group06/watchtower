@@ -36,10 +36,7 @@ const resolveBtn = document.getElementById('resolve-btn');
 function syncResolveButton(resolved) {
   if (!resolveBtn) {return;}
   resolveBtn.textContent = resolved ? 'Resolved' : 'Mark Resolved';
-  resolveBtn.setAttribute(
-    'aria-label',
-    resolved ? 'Error resolved' : 'Mark this error as resolved'
-  );
+  resolveBtn.setAttribute('aria-label', 'Mark this error as resolved');
   resolveBtn.classList.toggle('btn--resolved', resolved);
   resolveBtn.disabled = resolved;
 }
