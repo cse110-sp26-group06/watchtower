@@ -40,7 +40,7 @@ function seedSession() {
   );
 }
 
-async function mockErrorApi(page, errors = [mockError]) {
+async function mockErrorApi(page, errors = [mockError], { onPatch } = {}) {
   await page.route(`${API_BASE}**`, async (route) => {
     const request = route.request();
 
@@ -66,10 +66,20 @@ async function mockErrorApi(page, errors = [mockError]) {
       return;
     }
 
+    if (request.method() === 'PATCH') {
+      if (onPatch) { await onPatch(request); }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'ok', message: 'Error marked as resolved' }),
+      });
+      return;
+    }
+
     await route.fulfill({
-      status: 200,
+      status: 405,
       contentType: 'application/json',
-      body: JSON.stringify({ success: true }),
+      body: JSON.stringify({ status: 'error', message: 'Method not allowed' }),
     });
   });
 }
@@ -98,6 +108,27 @@ test.describe('Error Detail page', () => {
       await expect(page.locator('#navbar-root #navbar')).toBeVisible();
       await expect(page.locator('#nav-error-list')).toBeVisible();
       expect(errors).toHaveLength(0);
+    });
+
+    test('marks the error as resolved through the API', async ({ page }) => {
+      let patchUrl = '';
+      let patchBody = null;
+
+      await page.unroute(`${API_BASE}**`);
+      await mockErrorApi(page, [mockError], {
+        onPatch: async (request) => {
+          patchUrl = request.url();
+          patchBody = request.postDataJSON();
+        },
+      });
+
+      await page.goto(`/error-detail.html?id=${ERROR_ID}`);
+      await page.locator('#resolve-btn').click();
+
+      await expect(page.locator('#resolve-btn')).toHaveText('Resolved');
+      await expect(page.locator('#resolve-btn')).toBeDisabled();
+      expect(patchUrl).toContain(`/api/errors/${ERROR_ID}`);
+      expect(patchBody).toEqual({ status: 'resolved' });
     });
 
     test('back link navigates to error-list.html', async ({ page }) => {

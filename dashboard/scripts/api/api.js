@@ -6,7 +6,7 @@
 // Auth note: X-Api-Key header is NOT used — backend CORS only allows
 // Content-Type as a custom header. Auth is injected as api_key query param.
 
-import { API_BASE, API_KEY } from '../utils/constants.js';
+import { API_BASE, API_KEY, API_KEY_ERROR } from '../utils/constants.js';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -17,7 +17,19 @@ import { API_BASE, API_KEY } from '../utils/constants.js';
  * @returns {string | null}
  */
 function getApiKey() {
-  return API_KEY ?? null;
+  if (API_KEY) { return API_KEY; }
+
+  try {
+    const projects = JSON.parse(window.localStorage.getItem('watchtower:projects') ?? '[]');
+    const project = Array.isArray(projects) ? projects.find(item => item?.apiKey) : null;
+    return project?.apiKey ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function getApiKeyError() {
+  return API_KEY_ERROR ?? 'Missing WatchTower API key.';
 }
 
 /**
@@ -147,6 +159,17 @@ async function apiFetch(url, options = {}) {
  * @returns {Promise<{success: true, data: any} | {success: false, error: object}>}
  */
 export async function apiPatch(endpoint, body = {}) {
+  if (!getApiKey() && endpoint === '') {
+    return {
+      success: false,
+      error: {
+        type: 'client',
+        status: 400,
+        message: getApiKeyError(),
+      },
+    };
+  }
+
   return apiFetch(buildApiUrl(endpoint), {
     method: 'PATCH',
     body: JSON.stringify(body),
@@ -163,6 +186,17 @@ export async function apiPatch(endpoint, body = {}) {
  * @returns {Promise<{ success: boolean, data?: any, error?: ApiError }>}
  */
 async function apiGet(endpoint = '', params = {}) {
+  if (!getApiKey() && endpoint === '') {
+    return {
+      success: false,
+      error: {
+        type: 'client',
+        status: 400,
+        message: getApiKeyError(),
+      },
+    };
+  }
+
   return apiFetch(buildApiUrl(endpoint, params), { method: "GET" });
 }
 
