@@ -2,7 +2,7 @@
 // Verifies:
 //   - project B's api_key cannot read/resolve project A's error
 //   - GET /api/projects scopes to the calling user_id
-//   - missing/invalid user_id → 401 on project listing
+//   - missing/invalid user_id → 404 on project listing
 
 import { env, SELF } from 'cloudflare:test';
 import { beforeEach, describe, expect, test } from 'vitest';
@@ -154,13 +154,13 @@ describe('project listing scoping', () => {
     expect(names).toEqual(['A-1', 'A-2']);
   });
 
-  test('GET /api/projects with unknown user_id → 401', async () => {
+  test('GET /api/projects with unknown user_id → 404', async () => {
     const res = await SELF.fetch('http://test/api/projects?user_id=does-not-exist', { method: 'GET' });
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(404);
   });
 
-  test('GET /api/projects with missing user_id → 401', async () => {
+  test('GET /api/projects with missing user_id → 404', async () => {
     const res = await SELF.fetch('http://test/api/projects', { method: 'GET' });
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(404);
   });
 });

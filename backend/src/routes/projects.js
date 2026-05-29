@@ -28,7 +28,7 @@ export async function handleListProjects(request, env) {
 
   const owner = await getUserById(env, user_id);
   if (!owner) {
-    return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 401);
+    return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
   }
 
   try {

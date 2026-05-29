@@ -60,7 +60,7 @@ export default {
 
       const owner = await getUserById(env, body.user_id);
       if (!owner) {
-        return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 401);
+        return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
       }
 
       try {
