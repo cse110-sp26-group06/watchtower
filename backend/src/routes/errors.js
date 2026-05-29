@@ -76,11 +76,17 @@ export async function handleGetErrors(request, env) {
  * @returns {Response} JSON response with single error or error message
  */
 export async function handleGetErrorById(request, env, id) {
-  try {
-    // look up the error by id in D1
-    const error = await getErrorById(env, id);
+  const url = new URL(request.url);
+  const api_key = url.searchParams.get('api_key');
 
-    // return 404 if not found
+  const project = await validateApiKey(env, api_key);
+  if (!project) {
+    return jsonResponse({ status: 'error', message: 'Invalid API key' }, 401);
+  }
+
+  try {
+    const error = await getErrorById(env, id, api_key);
+
     if (!error) {
       return jsonResponse({ status: 'error', message: 'Error not found' }, 404);
     }
@@ -103,9 +109,16 @@ export async function handleGetErrorById(request, env, id) {
  * @returns {Response} JSON response confirming update or error message
  */
 export async function handleResolveError(request, env, id) {
+  const url = new URL(request.url);
+  const api_key = url.searchParams.get('api_key');
+
+  const project = await validateApiKey(env, api_key);
+  if (!project) {
+    return jsonResponse({ status: 'error', message: 'Invalid API key' }, 401);
+  }
+
   try {
-    // update status to resolved in D1
-    const updated = await resolveError(env, id);
+    const updated = await resolveError(env, id, api_key);
 
     if (!updated) {
       return jsonResponse({ status: 'error', message: 'Error not found' }, 404);

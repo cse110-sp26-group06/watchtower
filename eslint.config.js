@@ -44,6 +44,7 @@ export default [
     languageOptions: {
       globals: {
         ...globals.serviceworker,
+        crypto: 'readonly',
       },
     },
   },
