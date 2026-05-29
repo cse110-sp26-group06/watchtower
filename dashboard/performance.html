@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="WatchTower — Performance Overview. Monitor response times, error rates, and slow endpoints." />
+  <title>Performance</title>
+
+  <script>
+    if (localStorage.getItem('wt-theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+
+  <link rel="stylesheet" href="styles/globals.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+  <link rel="stylesheet" href="styles/layout.css" />
+  <link rel="stylesheet" href="styles/pages/performance.css" />
+  <script src="scripts/pages/performance/performance.js" type="module"></script>
+</head>
+
+<body>
+  <div id="app">
+    <div id="navbar-root"></div>
+
+    <main id="main-content">
+      <header class="page-header">
+        <h1 class="page-title">Performance Overview</h1>
+      </header>
+
+      <!-- Stat Cards -->
+      <section class="perf-stats" aria-label="Performance statistics">
+        <div class="perf-stat-card">
+          <div class="perf-stat-card__label">Avg Response Time</div>
+          <div class="perf-stat-card__value" id="stat-response-time">234ms</div>
+          <div class="perf-stat-card__delta perf-stat-card__delta--good" id="stat-response-delta">
+            ↓ 12% from yesterday
+          </div>
+        </div>
+        <div class="perf-stat-card">
+          <div class="perf-stat-card__label">Error Rate</div>
+          <div class="perf-stat-card__value" id="stat-error-rate">2.3%</div>
+          <div class="perf-stat-card__delta perf-stat-card__delta--bad" id="stat-error-delta">
+            ↑ 0.8% from yesterday
+          </div>
+        </div>
+        <div class="perf-stat-card">
+          <div class="perf-stat-card__label">Requests/min</div>
+          <div class="perf-stat-card__value" id="stat-requests">1.2k</div>
+          <div class="perf-stat-card__delta perf-stat-card__delta--neutral" id="stat-requests-delta">
+            → No change
+          </div>
+        </div>
+        <div class="perf-stat-card">
+          <div class="perf-stat-card__label">Active Users</div>
+          <div class="perf-stat-card__value" id="stat-users">847</div>
+          <div class="perf-stat-card__delta perf-stat-card__delta--good" id="stat-users-delta">
+            ↑ 23% from yesterday
+          </div>
+        </div>
+      </section>
+
+      <!-- Response Time Chart -->
+      <section class="perf-card" aria-label="Response time chart">
+        <h2 class="perf-card__title">Response Time (24h)</h2>
+        <div class="perf-chart-wrap">
+          <canvas id="response-time-chart" aria-label="Bar chart of response time over 24 hours"></canvas>
+        </div>
+      </section>
+
+      <!-- Slow Endpoints -->
+      <section class="perf-card" aria-label="Slow endpoints">
+        <h2 class="perf-card__title">Slow Endpoints</h2>
+        <div class="perf-endpoints" id="slow-endpoints"></div>
+      </section>
+    </main>
+  </div>
+</body>
+
+</html>
