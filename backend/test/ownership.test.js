@@ -1,7 +1,7 @@
 // Cross-project ownership tests for sprint 4 backend ownership work.
 // Verifies:
 //   - project B's api_key cannot read/resolve project A's error
-//   - GET /api/projects scopes to the calling user_id
+//   - GET /api/projects scopes to the calling x-user-id
 //   - missing/invalid user_id → 404 on project listing
 
 import { env, SELF } from 'cloudflare:test';
@@ -145,7 +145,10 @@ describe('project listing scoping', () => {
     await seedProject(userA, 'A-2');
     await seedProject(userB, 'B-1');
 
-    const res = await SELF.fetch(`http://test/api/projects?user_id=${userA}`, { method: 'GET' });
+    const res = await SELF.fetch('http://test/api/projects', {
+      method: 'GET',
+      headers: { 'x-user-id': userA },
+    });
     expect(res.status).toBe(200);
 
     const body = await res.json();
@@ -155,7 +158,10 @@ describe('project listing scoping', () => {
   });
 
   test('GET /api/projects with unknown user_id → 404', async () => {
-    const res = await SELF.fetch('http://test/api/projects?user_id=does-not-exist', { method: 'GET' });
+    const res = await SELF.fetch('http://test/api/projects', {
+      method: 'GET',
+      headers: { 'x-user-id': 'does-not-exist' },
+    });
     expect(res.status).toBe(404);
   });
 
