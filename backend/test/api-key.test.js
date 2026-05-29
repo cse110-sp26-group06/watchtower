@@ -7,12 +7,26 @@ beforeEach(async () => {
   await resetTestDatabase();
 });
 
+async function createUser(email = 'test@example.com') {
+  const response = await SELF.fetch('http://example.com/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  const body = await response.json();
+  expect(response.status).toBe(201);
+  return body.user_id;
+}
+
 describe('POST /api/key_generate', () => {
   test('creates a project and returns an API key', async () => {
+    const user_id = await createUser();
+
     const response = await SELF.fetch('http://example.com/api/key_generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'Test Project' }),
+      body: JSON.stringify({ name: 'Test Project', user_id }),
     });
 
     const body = await response.json();
@@ -24,10 +38,12 @@ describe('POST /api/key_generate', () => {
   });
 
   test('returns 400 when project name is missing', async () => {
+    const user_id = await createUser();
+
     const response = await SELF.fetch('http://example.com/api/key_generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ user_id }),
     });
 
     const body = await response.json();
