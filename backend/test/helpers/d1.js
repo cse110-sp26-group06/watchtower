@@ -34,10 +34,10 @@ const SCHEMA_STATEMENTS = [
 ];
 
 export async function resetTestDatabase() {
-    await reset();
+  await reset();
 
-    // apply schema.sql to env.watchtower_db
-    for (const statement of SCHEMA_STATEMENTS) {
-        await env.watchtower_db.prepare(statement).run();
-    }
+  // apply schema.sql to env.watchtower_db
+  for (const statement of SCHEMA_STATEMENTS) {
+    await env.watchtower_db.prepare(statement).run();
+  }
 }
