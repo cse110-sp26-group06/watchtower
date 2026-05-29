@@ -1,7 +1,7 @@
 ## Design SDK API Surface
 
 ### Design Methodology
-- Extension SDK that can be added to a program; not required 
+- Extension SDK that    can be added to a program; not required 
 - Lightweight, configurable
 
 
@@ -18,13 +18,26 @@
 	- Global error catching
 	- Provide functions so users can manually log errors to watchtower
 - Performance Metrics
-- User Signals
+- Capturing logs
+  - Override the console.log function to a parasitic function
+    - Store the original console.log functions so they can still be called later
+    - For each method, create a wrapper that for each call:
+      - Receives the arguments
+      - Sends them to Watchtower
+      - Calls the original console method with the same arguments
+  - List of console functions:
+    - console.log
+    - console.info
+    - console.warn
+    - console.error
+    - Optional:
+      - console.debug
+      - console.trace
+      - console.group 
 
-### 2) Event Normalization and Enrichment (Not Required)
-- Adds metadata to the captured event information
-  - Stack trace
-  - User/Session ID
-  - App Version
+### 2) Event Parsing
+- Normalizes the event into consistent schema that the backend expects.
+- Schemas can be found under sdk\watchtower-sdk\src\types
 
 ### 3) Local Queue + Batching
 - Push events in a queue

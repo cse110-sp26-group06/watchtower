@@ -1,6 +1,8 @@
 import BatchingEngine from "./batching/BatchingEngine";
 import { send } from  "./transport/send.js";
 import { handleError } from "./handler/parseError.js";
+import { parseLog } from "./handler/parseLog.js";
+import { patchConsole } from "./wrapper/console.js";
 
 let engine = null;
 
@@ -88,7 +90,7 @@ export function initWatchtower(config = {}) {
     }
   };
 
-  const engine = new BatchingEngine({
+  engine = new BatchingEngine({
     thresholds,
     sendFn: send,
     api_key: config.apiKey,
@@ -109,6 +111,9 @@ export function initWatchtower(config = {}) {
     const parsed = handleError(event.reason);
     engine.enqueue("error", parsed);
   });
+
+  // --- Log Handler ---
+  patchConsole(handleLog);
 }
 
 /**
@@ -121,8 +126,18 @@ export function captureError(error) {
     console.warn("WatchTower not initialized. Call initWatchtower() first.");
     return;
   }
-
   const parsed = handleError(error);
   engine.enqueue("error", parsed);
 }
 
+/**
+ * Processes a captured console call by converting it into a WatchTower
+ * log event and enqueueing it for batching.
+ *
+ * @param {string} level - The console method invoked ("log", "warn", "error", "info").
+ * @param {any[]} args - Raw arguments passed to the console call.
+ */
+function handleLog(level, args) {
+  const parsed = parseLog(level, args);
+  engine.enqueue("log", parsed);
+}
