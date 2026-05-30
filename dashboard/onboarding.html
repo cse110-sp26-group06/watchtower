@@ -12,6 +12,11 @@
   <link rel="stylesheet" href="styles/layout.css" />
   <link rel="stylesheet" href="styles/pages/onboarding.css" />
   <script src="scripts/pages/onboarding/onboarding.js" type="module"></script>
+  <script>
+    if (localStorage.getItem('wt-theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
 </head>
 
 <body class="onboarding-page">

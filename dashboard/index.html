@@ -12,6 +12,12 @@
   <link rel="stylesheet" href="styles/layout.css" />
   <link rel="stylesheet" href="styles/pages/login.css" />
   <script src="scripts/pages/login/login.js?v=login-ready" type="module"></script>
+  <script>
+    if (localStorage.getItem('wt-theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+  
 </head>
 
 <body class="login-page">
@@ -62,6 +68,7 @@
       </form>
     </section>
   </main>
+  <script src="scripts/utils/themeToggle.js"></script>
 </body>
 
 </html>
