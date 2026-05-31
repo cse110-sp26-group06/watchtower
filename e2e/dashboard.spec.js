@@ -144,10 +144,26 @@ test('onboarding generates an API key and returns the user to the projects list'
   await signIn(page);
   await expect(page).toHaveURL(/\/onboarding\.html$/);
 
+  await page.route('https://watchtower-backend.group6.workers.dev/api/users', async (route) => {
+    const payload = route.request().postDataJSON();
+
+    expect(payload).toEqual({ email: 'user@example.com' });
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'ok',
+        user_id: 'user_123',
+        email: 'user@example.com',
+      }),
+    });
+  });
+
   await page.route('https://watchtower-backend.group6.workers.dev/api/key_generate', async (route) => {
     const payload = route.request().postDataJSON();
 
-    expect(payload).toEqual({ name: 'Project 1' });
+    expect(payload).toEqual({ name: 'Project 1', user_id: 'user_123' });
 
     await route.fulfill({
       status: 200,
@@ -178,6 +194,8 @@ test('onboarding generates an API key and returns the user to the projects list'
       createdAt: storedProjects[0].createdAt,
     },
   ]);
+  await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('watchtower:user_id'))).toBe('user_123');
+  await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('watchtower:api_key'))).toBe('wt_test_api_key_123');
 
   await page.getByRole('button', { name: 'Continue to Dashboard' }).click();
 
