@@ -241,6 +241,42 @@ test('projects overflow menu supports rename and delete actions', async ({ page 
   await expect(page.getByLabel('Project Name')).toHaveValue('Project 1');
 });
 
+test('project settings shows the selected project API key', async ({ page }) => {
+  await page.goto('/index.html');
+  await page.evaluate(() => {
+    window.localStorage.setItem('watchtower:session', JSON.stringify({ email: 'user@example.com' }));
+    window.localStorage.setItem('watchtower:projects', JSON.stringify([
+      {
+        id: 'proj_123',
+        name: 'Project 1',
+        apiKey: 'wt_project_one_key',
+        createdAt: '2026-05-19T00:00:00.000Z',
+      },
+      {
+        id: 'proj_456',
+        name: 'Project 2',
+        apiKey: 'wt_project_two_key',
+        createdAt: '2026-05-20T00:00:00.000Z',
+      },
+    ]));
+    window.sessionStorage.setItem('watchtower:current-project', JSON.stringify({
+      id: 'proj_456',
+      name: 'Project 2',
+      apiKey: 'wt_project_two_key',
+      createdAt: '2026-05-20T00:00:00.000Z',
+    }));
+  });
+
+  const response = await page.goto('/settings.html');
+
+  expect(response?.ok()).toBeTruthy();
+  await expect(page.getByRole('heading', { name: 'Project Settings' })).toBeVisible();
+  await expect(page.getByText('Project 2')).toBeVisible();
+  await expect(page.getByText('npm install @watchtower/sdk')).toBeVisible();
+  await expect(page.getByLabel('Your API Key')).toHaveValue('wt_project_two_key');
+  await expect(page.getByLabel('Your API Key')).not.toHaveValue('wt_project_one_key');
+});
+
 test('resolved errors disappear from the unresolved list after navigating back', async ({ page }) => {
   await mockResolvedErrorsApi(page);
 
