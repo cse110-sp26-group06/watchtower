@@ -13,10 +13,9 @@ import {
   normalizeProjectName,
 } from '../../utils/projects.js';
 import { showToast } from '../../utils/toast.js';
+import { getOrCreateBackendUserId } from '../../api/projects.js';
 
 const API_BASE_URL = 'https://watchtower-backend.group6.workers.dev/api';
-const USER_ID_STORAGE_KEY = 'watchtower:user_id';
-const USER_EMAIL_STORAGE_KEY = 'watchtower:user_email';
 const API_KEY_STORAGE_KEY = 'watchtower:api_key';
 
 const session = requireAuth();
@@ -72,63 +71,6 @@ function setProjectFormStatus(message = '') {
 }
 
 /**
- * Returns a persisted backend user id when it belongs to the active dashboard email.
- * @param {string} email - Active session email.
- * @returns {string | null}
- */
-function getStoredUserId(email) {
-  const userId = window.localStorage.getItem(USER_ID_STORAGE_KEY);
-  const userEmail = window.localStorage.getItem(USER_EMAIL_STORAGE_KEY);
-
-  if (!userId) {return null;}
-  if (userEmail && userEmail !== email) {return null;}
-
-  return userId;
-}
-
-/**
- * Creates a backend user for the active dashboard email and stores its id locally.
- * @param {string} email - Active session email.
- * @returns {Promise<string>}
- */
-async function createBackendUser(email) {
-  const response = await fetch(`${API_BASE_URL}/users`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ email })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to create backend user: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-
-  if (data.status !== 'ok' || !data.user_id) {
-    throw new Error('User API returned an invalid response');
-  }
-
-  window.localStorage.setItem(USER_ID_STORAGE_KEY, data.user_id);
-  window.localStorage.setItem(USER_EMAIL_STORAGE_KEY, data.email ?? email);
-
-  return data.user_id;
-}
-
-/**
- * Gets the backend user id required for project API key generation.
- * @returns {Promise<string>}
- */
-async function getOrCreateBackendUserId() {
-  if (!session?.email) {
-    throw new Error('Login session is missing an email address.');
-  }
-
-  return getStoredUserId(session.email) ?? await createBackendUser(session.email);
-}
-
-/**
  * Makes an API request to generate a new API key for the project,
  * stores the result locally, and updates the UI to show the setup snippet.
  * @param {string} projectName - The valid name of the new project.
@@ -136,7 +78,7 @@ async function getOrCreateBackendUserId() {
  */
 async function generateProject(projectName) {
   try {
-    const userId = await getOrCreateBackendUserId();
+    const userId = await getOrCreateBackendUserId(session?.email);
     const response = await fetch(`${API_BASE_URL}/key_generate`, {
       method: 'POST',
       headers: {
