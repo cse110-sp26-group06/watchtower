@@ -77,7 +77,7 @@ function renderStats() {
 
   Object.entries(deltaMap).forEach(([id, stat]) => {
     const el = document.getElementById(id);
-    if (!el){
+    if (!el) {
       return;
     } 
     el.textContent = stat.delta;
@@ -99,7 +99,7 @@ function getChartColors() {
 
 function renderChart() {
   const canvas = document.getElementById('response-time-chart');
-  if (!canvas){
+  if (!canvas) {
     return;
   } 
 
