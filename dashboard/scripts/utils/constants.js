@@ -13,7 +13,7 @@ try {
     // include a query string, so fall back to the plain path.
     ({ WATCHTOWER_API_KEY } = await import('./env.js'));
   } catch (fallbackError) {
-    API_KEY_CONFIG_ERROR = 'Could not load dashboard/scripts/utils/env.js. Check that the file exists and exports WATCHTOWER_API_KEY.';
+    API_KEY_CONFIG_ERROR = 'No WatchTower API key is available. Create dashboard/scripts/utils/env.js from env.example.js with WATCHTOWER_API_KEY, or generate/select a project from onboarding.';
     console.error('[WatchTower] Failed to load dashboard API key config:', error);
     console.error('[WatchTower] Fallback import without query string also failed:', fallbackError);
   }
@@ -25,7 +25,7 @@ if (typeof WATCHTOWER_API_KEY === 'string') {
 
 if (!WATCHTOWER_API_KEY) {
   WATCHTOWER_API_KEY = null;
-  API_KEY_CONFIG_ERROR ??= 'WATCHTOWER_API_KEY is missing or empty in dashboard/scripts/utils/env.js.';
+  API_KEY_CONFIG_ERROR ??= 'No WatchTower API key is available. Set WATCHTOWER_API_KEY in dashboard/scripts/utils/env.js, or generate/select a project from onboarding.';
 }
 
 export const API_BASE   = 'https://watchtower-backend.group6.workers.dev/api/errors';
