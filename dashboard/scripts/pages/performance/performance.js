@@ -70,12 +70,16 @@ function renderStats() {
 
   Object.entries(map).forEach(([id, stat]) => {
     const el = document.getElementById(id);
-    if (el) el.textContent = stat.value;
+    if (el) {
+      el.textContent = stat.value;
+    }
   });
 
   Object.entries(deltaMap).forEach(([id, stat]) => {
     const el = document.getElementById(id);
-    if (!el) return;
+    if (!el){
+      return;
+    } 
     el.textContent = stat.delta;
     el.className = `perf-stat-card__delta perf-stat-card__delta--${stat.type}`;
   });
@@ -95,7 +99,9 @@ function getChartColors() {
 
 function renderChart() {
   const canvas = document.getElementById('response-time-chart');
-  if (!canvas) return;
+  if (!canvas){
+    return;
+  } 
 
   // Dynamically load Chart.js from CDN
   if (!window.Chart) {
@@ -173,8 +179,9 @@ function buildChart(canvas) {
 
 function renderEndpoints() {
   const container = document.getElementById('slow-endpoints');
-  if (!container) return;
-
+  if (!container) {
+    return;
+  }
   const maxMs = Math.max(...MOCK_SLOW_ENDPOINTS.map(e => e.ms));
 
   container.innerHTML = MOCK_SLOW_ENDPOINTS.map(endpoint => {
