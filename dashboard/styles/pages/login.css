@@ -1,9 +1,7 @@
 /* ── Login ───────────────────────────────────────────────────── */
 .login-page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.92), rgba(249, 250, 251, 0.98)),
-    linear-gradient(180deg, #ffffff 0%, #f9fafb 100%);
+  background:var(--color-bg); 
 }
 
 .login-shell {
