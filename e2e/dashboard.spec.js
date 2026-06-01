@@ -36,10 +36,8 @@ async function signIn(page, email = 'user@example.com', password = 'password123'
 async function submitLogin(page, email = 'user@example.com', password = 'password123') {
   await page.getByLabel('Email Address').fill(email);
   await page.getByLabel('Password').fill(password);
-  await Promise.all([
-    page.waitForURL(/\/(projects|onboarding)\.html$/),
-    page.getByRole('button', { name: 'Sign In' }).click(),
-  ]);
+  await page.getByRole('button', { name: 'Sign In' }).click();
+  await expect(page).toHaveURL(/\/(projects|onboarding)\.html$/);
 }
 
 async function seedProjects(page) {
