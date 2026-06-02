@@ -1,4 +1,3 @@
-/* global console */
 /**
  * routes/performance.js
  * Handles read API requests for performance data.
