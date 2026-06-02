@@ -3,7 +3,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe.configure({ mode: 'serial' });
 
-const API_BASE = 'https://watchtower-backend.group6.workers.dev/api/errors';
+const API_ROOT = 'https://watchtower-backend.group6.workers.dev/api';
+const API_BASE = `${API_ROOT}/errors`;
 
 const unresolvedError = {
   id: 1,
@@ -50,6 +51,34 @@ async function seedProjects(page) {
         createdAt: '2026-05-19T00:00:00.000Z',
       },
     ]));
+  });
+}
+
+async function mockUserProjectsApi(page, projects = [], email = 'user@example.com') {
+  await page.route(`${API_ROOT}/users`, async (route) => {
+    const payload = route.request().postDataJSON();
+
+    expect(payload).toEqual({ email });
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'ok',
+        user_id: 'user_123',
+        email,
+      }),
+    });
+  });
+
+  await page.route(`${API_ROOT}/projects`, async (route) => {
+    expect(route.request().headers()['x-user-id']).toBe('user_123');
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ status: 'ok', projects }),
+    });
   });
 }
 
@@ -131,6 +160,12 @@ test('successful login leads to the projects view', async ({ page }) => {
   expect(response?.ok()).toBeTruthy();
   await expect(page.locator('#login-form')).toHaveAttribute('data-ready', 'true', { timeout: 30000 });
   await seedProjects(page);
+  await mockUserProjectsApi(page, [{
+    id: 'proj_123',
+    name: 'Project 1',
+    api_key: 'wt_test_api_key_123',
+    created_at: '2026-05-19T00:00:00.000Z',
+  }], 'afsdasd@gmail.com');
   await submitLogin(page, 'afsdasd@gmail.com');
 
   await expect(page).toHaveURL(/\/projects\.html$/);
@@ -139,13 +174,22 @@ test('successful login leads to the projects view', async ({ page }) => {
 });
 
 test('onboarding generates an API key and returns the user to the projects list', async ({ page }) => {
+  const backendProjects = [];
+  await mockUserProjectsApi(page, backendProjects);
   await signIn(page);
   await expect(page).toHaveURL(/\/onboarding\.html$/);
 
-  await page.route('https://watchtower-backend.group6.workers.dev/api/key_generate', async (route) => {
+  await page.route(`${API_ROOT}/key_generate`, async (route) => {
     const payload = route.request().postDataJSON();
 
-    expect(payload).toEqual({ name: 'Project 1' });
+    expect(payload).toEqual({ name: 'Project 1', user_id: 'user_123' });
+
+    backendProjects.push({
+      id: 'proj_123',
+      name: 'Project 1',
+      api_key: 'wt_test_api_key_123',
+      created_at: new Date().toISOString(),
+    });
 
     await route.fulfill({
       status: 200,
@@ -176,6 +220,8 @@ test('onboarding generates an API key and returns the user to the projects list'
       createdAt: storedProjects[0].createdAt,
     },
   ]);
+  await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('watchtower:user_id'))).toBe('user_123');
+  await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('watchtower:api_key'))).toBe('wt_test_api_key_123');
 
   await page.getByRole('button', { name: 'Continue to Dashboard' }).click();
 
@@ -189,6 +235,12 @@ test('projects overflow menu supports rename and delete actions', async ({ page 
     window.localStorage.setItem('watchtower:session', JSON.stringify({ email: 'user@example.com' }));
   });
   await seedProjects(page);
+  await mockUserProjectsApi(page, [{
+    id: 'proj_123',
+    name: 'Project 1',
+    api_key: 'wt_test_api_key_123',
+    created_at: '2026-05-19T00:00:00.000Z',
+  }]);
 
   const response = await page.goto('/projects.html');
 
@@ -219,6 +271,42 @@ test('projects overflow menu supports rename and delete actions', async ({ page 
 
   await expect(page).toHaveURL(/\/onboarding\.html$/);
   await expect(page.getByLabel('Project Name')).toHaveValue('Project 1');
+});
+
+test('project settings shows the selected project API key', async ({ page }) => {
+  await page.goto('/index.html');
+  await page.evaluate(() => {
+    window.localStorage.setItem('watchtower:session', JSON.stringify({ email: 'user@example.com' }));
+    window.localStorage.setItem('watchtower:projects', JSON.stringify([
+      {
+        id: 'proj_123',
+        name: 'Project 1',
+        apiKey: 'wt_project_one_key',
+        createdAt: '2026-05-19T00:00:00.000Z',
+      },
+      {
+        id: 'proj_456',
+        name: 'Project 2',
+        apiKey: 'wt_project_two_key',
+        createdAt: '2026-05-20T00:00:00.000Z',
+      },
+    ]));
+    window.sessionStorage.setItem('watchtower:current-project', JSON.stringify({
+      id: 'proj_456',
+      name: 'Project 2',
+      apiKey: 'wt_project_two_key',
+      createdAt: '2026-05-20T00:00:00.000Z',
+    }));
+  });
+
+  const response = await page.goto('/settings.html');
+
+  expect(response?.ok()).toBeTruthy();
+  await expect(page.getByRole('heading', { name: 'Project Settings' })).toBeVisible();
+  await expect(page.getByText('Project 2')).toBeVisible();
+  await expect(page.getByText('npm install @watchtower/sdk')).toBeVisible();
+  await expect(page.getByLabel('Your API Key')).toHaveValue('wt_project_two_key');
+  await expect(page.getByLabel('Your API Key')).not.toHaveValue('wt_project_one_key');
 });
 
 test('resolved errors disappear from the unresolved list after navigating back', async ({ page }) => {

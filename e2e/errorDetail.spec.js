@@ -38,6 +38,24 @@ function seedSession() {
     'watchtower:session',
     JSON.stringify({ email: 'test@ucsd.edu' })
   );
+  window.localStorage.setItem(
+    'watchtower:projects',
+    JSON.stringify([{
+      id: 'project_1',
+      name: 'Project 1',
+      apiKey: 'wt_test_api_key_123',
+      createdAt: '2026-05-20T00:00:00.000Z',
+    }])
+  );
+  window.sessionStorage.setItem(
+    'watchtower:current-project',
+    JSON.stringify({
+      id: 'project_1',
+      name: 'Project 1',
+      apiKey: 'wt_test_api_key_123',
+      createdAt: '2026-05-20T00:00:00.000Z',
+    })
+  );
 }
 
 async function mockErrorApi(page, errors = [mockError], { onPatch } = {}) {
@@ -111,6 +129,7 @@ test.describe('Error Detail page', () => {
     });
 
     test('marks the error as resolved through the API', async ({ page }) => {
+      let detailUrl = '';
       let patchUrl = '';
       let patchBody = null;
 
@@ -121,13 +140,22 @@ test.describe('Error Detail page', () => {
           patchBody = request.postDataJSON();
         },
       });
+      page.on('request', (request) => {
+        const url = request.url();
+        if (request.method() === 'GET' && url.includes(`/api/errors/${ERROR_ID}`)) {
+          detailUrl = url;
+        }
+      });
 
       await page.goto(`/error-detail.html?id=${ERROR_ID}`);
       await page.locator('#resolve-btn').click();
 
       await expect(page.locator('#resolve-btn')).toHaveText('Resolved');
       await expect(page.locator('#resolve-btn')).toBeDisabled();
+      expect(detailUrl).toContain(`/api/errors/${ERROR_ID}`);
+      expect(new URL(detailUrl).searchParams.get('api_key')).toBe('wt_test_api_key_123');
       expect(patchUrl).toContain(`/api/errors/${ERROR_ID}`);
+      expect(new URL(patchUrl).searchParams.get('api_key')).toBe('wt_test_api_key_123');
       expect(patchBody).toEqual({ status: 'resolved' });
     });
 
