@@ -1,6 +1,6 @@
 import BatchingEngine from "./batching/BatchingEngine";
 import { send } from  "./transport/send.js";
-import { handleError } from "./handler/parseError.js";
+import { parseError } from "./handler/parseError.js";
 import { parseLog } from "./handler/parseLog.js";
 import { patchConsole } from "./wrapper/console.js";
 
@@ -102,13 +102,13 @@ export function initWatchtower(config = {}) {
 
   // --- Global error handler ---
   window.addEventListener("error", (event) => {
-    const parsed = handleError(event.error || event); // FIXED
+    const parsed = parseError(event.error || event); // FIXED
     engine.enqueue("error", parsed);
   });
 
   // --- Global unhandled promise rejection ---
   window.addEventListener("unhandledrejection", (event) => {
-    const parsed = handleError(event.reason);
+    const parsed = parseError(event.reason);
     engine.enqueue("error", parsed);
   });
 
@@ -126,7 +126,7 @@ export function captureError(error) {
     console.warn("WatchTower not initialized. Call initWatchtower() first.");
     return;
   }
-  const parsed = handleError(error);
+  const parsed = parseError(error);
   engine.enqueue("error", parsed);
 }
 
