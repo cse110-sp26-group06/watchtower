@@ -121,3 +121,61 @@ export async function listProjectsByOwner(env, owner_id) {
 
   return result.results;
 }
+
+/**
+ * Stores a performance event in D1
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {object} record - fully prepared record from ingest.js
+ */
+export async function storePerformance(env, record) {
+  await env.watchtower_db.prepare(`
+    INSERT INTO performance (id, api_key, service, environment, name, entry_type, time, duration, payload_json, client_timestamp, server_timestamp)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    record.id,
+    record.api_key,
+    record.service,
+    record.environment,
+    record.name,
+    record.entry_type,
+    record.time,
+    record.duration,
+    record.payload_json,
+    record.client_timestamp,
+    record.server_timestamp
+  ).run();
+}
+
+/**
+ * Reads performance events from D1 for a given project
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} api_key - project api key
+ * @param {object} params - optional filters
+ * @param {string} [params.entry_type] - filter by resource/paint/navigation
+ * @param {string} [params.since] - ISO timestamp
+ * @param {number} [params.page=1]
+ * @param {number} [params.limit=20]
+ * @returns {object[]}
+ */
+export async function getPerformance(env, api_key, params = {}) {
+  const { entry_type, since, page = 1, limit = 20 } = params;
+  const offset = (page - 1) * limit;
+
+  let query = 'SELECT * FROM performance WHERE api_key = ?';
+  const bindings = [api_key];
+
+  if (entry_type && entry_type !== 'all') {
+    query += ' AND entry_type = ?';
+    bindings.push(entry_type);
+  }
+  if (since) {
+    query += ' AND server_timestamp >= ?';
+    bindings.push(since);
+  }
+
+  query += ' ORDER BY server_timestamp DESC LIMIT ? OFFSET ?';
+  bindings.push(limit, offset);
+
+  const result = await env.watchtower_db.prepare(query).bind(...bindings).run();
+  return result.results;
+}
