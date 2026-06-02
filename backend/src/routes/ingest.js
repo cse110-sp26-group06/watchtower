@@ -1,13 +1,12 @@
 import { jsonResponse } from '../index.js'; // imported function which is convenient for consistent response return
-import { storeError } from '../storage/d1.js'; // imported function from d1, link to d1.js
 import { validateApiKey } from '../middleware/auth.js';
-
+import { storeError, storePerformance } from '../storage/d1.js'; // import functions from storage and link with it
 const VALID_ENDPOINTS = ['/ingest/error', '/ingest/log', '/ingest/performance'];
 const REQUIRED_PAYLOAD_FIELDS = {
   // added all properties in event except for severity, will add it after sdk implements it
   '/ingest/error': ['message', 'type', 'stack_trace', 'file', 'lineno', 'colno'],
   '/ingest/log': ['message', 'level', 'timestamp'],
-  '/ingest/performance': ['name', 'start_timestamp', 'end_timestamp', 'duration_ms'],
+  '/ingest/performance': ['name', 'entryType', 'time', 'duration'],
 };
 
 // Hardcoded keys for now — BE-4 replaces with D1 lookup
@@ -88,6 +87,21 @@ export async function handleIngest(request, env, path) {
         };
         // we send this bounded data to
         await storeError(env, record);
+      } else if (path === '/ingest/performance') {
+        const record = {
+          id: crypto.randomUUID(),
+          api_key: data.api_key,
+          service: data.service,
+          environment: data.environment,
+          name: event.payload.name,
+          entry_type: event.payload.entryType,
+          time: event.payload.time,
+          duration: event.payload.duration,
+          payload_json: JSON.stringify(event.payload),
+          client_timestamp: event.timestamp,
+          server_timestamp,
+        };
+        await storePerformance(env, record);
       }
       // storeLog and storePerformance added once Ethan adds tables
     } catch (err) {
