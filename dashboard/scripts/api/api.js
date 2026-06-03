@@ -200,4 +200,8 @@ async function apiGet(endpoint = '', params = {}) {
   return apiFetch(buildApiUrl(endpoint, params), { method: "GET" });
 }
 
+export async function apiGetPerformance() {
+  return apiGet('/performance');
+}
+
 export { apiGet };
