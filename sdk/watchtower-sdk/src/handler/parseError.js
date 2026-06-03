@@ -10,10 +10,10 @@ export function parseError(input) {
   if (input instanceof ErrorEvent) {
     message = input.message;
     name = input.error?.name ?? "Error";
-    stack = input.error?.stack;
-    file = input.filename;
-    lineno = input.lineno;
-    colno = input.colno;
+    stack = input.error?.stack ?? "";
+    file = input.filename ?? "";
+    lineno = input.lineno ?? "";
+    colno = input.colno ?? "";
   }
 
   // 2. Browser PromiseRejectionEvent
@@ -22,7 +22,7 @@ export function parseError(input) {
     if (reason instanceof Error) {
       message = reason.message;
       name = reason.name;
-      stack = reason.stack;
+      stack = reason.stack ?? "";
     } else {
       message = String(reason);
     }
@@ -32,7 +32,7 @@ export function parseError(input) {
   else if (input instanceof Error) {
     message = input.message;
     name = input.name;
-    stack = input.stack;
+    stack = input.stack ?? "";
   }
 
   // 4. String or anything else
