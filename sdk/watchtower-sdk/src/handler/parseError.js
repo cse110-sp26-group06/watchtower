@@ -1,7 +1,7 @@
 export function parseError(input) {
   let message = "Unknown error";
   let name = "Error";
-  let stack = undefined;
+  let stack = "Unknown";
   let file = undefined;
   let lineno = undefined;
   let colno = undefined;
