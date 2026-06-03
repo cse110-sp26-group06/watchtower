@@ -1,10 +1,10 @@
 export function parseError(input) {
   let message = "Unknown error";
   let name = "Error";
-  let stack = "Unknown";
-  let file = undefined;
-  let lineno = undefined;
-  let colno = undefined;
+  let stack = "";
+  let file = "";
+  let lineno = "";
+  let colno = "";
 
   // 1. Browser ErrorEvent
   if (input instanceof ErrorEvent) {
