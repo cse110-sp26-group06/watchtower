@@ -73,14 +73,13 @@
   
   .projects-list {
     min-height: 170px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
   }
   
   .project-item {
-    width: min(408px, 100%);
+    width: 100%;
     min-height: 160px;
     display: flex;
     flex-direction: column;
@@ -238,6 +237,10 @@
   
     #new-project-btn {
       width: 100%;
+    }
+
+    .projects-list {
+      grid-template-columns: 1fr;
     }
   
     .project-item {

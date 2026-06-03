@@ -7,6 +7,7 @@
 // Content-Type as a custom header. Auth is injected as api_key query param.
 
 import { API_BASE, API_KEY, API_KEY_ERROR } from '../utils/constants.js';
+import { getCurrentProject } from '../utils/projects.js';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -17,14 +18,17 @@ import { API_BASE, API_KEY, API_KEY_ERROR } from '../utils/constants.js';
  * @returns {string | null}
  */
 function getApiKey() {
-  if (API_KEY) { return API_KEY; }
-
   try {
+    const currentProject = getCurrentProject();
+    if (currentProject?.apiKey) {return currentProject.apiKey;}
+
+    if (API_KEY) { return API_KEY; }
+
     const projects = JSON.parse(window.localStorage.getItem('watchtower:projects') ?? '[]');
     const project = Array.isArray(projects) ? projects.find(item => item?.apiKey) : null;
-    return project?.apiKey ?? null;
+    return project?.apiKey ?? window.localStorage.getItem('watchtower:api_key') ?? null;
   } catch {
-    return null;
+    return window.localStorage.getItem('watchtower:api_key') ?? null;
   }
 }
 

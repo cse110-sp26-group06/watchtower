@@ -13,6 +13,10 @@ import {
   normalizeProjectName,
 } from '../../utils/projects.js';
 import { showToast } from '../../utils/toast.js';
+import { getOrCreateBackendUserId } from '../../api/projects.js';
+
+const API_BASE_URL = 'https://watchtower-backend.group6.workers.dev/api';
+const API_KEY_STORAGE_KEY = 'watchtower:api_key';
 
 const session = requireAuth();
 
@@ -74,12 +78,13 @@ function setProjectFormStatus(message = '') {
  */
 async function generateProject(projectName) {
   try {
-    const response = await fetch('https://watchtower-backend.group6.workers.dev/api/key_generate', {
+    const userId = await getOrCreateBackendUserId(session?.email);
+    const response = await fetch(`${API_BASE_URL}/key_generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ name: projectName })
+      body: JSON.stringify({ name: projectName, user_id: userId })
     });
 
     if (!response.ok) {
@@ -91,6 +96,8 @@ async function generateProject(projectName) {
     if (data.status !== 'ok') {
       throw new Error('API returned non-ok status');
     }
+
+    window.localStorage.setItem(API_KEY_STORAGE_KEY, data.api_key);
 
     addStoredProject({
       id: data.project_id,

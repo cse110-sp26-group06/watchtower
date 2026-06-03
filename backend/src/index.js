@@ -2,6 +2,7 @@ import { handleIngest } from "./routes/ingest.js";
 import { generateApiKey, createUser, getUserById } from './middleware/auth.js';
 import { handleGetErrors, handleGetErrorById, handleResolveError } from './routes/errors.js';
 import { handleListProjects } from './routes/projects.js';
+import { handleGetPerformance } from './routes/performance.js';
 
 export default {
   async fetch(request, env) {
@@ -102,7 +103,9 @@ export default {
     if (path === '/api/errors' && request.method === 'GET') {
       return handleGetErrors(request, env);
     }
-
+    if (path === '/api/performance' && request.method === 'GET') {
+      return handleGetPerformance(request, env);
+    }
     return jsonResponse({ status: "error", message: "Not found" }, 404);
   },
 };

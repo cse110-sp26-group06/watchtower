@@ -14,6 +14,7 @@ import {
   setCurrentProject,
 } from '../../utils/projects.js';
 import { showToast } from '../../utils/toast.js';
+import { syncBackendProjectsForEmail } from '../../api/projects.js';
 
 const session = requireAuth();
 
@@ -133,7 +134,7 @@ function toggleProjectMenu(button) {
  * Redirects to onboarding if no projects exist.
  * @returns {void}
  */
-function renderProjects() { 
+function renderProjects() {
   const projects = getStoredProjects();
 
   if (projects.length === 0) {
@@ -236,6 +237,30 @@ function renderProjects() {
   });
 }
 
+/**
+ * Refreshes projects from the backend when possible, then renders the local snapshot.
+ * @returns {Promise<void>}
+ */
+async function loadProjects() {
+  const hasCachedProjects = getStoredProjects().length > 0;
+  if (hasCachedProjects) {
+    renderProjects();
+  }
+
+  try {
+    if (session?.email) {
+      await syncBackendProjectsForEmail(session.email);
+    }
+  } catch (error) {
+    console.error('[WatchTower] project sync failed:', error);
+    if (getStoredProjects().length === 0) {
+      showToast('Could not load projects: ' + error.message, true);
+    }
+  }
+
+  renderProjects();
+}
+
 newProjectBtn.addEventListener('click', () => {
   window.location.assign('onboarding.html');
 });
@@ -259,4 +284,4 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-window.addEventListener('DOMContentLoaded', renderProjects);
+window.addEventListener('DOMContentLoaded', loadProjects);

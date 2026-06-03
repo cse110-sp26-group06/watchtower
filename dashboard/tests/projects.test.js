@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   addStoredProject,
   deleteStoredProject,
+  getCurrentProject,
   getNextProjectName,
   getStoredProjects,
   normalizeProjectName,
@@ -93,6 +94,41 @@ test('renameStoredProject updates the active project in session storage', () => 
   assert.equal(
     JSON.parse(window.sessionStorage.getItem('watchtower:current-project')).name,
     'Renamed Project'
+  );
+});
+
+test('getCurrentProject returns the selected stored project', () => {
+  const firstProject = addStoredProject({
+    id: 'p1',
+    name: 'Project Alpha',
+    apiKey: 'wt_test_123',
+    createdAt: '2026-05-19T00:00:00.000Z',
+  });
+  const secondProject = addStoredProject({
+    id: 'p2',
+    name: 'Project Beta',
+    apiKey: 'wt_test_456',
+    createdAt: '2026-05-19T00:00:00.000Z',
+  });
+
+  setCurrentProject(secondProject);
+
+  assert.deepEqual(getCurrentProject(), secondProject);
+  assert.notDeepEqual(getCurrentProject(), firstProject);
+});
+
+test('getCurrentProject falls back to a single stored project', () => {
+  const project = addStoredProject({
+    id: 'p1',
+    name: 'Project Alpha',
+    apiKey: 'wt_test_123',
+    createdAt: '2026-05-19T00:00:00.000Z',
+  });
+
+  assert.deepEqual(getCurrentProject(), project);
+  assert.deepEqual(
+    JSON.parse(window.sessionStorage.getItem('watchtower:current-project')),
+    project
   );
 });
 
