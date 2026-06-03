@@ -12,6 +12,11 @@
   <link rel="stylesheet" href="styles/layout.css" />
   <link rel="stylesheet" href="styles/pages/error-list.css" />
   <script src="scripts/pages/errorList/errorList.js" type="module"></script>
+  <script>
+    if (localStorage.getItem('wt-theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
 </head>
 
 <body>
@@ -70,6 +75,7 @@
 
     <div id="toast"></div>
   </div>
+  <script src="scripts/utils/themeToggle.js"></script>
 </body>
 
 </html>

@@ -1,7 +1,9 @@
+import { isValidEvent } from "../types/isValidEvent";
+
 /**
  * BatchingEngine
  *
- * Maintains separate queues for logs, errors, and spans.
+ * Maintains separate queues for logs, errors, and performance.
  * Flushes queues based on time or count thresholds.
  * Sends batches to the backend via a provided send function.
  *
@@ -18,7 +20,7 @@ class BatchingEngine {
     thresholds = {
       error: { maxTimeMs: 1000, maxCount: 10 },
       log:   { maxTimeMs: 3000, maxCount: 50 },
-      span:  { maxTimeMs: 2000, maxCount: 25 }
+      performance:  { maxTimeMs: 2000, maxCount: 25 }
     },
     sendFn, api_key, service, environment
   }) {
@@ -41,13 +43,20 @@ class BatchingEngine {
    * the count threshold is reached.
    *
    * @method
-   * @param {("log"|"error"|"span")} type - The event type to enqueue.
+   * @param {("log"|"error"|"performance")} type - The event type to enqueue.
    * @param {Object} event - The event payload to store in the queue.
    */
   enqueue(type, event) {
     if (!this.running) {
       return;
     }
+    if (!isValidEvent(event)) {
+      return;
+    }
+    if (type !== event.event_type) {
+      return;
+    }
+
     const queue = this.queues[type];
     queue.push(event);
 
@@ -58,7 +67,9 @@ class BatchingEngine {
 
     // Flush immediately if count threshold reached
     if (queue.length >= this.thresholds[type].maxCount) {
-      this.flush(type);
+      this.flush(type).catch(() => {
+        // Silently handle flush errors to prevent breaking enqueue
+      });
     }
   }
 
@@ -69,7 +80,7 @@ class BatchingEngine {
    * is reached. If a timer is already active for the event type, it does nothing.
    *
    * @method
-   * @param {("log"|"error"|"span")} type - The event type whose timer should be started.
+   * @param {("log"|"error"|"performance")} type - The event type whose timer should be started.
    */
   startTimer(type) {
     // If timer already exists, do nothing
@@ -80,7 +91,9 @@ class BatchingEngine {
     const { maxTimeMs } = this.thresholds[type];
 
     this.timers[type] = setTimeout(() => {
-      this.flush(type);
+      this.flush(type).catch(() => {
+        // Silently handle flush errors to prevent breaking enqueue
+      });
       this.timers[type] = null;
     }, maxTimeMs);
   }
@@ -92,7 +105,7 @@ class BatchingEngine {
    * containing metadata (API key, service, environment) and the events.
    *
    * @method
-   * @param {("log"|"error"|"span")} type - The event type whose batch should be created.
+   * @param {("log"|"error"|"performance")} type - The event type whose batch should be created.
    * @returns {Object|null} A batch envelope or null if no events exist.
    */
   createBatch(type) {
@@ -116,7 +129,7 @@ class BatchingEngine {
    * queue, sends the batch to the backend using the sendFn, and resets the queue.
    *
    * @method
-   * @param {("log"|"error"|"span")} type - The event type whose queue should be flushed.
+   * @param {("log"|"error"|"performance")} type - The event type whose queue should be flushed.
    */
   async flush(type) {
     // Clear timer if active
@@ -131,8 +144,10 @@ class BatchingEngine {
     }
       
 
-    const res = await this.sendFn(type, batch);
-    console.log(res.status);
+    //const res = await this.sendFn(type, batch);
+    //console.log(res.status);
+    await this.sendFn(type, batch);
+
     this.queues[type] = [];
   }
 
@@ -144,10 +159,10 @@ class BatchingEngine {
    *
    * @method
    */
-  flushAll() {
-    this.flush("error");
-    this.flush("log");
-    this.flush("span");
+  async flushAll() {
+    await this.flush("error");
+    await this.flush("log");
+    await this.flush("performance");
   }
 
   /**
@@ -162,13 +177,13 @@ class BatchingEngine {
     this.queues = {
       error: [],
       log: [],
-      span: []
+      performance: []
     };
 
     this.timers = {
       error: null,
       log: null,
-      span: null
+      performance: null
     };
 
     this.running = true;
@@ -182,11 +197,11 @@ class BatchingEngine {
    *
    * @method
    */
-  stop() {
+  async stop() {
     this.running = false;
 
     // Clear timers
-    ["error", "log", "span"].forEach(type => {
+    ["error", "log", "performance"].forEach(type => {
       if (this.timers[type]) {
         clearTimeout(this.timers[type]);
         this.timers[type] = null;
@@ -194,7 +209,7 @@ class BatchingEngine {
     });
 
     // Flush everything on stop
-    this.flushAll();
+    await this.flushAll();
   }
 }
 

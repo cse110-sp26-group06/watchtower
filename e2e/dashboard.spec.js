@@ -1,16 +1,136 @@
 /* global window */
 import { test, expect } from '@playwright/test';
 
+test.describe.configure({ mode: 'serial' });
+
+const API_ROOT = 'https://watchtower-backend.group6.workers.dev/api';
+const API_BASE = `${API_ROOT}/errors`;
+
+const unresolvedError = {
+  id: 1,
+  service: 'checkout-web',
+  environment: 'production',
+  error_type: 'TypeError',
+  severity: 'critical',
+  status: 'unresolved',
+  message: "TypeError: Cannot read property 'user' of undefined",
+  file: 'src/pages/Checkout.jsx',
+  lineno: 128,
+  colno: 17,
+  stack_trace: "TypeError: Cannot read property 'user' of undefined\n    at renderCheckout (src/pages/Checkout.jsx:128:17)",
+  client_timestamp: '2026-05-19T00:00:00.000Z',
+  server_timestamp: '2026-05-19T00:01:00.000Z',
+  payload_json: JSON.stringify({
+    occurrences: 3,
+    affectedUsers: 1,
+  }),
+};
+
 async function signIn(page, email = 'user@example.com', password = 'password123') {
   const response = await page.goto('/index.html');
 
   expect(response?.ok()).toBeTruthy();
+  await expect(page.locator('#login-form')).toHaveAttribute('data-ready', 'true', { timeout: 30000 });
+  await submitLogin(page, email, password);
+}
+
+async function submitLogin(page, email = 'user@example.com', password = 'password123') {
   await page.getByLabel('Email Address').fill(email);
   await page.getByLabel('Password').fill(password);
-  await Promise.all([
-    page.waitForURL(/\/(projects|onboarding)\.html$/),
-    page.getByRole('button', { name: 'Sign In' }).click(),
-  ]);
+  await page.getByRole('button', { name: 'Sign In' }).click();
+  await expect(page).toHaveURL(/\/(projects|onboarding)\.html$/);
+}
+
+async function seedProjects(page) {
+  await page.evaluate(() => {
+    window.localStorage.setItem('watchtower:projects', JSON.stringify([
+      {
+        id: 'proj_123',
+        name: 'Project 1',
+        apiKey: 'wt_test_api_key_123',
+        createdAt: '2026-05-19T00:00:00.000Z',
+      },
+    ]));
+  });
+}
+
+async function mockUserProjectsApi(page, projects = [], email = 'user@example.com') {
+  await page.route(`${API_ROOT}/users`, async (route) => {
+    const payload = route.request().postDataJSON();
+
+    expect(payload).toEqual({ email });
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'ok',
+        user_id: 'user_123',
+        email,
+      }),
+    });
+  });
+
+  await page.route(`${API_ROOT}/projects`, async (route) => {
+    expect(route.request().headers()['x-user-id']).toBe('user_123');
+
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ status: 'ok', projects }),
+    });
+  });
+}
+
+async function mockResolvedErrorsApi(page) {
+  const errors = [structuredClone(unresolvedError)];
+
+  await page.route(`${API_BASE}**`, async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const id = url.pathname.split('/').pop();
+
+    if (request.method() === 'GET' && id === 'errors') {
+      const status = url.searchParams.get('status');
+      const visibleErrors = status ? errors.filter(error => error.status === status) : errors;
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'ok', errors: visibleErrors }),
+      });
+      return;
+    }
+
+    const error = errors.find(item => String(item.id) === String(id));
+
+    if (request.method() === 'GET') {
+      await route.fulfill({
+        status: error ? 200 : 404,
+        contentType: 'application/json',
+        body: JSON.stringify(error
+          ? { status: 'ok', error }
+          : { status: 'error', message: 'Error not found' }),
+      });
+      return;
+    }
+
+    if (request.method() === 'PATCH' && error) {
+      Object.assign(error, request.postDataJSON());
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'ok', message: 'Error marked as resolved' }),
+      });
+      return;
+    }
+
+    await route.fulfill({
+      status: 405,
+      contentType: 'application/json',
+      body: JSON.stringify({ status: 'error', message: 'Method not allowed' }),
+    });
+  });
 }
 
 test('dashboard index responds with the login landing page', async ({ page }) => {
@@ -24,6 +144,7 @@ test('dashboard index responds with the login landing page', async ({ page }) =>
 test('login validates email and password before navigation', async ({ page }) => {
   await page.goto('/index.html');
 
+  await expect(page.locator('#login-form')).toHaveAttribute('data-ready', 'true', { timeout: 30000 });
   await page.getByLabel('Email Address').fill('invalid-email');
   await page.getByLabel('Password').fill('short');
   await page.getByRole('button', { name: 'Sign In' }).click();
@@ -34,20 +155,18 @@ test('login validates email and password before navigation', async ({ page }) =>
 });
 
 test('successful login leads to the projects view', async ({ page }) => {
-  await page.addInitScript(() => {
-    if (!window.localStorage.getItem('watchtower:projects')) {
-      window.localStorage.setItem('watchtower:projects', JSON.stringify([
-        {
-          id: 'proj_123',
-          name: 'Project 1',
-          apiKey: 'wt_test_api_key_123',
-          createdAt: '2026-05-19T00:00:00.000Z',
-        },
-      ]));
-    }
-  });
+  const response = await page.goto('/index.html');
 
-  await signIn(page, 'afsdasd@gmail.com');
+  expect(response?.ok()).toBeTruthy();
+  await expect(page.locator('#login-form')).toHaveAttribute('data-ready', 'true', { timeout: 30000 });
+  await seedProjects(page);
+  await mockUserProjectsApi(page, [{
+    id: 'proj_123',
+    name: 'Project 1',
+    api_key: 'wt_test_api_key_123',
+    created_at: '2026-05-19T00:00:00.000Z',
+  }], 'afsdasd@gmail.com');
+  await submitLogin(page, 'afsdasd@gmail.com');
 
   await expect(page).toHaveURL(/\/projects\.html$/);
   await expect(page.getByRole('heading', { name: 'Your Projects' })).toBeVisible();
@@ -55,13 +174,22 @@ test('successful login leads to the projects view', async ({ page }) => {
 });
 
 test('onboarding generates an API key and returns the user to the projects list', async ({ page }) => {
+  const backendProjects = [];
+  await mockUserProjectsApi(page, backendProjects);
   await signIn(page);
   await expect(page).toHaveURL(/\/onboarding\.html$/);
 
-  await page.route('https://watchtower-backend.group6.workers.dev/api/key_generate', async (route) => {
+  await page.route(`${API_ROOT}/key_generate`, async (route) => {
     const payload = route.request().postDataJSON();
 
-    expect(payload).toEqual({ name: 'Project 1' });
+    expect(payload).toEqual({ name: 'Project 1', user_id: 'user_123' });
+
+    backendProjects.push({
+      id: 'proj_123',
+      name: 'Project 1',
+      api_key: 'wt_test_api_key_123',
+      created_at: new Date().toISOString(),
+    });
 
     await route.fulfill({
       status: 200,
@@ -92,6 +220,8 @@ test('onboarding generates an API key and returns the user to the projects list'
       createdAt: storedProjects[0].createdAt,
     },
   ]);
+  await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('watchtower:user_id'))).toBe('user_123');
+  await expect.poll(async () => page.evaluate(() => window.localStorage.getItem('watchtower:api_key'))).toBe('wt_test_api_key_123');
 
   await page.getByRole('button', { name: 'Continue to Dashboard' }).click();
 
@@ -100,21 +230,17 @@ test('onboarding generates an API key and returns the user to the projects list'
 });
 
 test('projects overflow menu supports rename and delete actions', async ({ page }) => {
-  await page.addInitScript(() => {
-    if (!window.localStorage.getItem('watchtower:session')) {
-      window.localStorage.setItem('watchtower:session', JSON.stringify({ email: 'user@example.com' }));
-    }
-    if (!window.localStorage.getItem('watchtower:projects')) {
-      window.localStorage.setItem('watchtower:projects', JSON.stringify([
-        {
-          id: 'proj_123',
-          name: 'Project 1',
-          apiKey: 'wt_test_api_key_123',
-          createdAt: '2026-05-19T00:00:00.000Z',
-        },
-      ]));
-    }
+  await page.goto('/index.html');
+  await page.evaluate(() => {
+    window.localStorage.setItem('watchtower:session', JSON.stringify({ email: 'user@example.com' }));
   });
+  await seedProjects(page);
+  await mockUserProjectsApi(page, [{
+    id: 'proj_123',
+    name: 'Project 1',
+    api_key: 'wt_test_api_key_123',
+    created_at: '2026-05-19T00:00:00.000Z',
+  }]);
 
   const response = await page.goto('/projects.html');
 
@@ -147,7 +273,45 @@ test('projects overflow menu supports rename and delete actions', async ({ page 
   await expect(page.getByLabel('Project Name')).toHaveValue('Project 1');
 });
 
-/**test('resolved errors disappear from the unresolved list after navigating back', async ({ page }) => {
+test('project settings shows the selected project API key', async ({ page }) => {
+  await page.goto('/index.html');
+  await page.evaluate(() => {
+    window.localStorage.setItem('watchtower:session', JSON.stringify({ email: 'user@example.com' }));
+    window.localStorage.setItem('watchtower:projects', JSON.stringify([
+      {
+        id: 'proj_123',
+        name: 'Project 1',
+        apiKey: 'wt_project_one_key',
+        createdAt: '2026-05-19T00:00:00.000Z',
+      },
+      {
+        id: 'proj_456',
+        name: 'Project 2',
+        apiKey: 'wt_project_two_key',
+        createdAt: '2026-05-20T00:00:00.000Z',
+      },
+    ]));
+    window.sessionStorage.setItem('watchtower:current-project', JSON.stringify({
+      id: 'proj_456',
+      name: 'Project 2',
+      apiKey: 'wt_project_two_key',
+      createdAt: '2026-05-20T00:00:00.000Z',
+    }));
+  });
+
+  const response = await page.goto('/settings.html');
+
+  expect(response?.ok()).toBeTruthy();
+  await expect(page.getByRole('heading', { name: 'Project Settings' })).toBeVisible();
+  await expect(page.getByText('Project 2')).toBeVisible();
+  await expect(page.getByText('npm install @watchtower/sdk')).toBeVisible();
+  await expect(page.getByLabel('Your API Key')).toHaveValue('wt_project_two_key');
+  await expect(page.getByLabel('Your API Key')).not.toHaveValue('wt_project_one_key');
+});
+
+test('resolved errors disappear from the unresolved list after navigating back', async ({ page }) => {
+  await mockResolvedErrorsApi(page);
+
   await page.addInitScript(() => {
     if (!window.localStorage.getItem('watchtower:projects')) {
       window.localStorage.setItem('watchtower:projects', JSON.stringify([
@@ -179,4 +343,4 @@ test('projects overflow menu supports rename and delete actions', async ({ page 
   await page.goBack();
   await expect(page).toHaveURL(/\/error-list\.html$/);
   await expect(errorCard).toHaveCount(0);
-});*/
+});

@@ -38,23 +38,66 @@ function seedSession() {
     'watchtower:session',
     JSON.stringify({ email: 'test@ucsd.edu' })
   );
+  window.localStorage.setItem(
+    'watchtower:projects',
+    JSON.stringify([{
+      id: 'project_1',
+      name: 'Project 1',
+      apiKey: 'wt_test_api_key_123',
+      createdAt: '2026-05-20T00:00:00.000Z',
+    }])
+  );
+  window.sessionStorage.setItem(
+    'watchtower:current-project',
+    JSON.stringify({
+      id: 'project_1',
+      name: 'Project 1',
+      apiKey: 'wt_test_api_key_123',
+      createdAt: '2026-05-20T00:00:00.000Z',
+    })
+  );
 }
 
-async function mockErrorApi(page, errors = [mockError]) {
+async function mockErrorApi(page, errors = [mockError], { onPatch } = {}) {
   await page.route(`${API_BASE}**`, async (route) => {
-    if (route.request().method() === 'GET') {
+    const request = route.request();
+
+    if (request.method() === 'GET') {
+      const url = new URL(request.url());
+      const id = url.pathname.split('/').pop();
+      const error = errors.find((item) => String(item.id) === String(id));
+
+      if (!error) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ status: 'error', message: 'Error not found' }),
+        });
+        return;
+      }
+
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ errors }),
+        body: JSON.stringify({ status: 'ok', error }),
+      });
+      return;
+    }
+
+    if (request.method() === 'PATCH') {
+      if (onPatch) { await onPatch(request); }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'ok', message: 'Error marked as resolved' }),
       });
       return;
     }
 
     await route.fulfill({
-      status: 200,
+      status: 405,
       contentType: 'application/json',
-      body: JSON.stringify({ success: true }),
+      body: JSON.stringify({ status: 'error', message: 'Method not allowed' }),
     });
   });
 }
@@ -83,6 +126,37 @@ test.describe('Error Detail page', () => {
       await expect(page.locator('#navbar-root #navbar')).toBeVisible();
       await expect(page.locator('#nav-error-list')).toBeVisible();
       expect(errors).toHaveLength(0);
+    });
+
+    test('marks the error as resolved through the API', async ({ page }) => {
+      let detailUrl = '';
+      let patchUrl = '';
+      let patchBody = null;
+
+      await page.unroute(`${API_BASE}**`);
+      await mockErrorApi(page, [mockError], {
+        onPatch: async (request) => {
+          patchUrl = request.url();
+          patchBody = request.postDataJSON();
+        },
+      });
+      page.on('request', (request) => {
+        const url = request.url();
+        if (request.method() === 'GET' && url.includes(`/api/errors/${ERROR_ID}`)) {
+          detailUrl = url;
+        }
+      });
+
+      await page.goto(`/error-detail.html?id=${ERROR_ID}`);
+      await page.locator('#resolve-btn').click();
+
+      await expect(page.locator('#resolve-btn')).toHaveText('Resolved');
+      await expect(page.locator('#resolve-btn')).toBeDisabled();
+      expect(detailUrl).toContain(`/api/errors/${ERROR_ID}`);
+      expect(new URL(detailUrl).searchParams.get('api_key')).toBe('wt_test_api_key_123');
+      expect(patchUrl).toContain(`/api/errors/${ERROR_ID}`);
+      expect(new URL(patchUrl).searchParams.get('api_key')).toBe('wt_test_api_key_123');
+      expect(patchBody).toEqual({ status: 'resolved' });
     });
 
     test('back link navigates to error-list.html', async ({ page }) => {

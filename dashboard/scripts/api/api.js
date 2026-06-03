@@ -6,7 +6,8 @@
 // Auth note: X-Api-Key header is NOT used — backend CORS only allows
 // Content-Type as a custom header. Auth is injected as api_key query param.
 
-import { API_BASE, API_KEY } from '../utils/constants.js';
+import { API_BASE, API_KEY, API_KEY_ERROR } from '../utils/constants.js';
+import { getCurrentProject } from '../utils/projects.js';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -17,7 +18,40 @@ import { API_BASE, API_KEY } from '../utils/constants.js';
  * @returns {string | null}
  */
 function getApiKey() {
-  return API_KEY ?? null;
+  try {
+    const currentProject = getCurrentProject();
+    if (currentProject?.apiKey) {return currentProject.apiKey;}
+
+    if (API_KEY) { return API_KEY; }
+
+    const projects = JSON.parse(window.localStorage.getItem('watchtower:projects') ?? '[]');
+    const project = Array.isArray(projects) ? projects.find(item => item?.apiKey) : null;
+    return project?.apiKey ?? window.localStorage.getItem('watchtower:api_key') ?? null;
+  } catch {
+    return window.localStorage.getItem('watchtower:api_key') ?? null;
+  }
+}
+
+function getApiKeyError() {
+  return API_KEY_ERROR ?? 'Missing WatchTower API key.';
+}
+
+/**
+ * Builds a backend API URL, injecting api_key when available.
+ * @param {string} endpoint
+ * @param {Record<string, string>} [params]
+ * @returns {string}
+ */
+function buildApiUrl(endpoint = '', params = {}) {
+  const apiKey = getApiKey();
+  const query = new URLSearchParams({
+    ...(apiKey ? { api_key: apiKey } : {}),
+    ...params,
+  }).toString();
+
+  return query
+    ? `${API_BASE}${endpoint}?${query}`
+    : `${API_BASE}${endpoint}`;
 }
 
 // ─── Core Fetch Wrapper ───────────────────────────────────────────────────────
@@ -129,7 +163,18 @@ async function apiFetch(url, options = {}) {
  * @returns {Promise<{success: true, data: any} | {success: false, error: object}>}
  */
 export async function apiPatch(endpoint, body = {}) {
-  return apiFetch(endpoint, {
+  if (!getApiKey() && endpoint === '') {
+    return {
+      success: false,
+      error: {
+        type: 'client',
+        status: 400,
+        message: getApiKeyError(),
+      },
+    };
+  }
+
+  return apiFetch(buildApiUrl(endpoint), {
     method: 'PATCH',
     body: JSON.stringify(body),
   });
@@ -145,18 +190,18 @@ export async function apiPatch(endpoint, body = {}) {
  * @returns {Promise<{ success: boolean, data?: any, error?: ApiError }>}
  */
 async function apiGet(endpoint = '', params = {}) {
-  const apiKey = getApiKey();
+  if (!getApiKey() && endpoint === '') {
+    return {
+      success: false,
+      error: {
+        type: 'client',
+        status: 400,
+        message: getApiKeyError(),
+      },
+    };
+  }
 
-  const query = new URLSearchParams({
-    ...(apiKey ? { api_key: apiKey } : {}),
-    ...params,
-  }).toString();
-
-  const url = query
-    ? `${API_BASE}${endpoint}?${query}`
-    : `${API_BASE}${endpoint}`;
-
-  return apiFetch(url, { method: "GET" });
+  return apiFetch(buildApiUrl(endpoint, params), { method: "GET" });
 }
 
 export { apiGet };

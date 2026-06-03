@@ -1,0 +1,134 @@
+/* ================================================================
+   settings.css — Project Settings Page
+   ================================================================ */
+
+.settings-header {
+  align-items: flex-start;
+}
+
+.settings-header__project {
+  margin-top: 4px;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-panel {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: 26px;
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-panel[hidden] {
+  display: none;
+}
+
+.settings-panel__title {
+  margin-bottom: 18px;
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-section + .settings-section {
+  margin-top: 18px;
+}
+
+.settings-label {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.settings-code-row,
+.settings-api-key-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.settings-code {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+  background: #101827;
+  color: #20e28a;
+  padding: 15px 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.settings-api-key {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  padding: 10px 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+}
+
+.settings-api-key:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+  border-color: var(--color-accent);
+}
+
+.settings-copy-btn {
+  min-width: 86px;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.settings-copy-btn:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.settings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.settings-empty__text {
+  max-width: 560px;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+@media (max-width: 720px) {
+  .settings-panel {
+    padding: 20px;
+  }
+
+  .settings-code-row,
+  .settings-api-key-row {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-copy-btn {
+    width: 100%;
+  }
+}

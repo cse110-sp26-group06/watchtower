@@ -1,33 +1,68 @@
 # Watchtower: Dashboard
 This folder contains the HTML, CSS, and JavaScript files for the Watchtower dashboard, as well as centralized module for talking to the backend's read endpoints.
 
+## Local Setup
+The error list page calls the deployed backend and needs a WatchTower API key. On a fresh clone, create a local config file:
+
+```sh
+cp dashboard/scripts/utils/env.example.js dashboard/scripts/utils/env.js
+```
+
+Then edit `dashboard/scripts/utils/env.js` and set `WATCHTOWER_API_KEY` to a valid project key. This file is intentionally gitignored so real keys are not committed.
+
+Alternatively, use the onboarding page to generate a project. The dashboard can read the saved project API key from `localStorage`.
+
+If the page shows "Failed to load errors" on another machine, first check that they are logged in locally and have either `dashboard/scripts/utils/env.js` configured or a saved onboarding project.
+
 ## Folder Structure
 ```
 /dashboard
 │
-├── index.html          # Main dashboard page (error list)
-├── error-detail.html   # Page for displaying detailed error information
-├── performance.html    # Page for viewing performance metrics
-├── feedback.html       # Page for submitting and viewing feedback
-├── alerts.html         # Page for managing alerts
-├── settings.html       # Page for configuring dashboard settings
+├── index.html              # Login landing page
+├── projects.html           # Project switcher / dashboard home
+├── onboarding.html         # First-project onboarding flow
+├── error-list.html         # Error list page
+├── error-detail.html       # Single error detail page
+├── performance.html        # Performance view placeholder
+├── feedback.html           # Feedback view placeholder
+├── alerts.html             # Alert settings placeholder
+├── settings.html           # Project settings placeholder
 │
 ├── /assets
 │   ├── /icons
 │   ├── /images
 │   └── /fonts
 │
-├── /styles # css files
-|
-├── /scripts
-|   └── /api
-│   |   ├── api.js          # Core API utilities (fetch wrappers, base URL, etc.)
-│   |   ├── errors.js       # Functions for error-related endpoints
-│   |   ├── performance.js  # Functions for performance endpoints
-│   |   └── alerts.js       # Functions for alert endpoints
-│   └── /components         # Reusable UI components like the nav bar, error cards, etc.
-│   └── /pages              # JS specific to each page(event listeners, page init, etc.)
-|   └── /utils              # Utility functions (formatting, date handling, etc.)
+├── /styles
+│   ├── globals.css         # Shared design tokens / base styles
+│   ├── components.css      # Shared component styles
+│   ├── layout.css          # Shared app shell / navbar layout
+│   └── /pages              # Page-specific CSS
 │
-└── README.md # go over folder structure, description
+├── /scripts
+│   ├── /api
+│   │   ├── api.js          # Shared fetch wrapper for dashboard API calls
+│   │   └── errors.js       # Error endpoint helpers
+│   ├── /components
+│   │   ├── errorCard.js    # Reusable error list/detail card helpers
+│   │   └── navbar.js       # Shared authenticated sidebar nav
+│   ├── /pages
+│   │   ├── /errorDetail
+│   │   │   ├── errorDetail.js
+│   │   │   └── stackTrace.js
+│   │   ├── /errorList
+│   │   │   ├── errorFilter.js
+│   │   │   └── errorList.js
+│   │   ├── /login
+│   │   │   ├── login.js
+│   │   │   └── staticPage.js
+│   │   ├── /onboarding
+│   │   │   └── onboarding.js
+│   │   └── /projects
+│   │       └── projects.js
+│   └── /utils              # Auth, DOM, project, toast, API constants helpers
+│
+├── /tests                  # Node-based frontend unit tests
+│
+└── README.md               # Dashboard-specific structure and notes
 ```

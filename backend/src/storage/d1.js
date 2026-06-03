@@ -73,29 +73,109 @@ export async function getErrors(env, api_key, params = {}) {
 }
 
 /**
- * Reads a single error from D1 by its id
+ * Reads a single error from D1 by its id, scoped to the calling project's api_key.
+ * Returns null if the error doesn't exist OR belongs to a different project —
+ * the two cases are indistinguishable so cross-project access can't enumerate ids.
+ *
  * @param {object} env - Cloudflare env with D1 binding
  * @param {string} id - the error's unique id
- * @returns {object|null} - error record or null if not found
+ * @param {string} api_key - the calling project's api_key
+ * @returns {object|null} - error record or null if not found / not owned
  */
-export async function getErrorById(env, id) {
+export async function getErrorById(env, id, api_key) {
   const result = await env.watchtower_db.prepare(
-    'SELECT * FROM errors WHERE id = ?'
-  ).bind(id).first();
+    'SELECT * FROM errors WHERE id = ? AND api_key = ?'
+  ).bind(id, api_key).first();
   return result || null;
 }
 
 /**
- * Updates an error's status to 'resolved' in D1
+ * Updates an error's status to 'resolved' in D1, scoped to the calling project's api_key.
+ * Returns false if the error doesn't exist OR belongs to a different project.
+ *
  * @param {object} env - Cloudflare env with D1 binding
  * @param {string} id - the error's unique id
- * @returns {boolean} - true if updated, false if not found
+ * @param {string} api_key - the calling project's api_key
+ * @returns {boolean} - true if updated, false if not found / not owned
  */
-export async function resolveError(env, id) {
+export async function resolveError(env, id, api_key) {
   const result = await env.watchtower_db.prepare(
-    'UPDATE errors SET status = ? WHERE id = ?'
-  ).bind('resolved', id).run();
+    'UPDATE errors SET status = ? WHERE id = ? AND api_key = ?'
+  ).bind('resolved', id, api_key).run();
 
-  // returns true if a row was actually updated
   return result.meta.changes > 0;
+}
+
+/**
+ * Lists all projects owned by a given user, newest first.
+ * Used by GET /api/projects to back the Dashboard's project-selection flow.
+ *
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} owner_id - the user id
+ * @returns {object[]} - array of project records
+ */
+export async function listProjectsByOwner(env, owner_id) {
+  const result = await env.watchtower_db.prepare(
+    'SELECT id, name, api_key, created_at FROM projects WHERE owner_id = ? ORDER BY created_at DESC'
+  ).bind(owner_id).all();
+
+  return result.results;
+}
+
+/**
+ * Stores a performance event in D1
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {object} record - fully prepared record from ingest.js
+ */
+export async function storePerformance(env, record) {
+  await env.watchtower_db.prepare(`
+    INSERT INTO performance (id, api_key, service, environment, name, entry_type, time, duration, payload_json, client_timestamp, server_timestamp)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    record.id,
+    record.api_key,
+    record.service,
+    record.environment,
+    record.name,
+    record.entry_type,
+    record.time,
+    record.duration,
+    record.payload_json,
+    record.client_timestamp,
+    record.server_timestamp
+  ).run();
+}
+
+/**
+ * Reads performance events from D1 for a given project
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} api_key - project api key
+ * @param {object} params - optional filters
+ * @param {string} [params.entry_type] - filter by resource/paint/navigation
+ * @param {string} [params.since] - ISO timestamp
+ * @param {number} [params.page=1]
+ * @param {number} [params.limit=20]
+ * @returns {object[]}
+ */
+export async function getPerformance(env, api_key, params = {}) {
+  const { entry_type, since, page = 1, limit = 20 } = params;
+  const offset = (page - 1) * limit;
+
+  let query = 'SELECT * FROM performance WHERE api_key = ?';
+  const bindings = [api_key];
+
+  if (entry_type && entry_type !== 'all') {
+    query += ' AND entry_type = ?';
+    bindings.push(entry_type);
+  }
+  if (since) {
+    query += ' AND server_timestamp >= ?';
+    bindings.push(since);
+  }
+
+  query += ' ORDER BY server_timestamp DESC LIMIT ? OFFSET ?';
+  bindings.push(limit, offset);
+
+  const result = await env.watchtower_db.prepare(query).bind(...bindings).run();
+  return result.results;
 }
