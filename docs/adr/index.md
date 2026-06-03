@@ -33,6 +33,8 @@ Each ADR carries one of the following statuses:
 | 0005 | [Changelog and versioning approach](0005-changelog-and-versioning.md) | Accepted | 2026-05-15 |
 | 0006 | [Testing traffic generation](0006-testing-traffic-generation.md) | Accepted | 2026-05-17 |
 | 0007 | [JavaScript style guide](0007-javascript-style-guide.md) | Accepted | 2026-05-18 |
+| 0008 | [Product form factor](0008-product-form-factor.md) | Accepted | 2026-05-25 |
+| 0009 | [Final release scope](0009-final-release-scope.md) | Accepted | 2026-06-03 |
 
 ## Adding a New ADR
 

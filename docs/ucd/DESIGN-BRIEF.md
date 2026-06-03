@@ -43,6 +43,8 @@ By the end of the project, WatchTower can:
 - Integrate with **build signals** so a developer can identify which deployment introduced a regression
 - **Notify** the developer through configured channels when something meaningful happens — not for every event
 
+**NOTE: Due to time constraints, user feedback, build signals, and notifications were moved to Post-MVP/Stretch goals rather than MVP goals. See [docs/adr/index.md](docs/adr/index.md) for decision regarding our final release scope.**
+
 ## Post-MVP / Stretch
 
 Larger or recurring issues can be escalated into GitHub Issues automatically, dropping straight into the developer's existing workflow without requiring them to log into the WatchTower dashboard.
