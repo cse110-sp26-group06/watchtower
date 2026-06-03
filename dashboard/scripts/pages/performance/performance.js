@@ -1,43 +1,24 @@
 /**
  * performance.js
  * Performance page for WatchTower dashboard.
- * Uses Chart.js for the response time bar chart.
- * All data is mocked for development/testing.
+ * Fetches live data from GET /api/errors/performance via apiGetPerformance().
+ * Falls back to empty states on error. Uses Chart.js for the response time chart.
  */
 
-import { renderNavbar } from '../../components/navbar.js';
+import { renderNavbar }         from '../../components/navbar.js';
+import { requireAuth }          from '../../utils/auth.js';
+import { showToast }            from '../../utils/toast.js';
+import { apiGetPerformance }    from '../../api/api.js';
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
+const session = requireAuth();
+if (session) { renderNavbar('performance'); }
 
-const MOCK_STATS = {
-  responseTime: { value: '234ms', delta: '↓ 12% from yesterday', type: 'good' },
-  errorRate:    { value: '2.3%',  delta: '↑ 0.8% from yesterday', type: 'bad'  },
-  requests:     { value: '1.2k',  delta: '→ No change',            type: 'neutral' },
-  activeUsers:  { value: '847',   delta: '↑ 23% from yesterday',   type: 'good' },
-};
+// Expose reload() for the "Try again" button in error state
+window.reloadPerformance = load;
 
-const MOCK_RESPONSE_TIME_24H = [
-  { hour: '0h',  ms: 180 },
-  { hour: '2h',  ms: 210 },
-  { hour: '4h',  ms: 260 },
-  { hour: '6h',  ms: 310 },
-  { hour: '8h',  ms: 275 },
-  { hour: '10h', ms: 230 },
-  { hour: '12h', ms: 290 },
-  { hour: '14h', ms: 340 },
-  { hour: '16h', ms: 320 },
-  { hour: '18h', ms: 295 },
-  { hour: '20h', ms: 265 },
-  { hour: '22h', ms: 285 },
-];
+// ── State ─────────────────────────────────────────────────────────────────────
 
-const MOCK_SLOW_ENDPOINTS = [
-  { path: '/api/users/profile',     calls: '1234 calls in 24h', ms: 850, severity: 'crit' },
-  { path: '/api/analytics/data',    calls: '892 calls in 24h',  ms: 620, severity: 'warn' },
-  { path: '/api/errors/list',       calls: '3421 calls in 24h', ms: 410, severity: 'warn' },
-  { path: '/api/projects/:id',      calls: '567 calls in 24h',  ms: 390, severity: 'ok'   },
-  { path: '/api/feedback/submit',   calls: '234 calls in 24h',  ms: 310, severity: 'ok'   },
-];
+let chartInstance = null;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -51,70 +32,209 @@ function isDark() {
   return document.documentElement.getAttribute('data-theme') === 'dark';
 }
 
+// ── Data Normalisation ────────────────────────────────────────────────────────
+
+/**
+ * Normalizes a raw performance event row from the backend.
+ *
+ * Actual D1 row shape (confirmed from live API):
+ *   { id, api_key, service, environment, name, entry_type, time, duration,
+ *     payload_json, client_timestamp, server_timestamp }
+ *
+ * payload_json is also stored as a JSON string with { name, entryType, time, duration }.
+ *
+ * @param {object} row  Raw row from GET /api/performance
+ * @returns {object}    Normalized performance event
+ */
+function normalizeEvent(row) {
+  let payload = {};
+  try { payload = JSON.parse(row.payload_json ?? '{}'); } catch { /* keep {} */ }
+
+  return {
+    name:      row.name       ?? payload.name       ?? 'unknown',
+    entryType: row.entry_type ?? payload.entryType  ?? 'resource',
+    time:      row.time       ?? payload.time        ?? 0,
+    duration:  row.duration   ?? payload.duration    ?? 0,
+    timestamp: row.client_timestamp ?? row.server_timestamp ?? null,
+  };
+}
+
+/**
+ * Derives dashboard stats and chart data from a list of normalized events.
+ * @param {object[]} events  Normalized performance events
+ */
+function deriveStats(events) {
+  const navEvents      = events.filter(e => e.entryType === 'navigation');
+  const resourceEvents = events.filter(e => e.entryType === 'resource');
+
+  // Avg response time — all resource events
+  const avgMs = resourceEvents.length
+    ? Math.round(resourceEvents.reduce((s, e) => s + e.duration, 0) / resourceEvents.length)
+    : null;
+
+  // Page load — average of navigation events
+  const avgPageLoad = navEvents.length
+    ? Math.round(navEvents.reduce((s, e) => s + e.duration, 0) / navEvents.length)
+    : null;
+
+  // Slowest endpoint — max duration resource event
+  const slowest = resourceEvents.reduce(
+    (max, e) => (e.duration > (max?.duration ?? -1) ? e : max),
+    null
+  );
+
+  // Build chart data: group resource events by hour bucket
+  const chartData = buildChartData(resourceEvents);
+
+  // Build endpoints table: deduplicate by name, pick max duration per name
+  const endpointMap = new Map();
+  for (const e of resourceEvents) {
+    const key = e.name;
+    const existing = endpointMap.get(key);
+    if (!existing || e.duration > existing.ms) {
+      endpointMap.set(key, { path: key, ms: e.duration, calls: 1 });
+    } else {
+      existing.calls += 1;
+    }
+  }
+  // Also count calls properly in a second pass
+  const callCounts = new Map();
+  for (const e of resourceEvents) {
+    callCounts.set(e.name, (callCounts.get(e.name) ?? 0) + 1);
+  }
+  for (const [name, ep] of endpointMap) {
+    ep.calls = callCounts.get(name) ?? 1;
+  }
+
+  const endpoints = Array.from(endpointMap.values())
+    .sort((a, b) => b.ms - a.ms)
+    .slice(0, 10);
+
+  return { avgMs, avgPageLoad, slowest, chartData, endpoints, total: events.length };
+}
+
+/**
+ * Groups resource events into hourly buckets for the bar chart.
+ * Returns up to 12 buckets sorted ascending by time.
+ * @param {object[]} events
+ * @returns {{ hour: string, ms: number }[]}
+ */
+function buildChartData(events) {
+  if (!events.length) { return []; }
+
+  const buckets = new Map();
+
+  for (const e of events) {
+    const ts = e.timestamp ? new Date(e.timestamp) : new Date();
+    const label = `${ts.getUTCHours()}h`;
+    if (!buckets.has(label)) {
+      buckets.set(label, { sum: 0, count: 0, hour: ts.getUTCHours() });
+    }
+    const b = buckets.get(label);
+    b.sum   += e.duration;
+    b.count += 1;
+  }
+
+  return Array.from(buckets.entries())
+    .map(([label, b]) => ({ hour: label, ms: Math.round(b.sum / b.count), _h: b.hour }))
+    .sort((a, b) => a._h - b._h)
+    .slice(0, 12);
+}
+
+// ── Severity helper ───────────────────────────────────────────────────────────
+
+function endpointSeverity(ms, maxMs) {
+  if (ms >= maxMs * 0.8) { return 'crit'; }
+  if (ms >= maxMs * 0.5) { return 'warn'; }
+  return 'ok';
+}
+
 // ── Render Stats ──────────────────────────────────────────────────────────────
 
-function renderStats() {
-  const map = {
-    'stat-response-time':  MOCK_STATS.responseTime,
-    'stat-error-rate':     MOCK_STATS.errorRate,
-    'stat-requests':       MOCK_STATS.requests,
-    'stat-users':          MOCK_STATS.activeUsers,
+function renderStats({ avgMs, avgPageLoad, slowest, total }) {
+  const set = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = text; }
+  };
+  const setClass = (id, cls) => {
+    const el = document.getElementById(id);
+    if (el) { el.className = cls; }
   };
 
-  const deltaMap = {
-    'stat-response-delta':  MOCK_STATS.responseTime,
-    'stat-error-delta':     MOCK_STATS.errorRate,
-    'stat-requests-delta':  MOCK_STATS.requests,
-    'stat-users-delta':     MOCK_STATS.activeUsers,
-  };
+  // Avg response time
+  if (avgMs !== null) {
+    set('stat-response-time', `${avgMs}ms`);
+    const cls = avgMs > 600
+      ? 'perf-stat-card__delta perf-stat-card__delta--bad'
+      : avgMs > 300
+        ? 'perf-stat-card__delta perf-stat-card__delta--neutral'
+        : 'perf-stat-card__delta perf-stat-card__delta--good';
+    set('stat-response-delta', avgMs > 600 ? '⚠ High latency' : avgMs > 300 ? 'Moderate' : '✓ Fast');
+    setClass('stat-response-delta', cls);
+  } else {
+    set('stat-response-time', '—');
+    set('stat-response-delta', 'No resource data');
+  }
 
-  Object.entries(map).forEach(([id, stat]) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = stat.value;
-    }
-  });
+  // Page load
+  if (avgPageLoad !== null) {
+    set('stat-page-load', `${avgPageLoad}ms`);
+    const cls = avgPageLoad > 3000
+      ? 'perf-stat-card__delta perf-stat-card__delta--bad'
+      : avgPageLoad > 1500
+        ? 'perf-stat-card__delta perf-stat-card__delta--neutral'
+        : 'perf-stat-card__delta perf-stat-card__delta--good';
+    set('stat-page-load-delta', avgPageLoad > 3000 ? '⚠ Slow page load' : avgPageLoad > 1500 ? 'Moderate' : '✓ Fast load');
+    setClass('stat-page-load-delta', cls);
+  } else {
+    set('stat-page-load', '—');
+    set('stat-page-load-delta', 'No navigation data');
+  }
 
-  Object.entries(deltaMap).forEach(([id, stat]) => {
-    const el = document.getElementById(id);
-    if (!el) {
-      return;
-    } 
-    el.textContent = stat.delta;
-    el.className = `perf-stat-card__delta perf-stat-card__delta--${stat.type}`;
-  });
+  // Slowest endpoint
+  if (slowest) {
+    set('stat-slowest', `${slowest.duration}ms`);
+    set('stat-slowest-delta', slowest.name);
+    setClass('stat-slowest-delta',
+      slowest.duration > 600
+        ? 'perf-stat-card__delta perf-stat-card__delta--bad'
+        : 'perf-stat-card__delta perf-stat-card__delta--neutral'
+    );
+  } else {
+    set('stat-slowest', '—');
+    set('stat-slowest-delta', 'No endpoints tracked');
+  }
+
+  // Total events
+  set('stat-total-events', total > 0 ? String(total) : '0');
+  set('stat-total-events-delta', total === 1 ? '1 event ingested' : `${total} events ingested`);
+  setClass('stat-total-events-delta', 'perf-stat-card__delta perf-stat-card__delta--neutral');
 }
 
 // ── Render Chart ──────────────────────────────────────────────────────────────
 
-let chartInstance = null;
-
 function getChartColors() {
-  const accent = cssVar('--color-accent') || '#e8732e';
-  const border = cssVar('--color-border') || 'rgba(255,255,255,0.08)';
+  const accent    = cssVar('--color-accent')    || '#e8732e';
   const textMuted = cssVar('--color-text-muted') || '#A89080';
-  const text = cssVar('--color-text') || '#1C120A';
-  return { accent, border, textMuted, text };
+  const text      = cssVar('--color-text')       || '#1C120A';
+  return { accent, textMuted, text };
 }
 
-function renderChart() {
+function renderChart(chartData) {
   const canvas = document.getElementById('response-time-chart');
-  if (!canvas) {
-    return;
-  } 
+  if (!canvas) { return; }
 
-  // Dynamically load Chart.js from CDN
   if (!window.Chart) {
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
-    script.onload = () => buildChart(canvas);
+    script.onload = () => buildChart(canvas, chartData);
     document.head.appendChild(script);
   } else {
-    buildChart(canvas);
+    buildChart(canvas, chartData);
   }
 }
 
-function buildChart(canvas) {
+function buildChart(canvas, chartData) {
   const { accent, textMuted, text } = getChartColors();
 
   if (chartInstance) {
@@ -122,14 +242,25 @@ function buildChart(canvas) {
     chartInstance = null;
   }
 
+  if (!chartData || !chartData.length) {
+    // Show a placeholder message on the canvas
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = textMuted;
+    ctx.font = '14px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No response time data available', canvas.width / 2, canvas.height / 2);
+    return;
+  }
+
   chartInstance = new window.Chart(canvas, {
     type: 'bar',
     data: {
-      labels: MOCK_RESPONSE_TIME_24H.map(d => d.hour),
+      labels: chartData.map(d => d.hour),
       datasets: [{
-        label: 'Response Time (ms)',
-        data: MOCK_RESPONSE_TIME_24H.map(d => d.ms),
-        backgroundColor: accent + 'CC',   // accent with opacity
+        label: 'Avg Response Time (ms)',
+        data: chartData.map(d => d.ms),
+        backgroundColor: accent + 'CC',
         borderColor: accent,
         borderWidth: 1.5,
         borderRadius: 4,
@@ -177,26 +308,34 @@ function buildChart(canvas) {
 
 // ── Render Endpoints ──────────────────────────────────────────────────────────
 
-function renderEndpoints() {
+function renderEndpoints(endpoints) {
   const container = document.getElementById('slow-endpoints');
-  if (!container) {
+  if (!container) { return; }
+
+  if (!endpoints || !endpoints.length) {
+    container.innerHTML = `<div style="padding:var(--space-md);color:var(--color-text-muted);font-size:14px;">
+      No endpoint data available yet.
+    </div>`;
     return;
   }
-  const maxMs = Math.max(...MOCK_SLOW_ENDPOINTS.map(e => e.ms));
 
-  container.innerHTML = MOCK_SLOW_ENDPOINTS.map(endpoint => {
-    const pct = Math.round((endpoint.ms / maxMs) * 100);
-    const barClass = endpoint.severity === 'crit'
+  const maxMs = Math.max(...endpoints.map(e => e.ms));
+
+  container.innerHTML = endpoints.map(endpoint => {
+    const pct      = Math.round((endpoint.ms / maxMs) * 100);
+    const severity = endpointSeverity(endpoint.ms, maxMs);
+    const barClass = severity === 'crit'
       ? 'perf-endpoint__bar perf-endpoint__bar--crit'
-      : endpoint.severity === 'warn'
+      : severity === 'warn'
         ? 'perf-endpoint__bar perf-endpoint__bar--warn'
         : 'perf-endpoint__bar';
+    const callLabel = endpoint.calls === 1 ? '1 call' : `${endpoint.calls} calls`;
 
     return `
       <div class="perf-endpoint">
         <div class="perf-endpoint__info">
-          <span class="perf-endpoint__path">${endpoint.path}</span>
-          <span class="perf-endpoint__calls">${endpoint.calls}</span>
+          <span class="perf-endpoint__path">${escHtml(endpoint.path)}</span>
+          <span class="perf-endpoint__calls">${callLabel}</span>
         </div>
         <div class="perf-endpoint__bar-wrap">
           <div class="${barClass}" style="width: ${pct}%"></div>
@@ -207,12 +346,59 @@ function renderEndpoints() {
   }).join('');
 }
 
+/** Minimal HTML escape to prevent XSS from endpoint names */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── Loading / Error States ────────────────────────────────────────────────────
+
+function renderLoading() {
+  const container = document.getElementById('slow-endpoints');
+  if (container) {
+    container.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:var(--space-md);color:var(--color-text-muted);">
+      <div class="spinner"></div><span>Loading performance data…</span>
+    </div>`;
+  }
+
+  ['stat-response-time','stat-page-load','stat-slowest','stat-total-events'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = '…'; }
+  });
+}
+
+function renderFetchError(msg) {
+  const container = document.getElementById('slow-endpoints');
+  if (container) {
+    container.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:var(--space-md);">
+        <span style="font-weight:600;color:var(--color-critical)">⚠ Failed to load performance data</span>
+        <span style="font-size:13px;color:var(--color-text-muted)">${escHtml(msg)}</span>
+        <button class="btn btn--outline" onclick="reloadPerformance()" style="margin-top:4px">Try again</button>
+      </div>`;
+  }
+
+  ['stat-response-time','stat-page-load','stat-slowest','stat-total-events'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = '—'; }
+  });
+}
+
 // ── Theme Change Observer ─────────────────────────────────────────────────────
 
-// Re-render chart when theme toggles so colors update
 const themeObserver = new MutationObserver(() => {
   if (window.Chart && chartInstance) {
-    buildChart(document.getElementById('response-time-chart'));
+    const canvas = document.getElementById('response-time-chart');
+    if (canvas && chartInstance.data?.datasets?.[0]?.data) {
+      buildChart(canvas, chartInstance.data.datasets[0].data.map((ms, i) => ({
+        hour: chartInstance.data.labels[i],
+        ms,
+      })));
+    }
   }
 });
 
@@ -221,11 +407,52 @@ themeObserver.observe(document.documentElement, {
   attributeFilter: ['data-theme'],
 });
 
+// ── Load ──────────────────────────────────────────────────────────────────────
+
+let _loading = false;
+
+/**
+ * Fetches live performance data from GET /api/errors/performance,
+ * normalizes events, derives stats, and renders the full page.
+ */
+async function load() {
+  if (_loading) { return; }
+  _loading = true;
+  renderLoading();
+
+  try {
+    const result = await apiGetPerformance();
+
+    if (!result.success) {
+      console.error('[WatchTower] Performance fetch error:', result.error);
+      renderFetchError(result.error.message);
+      showToast('Could not load performance data: ' + result.error.message, true);
+      return;
+    }
+
+    // Backend responds with { status: "ok", performance: [...] }
+    const raw = result.data?.performance
+      ?? result.data?.events
+      ?? (Array.isArray(result.data) ? result.data : []);
+
+    const events  = raw.map(normalizeEvent);
+    const derived = deriveStats(events);
+
+    renderStats(derived);
+    renderChart(derived.chartData);
+    renderEndpoints(derived.endpoints);
+
+  } finally {
+    _loading = false;
+  }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await renderNavbar('performance');
-  renderStats();
-  renderChart();
-  renderEndpoints();
+  await load();
+});
+
+window.addEventListener('pageshow', () => {
+  load();
 });
