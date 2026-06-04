@@ -2,11 +2,10 @@ import { jsonResponse } from '../index.js';
 import { getLogs } from '../storage/d1.js';
 import { validateApiKey } from '../middleware/auth.js';
 
-
-export async function handleGetLogs(request,env){
-    const url = new URL(request.url);
-    const api_key = url.searchParams.get('api_key');
-    const project = await validateApiKey(env, api_key);
+export async function handleGetLogs(request,env) {
+  const url = new URL(request.url);
+  const api_key = url.searchParams.get('api_key');
+  const project = await validateApiKey(env, api_key);
   if (!project) {
     return jsonResponse({ status: 'error', message: 'Invalid API key' }, 401);
   }
