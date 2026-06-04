@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_projects_owner
 ON projects (owner_id);
 
--- This is the performance talbe which stores the performance info according to sdk schema
+-- This is the performance table which stores the performance info according to sdk schema
 CREATE TABLE IF NOT EXISTS performance (
     id TEXT PRIMARY KEY,
     api_key TEXT NOT NULL,
@@ -73,6 +73,31 @@ CREATE TABLE IF NOT EXISTS performance (
     server_timestamp TEXT NOT NULL,
     FOREIGN KEY (api_key) REFERENCES projects(api_key)
 );
+
+-- This is the logs table which stores log info according to sdk schema 
+CREATE TABLE IF NOT EXISTS logs (
+    id TEXT PRIMARY KEY,
+    api_key TEXT NOT NULL,
+    service TEXT NOT NULL,
+    environment TEXT NOT NULL,
+    level TEXT NOT NULL,
+    message TEXT NOT NULL,
+    payload_timestamp TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    client_timestamp TEXT NOT NULL,
+    server_timestamp TEXT NOT NULL,
+    FOREIGN KEY (api_key) REFERENCES projects(api_key)
+);
+
+
+CREATE INDEX IF NOT EXISTS idx_logs_api_key
+ON logs (api_key);
+
+CREATE INDEX IF NOT EXISTS idx_logs_level
+ON logs (level);
+
+CREATE INDEX IF NOT EXISTS idx_logs_server_timestamp
+ON logs (server_timestamp);
 
 CREATE INDEX IF NOT EXISTS idx_performance_api_key
 ON performance (api_key);
