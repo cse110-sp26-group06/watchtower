@@ -9,6 +9,9 @@
 import { API_BASE, API_KEY, API_KEY_ERROR } from '../utils/constants.js';
 import { getCurrentProject } from '../utils/projects.js';
 
+const INGEST_BASE = 'https://watchtower-backend.group6.workers.dev/ingest';
+const PERF_API_BASE = 'https://watchtower-backend.group6.workers.dev/api/performance';
+
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 /**
@@ -202,6 +205,55 @@ async function apiGet(endpoint = '', params = {}) {
   }
 
   return apiFetch(buildApiUrl(endpoint, params), { method: "GET" });
+}
+
+/**
+ * Fetches performance metrics from the WatchTower backend.
+ *
+ * This call retrieves performance data for the currently selected project.
+ * The current project API key is appended as a query parameter, matching
+ * the backend's API key validation requirements.
+ *
+ * @returns {Promise<{ success: boolean, data?: any, error?: { type: string, status?: number, message: string } }>}
+ */
+export async function apiGetPerformance() {
+  const apiKey = getApiKey();
+  const query = apiKey ? `?api_key=${encodeURIComponent(apiKey)}` : '';
+  return apiFetch(`${PERF_API_BASE}${query}`, { method: 'GET' });
+}
+
+/**
+ * POST performance events to the ingest endpoint.
+ * Auth is passed as api_key inside the request body (not as a query param),
+ * alongside service, environment, and the events array.
+ *
+ * @param {string} service       - The service name (e.g. 'my-app')
+ * @param {string} environment   - The environment (e.g. 'production')
+ * @param {Array}  events        - Array of performance event objects
+ * @returns {Promise<{success: boolean, data?: any, error?: object}>}
+ */
+export async function apiPostPerformance(service, environment, events) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    return {
+      success: false,
+      error: {
+        type: 'client',
+        status: 400,
+        message: getApiKeyError(),
+      },
+    };
+  }
+
+  return apiFetch(`${INGEST_BASE}/performance`, {
+    method: 'POST',
+    body: JSON.stringify({
+      api_key: apiKey,
+      service,
+      environment,
+      events,
+    }),
+  });
 }
 
 export { apiGet };
