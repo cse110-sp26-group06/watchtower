@@ -116,6 +116,17 @@ export function initWatchtower(config = {}) {
 
   // --- Log Handler ---
   patchConsole(handleLog);
+
+  // --- Performance Observer ---
+  const observer = new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      capturePerformance(entry); // feeds into parsePerformance → engine.enqueue
+    }
+  });
+
+  observer.observe({ type: 'resource',   buffered: true });
+  observer.observe({ type: 'paint',      buffered: true });
+  observer.observe({ type: 'navigation', buffered: true });
 }
 
 /**
