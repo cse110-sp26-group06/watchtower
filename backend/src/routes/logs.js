@@ -10,11 +10,14 @@ export async function handleGetLogs(request,env) {
     return jsonResponse({ status: 'error', message: 'Invalid API key' }, 401);
   }
 
+  const pageRaw = Number.parseInt(url.searchParams.get("page") ?? "1", 10);
+  const limitRaw = Number.parseInt(url.searchParams.get("limit") ?? "20", 10);
+
   const queryParams = {
     level: url.searchParams.get('level'),
     since: url.searchParams.get('since'),
-    page: parseInt(url.searchParams.get('page') ?? '1'),
-    limit: parseInt(url.searchParams.get('limit') ?? '20'),
+    page: Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : 1,
+    limit: Number.isFinite(limitRaw) && limitRaw > 0 && limitRaw <= 100 ? limitRaw : 20,
   };
 
   try {
