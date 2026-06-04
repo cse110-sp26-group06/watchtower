@@ -18,7 +18,7 @@ const jsRules = {
 const htmlRules = {
   "@html-eslint/no-duplicate-class": "error",
   "@html-eslint/css-no-empty-blocks" : "error",
-  "@html-eslint/max-element-depth" : ["error",{ "max" : 10}],
+  "@html-eslint/max-element-depth" : ["error",{ "max" : 10 }],
 };
 
 export default [
