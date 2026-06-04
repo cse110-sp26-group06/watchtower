@@ -207,6 +207,15 @@ async function apiGet(endpoint = '', params = {}) {
   return apiFetch(buildApiUrl(endpoint, params), { method: "GET" });
 }
 
+/**
+ * Fetches performance metrics from the WatchTower backend.
+ *
+ * This call retrieves performance data for the currently selected project.
+ * The current project API key is appended as a query parameter, matching
+ * the backend's API key validation requirements.
+ *
+ * @returns {Promise<{ success: boolean, data?: any, error?: { type: string, status?: number, message: string } }>}
+ */
 export async function apiGetPerformance() {
   const apiKey = getApiKey();
   const query = apiKey ? `?api_key=${encodeURIComponent(apiKey)}` : '';
