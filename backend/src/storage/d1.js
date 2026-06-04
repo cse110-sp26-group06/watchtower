@@ -203,9 +203,11 @@ export async function storeLog(env, record) {
 
 
 export async function getLogs(env, api_key, params = {}) {
-  const { level, since, page = 1, limit = 20 } = params;
-  const offset = (page - 1) * limit;
+  const { level, since } = params;
 
+  const page = Number.isFinite(params.page) && params.page > 0 ? Math.floor(params.page) : 1;
+  const limit = Number.isFinite(params.limit) && params.limit > 0 ? Math.floor(params.limit) : 20;
+  const offset = (page - 1) * limit;
   let query = 'SELECT * FROM logs WHERE api_key = ?';
   const bindings = [api_key];
 
