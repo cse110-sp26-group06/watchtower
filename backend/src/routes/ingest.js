@@ -1,6 +1,6 @@
 import { jsonResponse } from '../index.js'; // imported function which is convenient for consistent response return
 import { validateApiKey } from '../middleware/auth.js';
-import { storeError, storePerformance } from '../storage/d1.js'; // import functions from storage and link with it
+import { storeError,storeLog, storePerformance } from '../storage/d1.js'; // import functions from storage and link with it
 const VALID_ENDPOINTS = ['/ingest/error', '/ingest/log', '/ingest/performance'];
 const REQUIRED_PAYLOAD_FIELDS = {
   // added all properties in event except for severity, will add it after sdk implements it
@@ -102,8 +102,22 @@ export async function handleIngest(request, env, path) {
           server_timestamp,
         };
         await storePerformance(env, record);
+      } else if (path === '/ingest/log') {
+        const record = {
+          id: crypto.randomUUID(),
+          api_key: data.api_key,
+          service: data.service,
+          environment: data.environment,
+          level: event.payload.level,
+          message: event.payload.message,
+          payload_timestamp: event.payload.timestamp,
+          payload_json: JSON.stringify(event.payload),
+          client_timestamp: event.timestamp,
+          server_timestamp,
+        };
+        await storeLog(env, record);
       }
-      // storeLog and storePerformance added once Ethan adds tables
+          
     } catch (err) {
       console.error('D1 write failed:', err);
       return jsonResponse({ status: 'error', message: 'Storage error' }, 500);

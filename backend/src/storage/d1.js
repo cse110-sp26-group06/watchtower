@@ -1,6 +1,4 @@
-// BE-3: D1 storage layer
-// TODO: implement write and read functions for events
-//pull
+
 export async function storeError(env, record) {
   await env.watchtower_db.prepare(`
     INSERT INTO errors (id, api_key, service, environment, message, error_type, severity, stack_trace, file, lineno, colno, payload_json, client_timestamp, server_timestamp, status)
@@ -167,6 +165,55 @@ export async function getPerformance(env, api_key, params = {}) {
   if (entry_type && entry_type !== 'all') {
     query += ' AND entry_type = ?';
     bindings.push(entry_type);
+  }
+  if (since) {
+    query += ' AND server_timestamp >= ?';
+    bindings.push(since);
+  }
+
+  query += ' ORDER BY server_timestamp DESC LIMIT ? OFFSET ?';
+  bindings.push(limit, offset);
+
+  const result = await env.watchtower_db.prepare(query).bind(...bindings).run();
+  return result.results;
+}
+
+/**
+ * 
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {object} record - fully prepared record from ingest.js
+ */
+export async function storeLog(env, record) {
+  await env.watchtower_db.prepare(`
+    INSERT INTO logs (id, api_key, service, environment, level, message, payload_timestamp, payload_json, client_timestamp, server_timestamp)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).bind(
+    record.id,
+    record.api_key,
+    record.service,
+    record.environment,
+    record.level,
+    record.message,
+    record.payload_timestamp,
+    record.payload_json,
+    record.client_timestamp,
+    record.server_timestamp
+  ).run();
+}
+
+
+export async function getLogs(env, api_key, params = {}) {
+  const { level, since } = params;
+
+  const page = Number.isFinite(params.page) && params.page > 0 ? Math.floor(params.page) : 1;
+  const limit = Number.isFinite(params.limit) && params.limit > 0 ? Math.floor(params.limit) : 20;
+  const offset = (page - 1) * limit;
+  let query = 'SELECT * FROM logs WHERE api_key = ?';
+  const bindings = [api_key];
+
+  if (level && level !== 'all') {
+    query += ' AND level = ?';
+    bindings.push(level);
   }
   if (since) {
     query += ' AND server_timestamp >= ?';

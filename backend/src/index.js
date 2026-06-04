@@ -2,6 +2,7 @@ import { handleIngest } from "./routes/ingest.js";
 import { generateApiKey, createUser, getUserById } from './middleware/auth.js';
 import { handleGetErrors, handleGetErrorById, handleResolveError } from './routes/errors.js';
 import { handleListProjects } from './routes/projects.js';
+import { handleGetLogs } from './routes/logs.js';
 import { handleGetPerformance } from './routes/performance.js';
 
 export default {
@@ -106,8 +107,12 @@ export default {
     if (path === '/api/performance' && request.method === 'GET') {
       return handleGetPerformance(request, env);
     }
+    if (path === '/api/logs' && request.method === 'GET') {
+      return handleGetLogs(request, env);
+    }
     return jsonResponse({ status: "error", message: "Not found" }, 404);
   },
+  
 };
 
 export function corsHeaders() {
