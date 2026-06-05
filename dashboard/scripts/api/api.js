@@ -11,6 +11,7 @@ import { getCurrentProject } from '../utils/projects.js';
 
 const INGEST_BASE = 'https://watchtower-backend.group6.workers.dev/ingest';
 const PERF_API_BASE = 'https://watchtower-backend.group6.workers.dev/api/performance';
+const LOGS_API_BASE = 'https://watchtower-backend.group6.workers.dev/api/logs';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -220,6 +221,30 @@ export async function apiGetPerformance() {
   const apiKey = getApiKey();
   const query = apiKey ? `?api_key=${encodeURIComponent(apiKey)}` : '';
   return apiFetch(`${PERF_API_BASE}${query}`, { method: 'GET' });
+}
+
+/**
+ * Fetches log entries from GET /api/logs.
+ *
+ * Supports the following optional query params (pass via `params`):
+ *   level  – filter by level ('info' | 'warn' | 'error')
+ *   since  – ISO 8601 lower bound on server_timestamp
+ *   page   – page number (default: 1)
+ *   limit  – results per page (default: 20, max: 100)
+ *
+ * api_key is automatically injected by buildApiUrl().
+ *
+ * @param {Record<string, string>} [params] - Additional query parameters
+ * @returns {Promise<{ success: boolean, data?: { status: string, logs: object[] }, error?: ApiError }>}
+ */
+export async function apiGetLogs(params = {}) {
+  const apiKey = getApiKey();
+  const query = new URLSearchParams({
+    ...(apiKey ? { api_key: apiKey } : {}),
+    ...params,
+  }).toString();
+  const queryString = query ? `?${query}` : '';
+  return apiFetch(`${LOGS_API_BASE}${queryString}`, { method: 'GET' });
 }
 
 /**

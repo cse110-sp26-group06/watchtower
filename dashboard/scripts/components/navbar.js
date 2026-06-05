@@ -13,7 +13,7 @@ import { clearSession, DASHBOARD_HOME, getSession } from '../utils/auth.js';
 const NAV_ITEMS = [
   { id: 'error-list',  label: 'Error List',       href: 'error-list.html',  icon: 'assets/icons/error-list.svg'  },
   { id: 'performance', label: 'Performance',       href: 'performance.html', icon: 'assets/icons/performance.svg' },
-  { id: 'feedback',    label: 'Feedback Inbox',    href: 'feedback.html',    icon: 'assets/icons/feedback.svg'    },
+  { id: 'logs',        label: 'Logs',        href: 'logs.html',        icon: 'assets/icons/logs.svg'        },
   { id: 'alerts',      label: 'Alert Settings',    href: 'alerts.html',      icon: 'assets/icons/alerts.svg'      },
   { id: 'settings',    label: 'Project Settings',  href: 'settings.html',    icon: 'assets/icons/settings.svg'    },
 ];

@@ -6,8 +6,10 @@
  */
 
 import { renderNavbar }         from '../../components/navbar.js';
+import { loadingStateHtml, errorStateHtml } from '../../components/pageState.js';
 import { requireAuth }          from '../../utils/auth.js';
 import { showToast }            from '../../utils/toast.js';
+import { escHtml }              from '../../utils/dom.js';
 import { apiGetPerformance }    from '../../api/api.js';
 
 const session = requireAuth();
@@ -346,23 +348,14 @@ function renderEndpoints(endpoints) {
   }).join('');
 }
 
-/** Minimal HTML escape to prevent XSS from endpoint names */
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+/** Minimal HTML escape to prevent XSS from endpoint names — imported from utils/dom.js */
 
 // ── Loading / Error States ────────────────────────────────────────────────────
 
 function renderLoading() {
   const container = document.getElementById('slow-endpoints');
   if (container) {
-    container.innerHTML = `<div style="display:flex;align-items:center;gap:12px;padding:var(--space-md);color:var(--color-text-muted);">
-      <div class="spinner"></div><span>Loading performance data…</span>
-    </div>`;
+    container.innerHTML = loadingStateHtml('Loading performance data…');
   }
 
   ['stat-response-time','stat-page-load','stat-slowest','stat-total-events'].forEach(id => {
@@ -374,12 +367,7 @@ function renderLoading() {
 function renderFetchError(msg) {
   const container = document.getElementById('slow-endpoints');
   if (container) {
-    container.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:var(--space-md);">
-        <span style="font-weight:600;color:var(--color-critical)">⚠ Failed to load performance data</span>
-        <span style="font-size:13px;color:var(--color-text-muted)">${escHtml(msg)}</span>
-        <button class="btn btn--outline" onclick="reloadPerformance()" style="margin-top:4px">Try again</button>
-      </div>`;
+    container.innerHTML = errorStateHtml(msg, 'reloadPerformance');
   }
 
   ['stat-response-time','stat-page-load','stat-slowest','stat-total-events'].forEach(id => {

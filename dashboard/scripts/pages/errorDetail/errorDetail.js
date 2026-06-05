@@ -7,6 +7,7 @@
 
 import { renderNavbar }     from '../../components/navbar.js';
 import { badgeClass }       from '../../components/errorCard.js';
+import { skeletonHtml }     from '../../components/skeleton.js';
 import { renderStackTrace } from './stackTrace.js';
 import { normalizeError } from '../../utils/constants.js';
 import { apiGet, apiPatch } from '../../api/api.js';
@@ -203,16 +204,11 @@ function renderDetail(err) {
 function renderSkeleton() {
   document.getElementById('detail-root').innerHTML = `
     <div class="detail-card">
-      <div class="skeleton skeleton--badge"></div>
-      <div class="skeleton skeleton--title"></div>
+      ${skeletonHtml(['badge', 'title'])}
       <div class="detail-stats">
-        <div class="skeleton skeleton--stat"></div>
-        <div class="skeleton skeleton--stat"></div>
-        <div class="skeleton skeleton--stat"></div>
-        <div class="skeleton skeleton--stat"></div>
+        ${skeletonHtml(['stat', 'stat', 'stat', 'stat'])}
       </div>
-      <div class="skeleton skeleton--block"></div>
-      <div class="skeleton skeleton--block"></div>
+      ${skeletonHtml(['block', 'block'])}
     </div>`;
 }
 
