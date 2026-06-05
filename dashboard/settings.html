@@ -37,11 +37,29 @@
         <div class="settings-section">
           <label class="settings-label" for="sdk-install-command">Install command</label>
           <div class="settings-code-row">
-            <code id="sdk-install-command" class="settings-code">npm install @watchtower/sdk</code>
+            <code id="sdk-install-command" class="settings-code">npm install https://github.com/cse110-sp26-group06/watchtower</code>
             <button id="copy-install-btn" class="btn btn--outline settings-copy-btn" type="button">Copy</button>
           </div>
         </div>
 
+        <div class="settings-section">
+          <label class="settings-label">Setup</label>
+          <p class="settings-label">Move <code>init-watchtower.js</code> from <code>node_modules</code> into your main project directory and paste in your API key.</p>
+        </div>
+
+        <div class="settings-section">
+          <label class="settings-label">Imports</label>
+          <div class="settings-code-row">
+            <code class="settings-code">import { captureError } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";</code>
+          </div>
+          <div class="settings-code-row">
+            <code class="settings-code">import { captureLog } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";</code>
+          </div>
+          <div class="settings-code-row">
+            <code class="settings-code">import { capturePerformance } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";</code>
+          </div>
+        </div>
+        
         <div class="settings-section">
           <label class="settings-label" for="project-api-key">Your API Key:</label>
           <div class="settings-api-key-row">
