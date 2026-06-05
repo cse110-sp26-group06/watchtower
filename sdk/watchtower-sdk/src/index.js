@@ -2,7 +2,9 @@ import BatchingEngine from "./batching/BatchingEngine";
 import { send } from  "./transport/send.js";
 import { parseError } from "./handler/parseError.js";
 import { parseLog } from "./handler/parseLog.js";
+import { parsePerformance } from "./handler/parsePerformance.js";
 import { patchConsole } from "./wrapper/console.js";
+
 
 let engine = null;
 
@@ -40,11 +42,11 @@ let engine = null;
  * @param {number} [config.logMaxCount=50]
  *        Maximum number of log events allowed in a batch.
  *
- * @param {number} [config.spanMaxTimeMs=2000]
- *        Maximum time (in ms) before flushing span (performance) events.
+ * @param {number} [config.performanceMaxTimeMs=2000]
+ *        Maximum time (in ms) before flushing performance events.
  *
- * @param {number} [config.spanMaxCount=25]
- *        Maximum number of span events allowed in a batch.
+ * @param {number} [config.performanceMaxCount=25]
+ *        Maximum number of performance events allowed in a batch.
  *
  * @throws {Error}
  *         Throws if called more than once or if required fields (like apiKey)
@@ -84,9 +86,9 @@ export function initWatchtower(config = {}) {
       maxTimeMs: config.logMaxTimeMs ?? 3000,
       maxCount:  config.logMaxCount  ?? 50
     },
-    span: {
-      maxTimeMs: config.spanMaxTimeMs ?? 2000,
-      maxCount:  config.spanMaxCount  ?? 25
+    performance: {
+      maxTimeMs: config.performanceMaxTimeMs ?? 2000,
+      maxCount:  config.performanceMaxCount  ?? 25
     }
   };
 
@@ -114,6 +116,17 @@ export function initWatchtower(config = {}) {
 
   // --- Log Handler ---
   patchConsole(handleLog);
+
+  // --- Performance Observer ---
+  const observer = new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      capturePerformance(entry); // feeds into parsePerformance → engine.enqueue
+    }
+  });
+
+  observer.observe({ type: 'resource',   buffered: true });
+  observer.observe({ type: 'paint',      buffered: true });
+  observer.observe({ type: 'navigation', buffered: true });
 }
 
 /**
@@ -141,3 +154,19 @@ function handleLog(level, args) {
   const parsed = parseLog(level, args);
   engine.enqueue("log", parsed);
 }
+
+/**
+ * Manually capture performance data and send it through the batching engine.
+ *
+ * @param {string} entry - The performance entry to capture.
+ */
+export function capturePerformance(entry) {
+  if (!engine) {
+    console.warn("WatchTower not initialized. Call initWatchtower() first.");
+    return;
+  }
+
+  const parsedPerformance = parsePerformance(entry);
+  engine.enqueue("performance", parsedPerformance);
+}
+

@@ -9,6 +9,7 @@
  * @param {any[]} [args=[]] - Raw console arguments captured by the wrapper.
  * @returns {{ event_type: "log", timestamp: string, payload: { level: string, message: string, file?: string, lineno?: number, colno?: number } }} A normalized log event.
  */
+
 export function parseLog(level, args = []) {
   const message = formatConsoleMessage(args);
 

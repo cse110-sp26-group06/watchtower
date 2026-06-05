@@ -1,5 +1,5 @@
 /**
- * Sends a batch of span events to the Watchtower ingestion API.
+ * Sends a batch of performance events to the Watchtower ingestion API.
  *
  * This function accepts an EventBatch object that conforms to the
  * JSON schema used by the backend. It serializes the batch into JSON
@@ -8,7 +8,7 @@
  * @param batch - A fully validated EventBatch containing one or more span events.
  * @returns A Promise that resolves when the request completes.
  */
-export async function sendSpanBatch(batch) { 
+export async function sendPerformanceBatch(batch) { 
   try {
     const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/span", {
       method: "POST",
@@ -19,10 +19,10 @@ export async function sendSpanBatch(batch) {
     });
 
     if (!res.ok) {
-      console.error("Failed to send span batch", await res.text());
+      console.error("Failed to send performance batch", await res.text());
     }
   } catch (err) {
-    console.error("Network error while sending span batch:", err);
+    console.error("Network error while sending performance batch:", err);
   }
 }
 
