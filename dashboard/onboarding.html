@@ -61,8 +61,6 @@
           <p class="step-section__hint">Keep this API key secure. You'll need it to connect your application to WatchTower.</p>
         </section>
 
-        
-
         <section class="step-section">
           <h3 class="step-section__title"><span class="step-number">2</span> Initialize Your Project</h3>
           <p class="step-section__hint">If your project does not have a <code>package.json</code> file yet, run this first:</p>
@@ -88,8 +86,13 @@
           <p class="step-section__hint">At the top of each file you want to monitor, add the following imports:</p>
           <div class="code-block code-block--multiline">
             <pre><code>import { captureError } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";
-import { captureLog } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";
-import { capturePerformance } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";</code></pre>
+        import { captureLog } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";
+        import { capturePerformance } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";
+        
+WatchTower.init({
+  apiKey: '<span id="snippet-api-key">your-api-key</span>',
+  environment: 'production'
+});</code></pre>
           </div>
         </section>
 
