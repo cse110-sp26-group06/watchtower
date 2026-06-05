@@ -7,6 +7,7 @@
 
 import { renderNavbar }         from '../../components/navbar.js';
 import { loadingStateHtml, errorStateHtml } from '../../components/pageState.js';
+import { statCardsHtml }        from '../../components/statCards.js';
 import { requireAuth }          from '../../utils/auth.js';
 import { showToast }            from '../../utils/toast.js';
 import { escHtml }              from '../../utils/dom.js';
@@ -154,63 +155,44 @@ function endpointSeverity(ms, maxMs) {
 // ── Render Stats ──────────────────────────────────────────────────────────────
 
 function renderStats({ avgMs, avgPageLoad, slowest, total }) {
-  const set = (id, text) => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = text; }
-  };
-  const setClass = (id, cls) => {
-    const el = document.getElementById(id);
-    if (el) { el.className = cls; }
-  };
+  const container = document.getElementById('perf-stats-container');
+  if (!container) return;
+
+  const cards = [];
 
   // Avg response time
+  let msSub = 'No resource data', msMod = 'neutral';
   if (avgMs !== null) {
-    set('stat-response-time', `${avgMs}ms`);
-    const cls = avgMs > 600
-      ? 'perf-stat-card__delta perf-stat-card__delta--bad'
-      : avgMs > 300
-        ? 'perf-stat-card__delta perf-stat-card__delta--neutral'
-        : 'perf-stat-card__delta perf-stat-card__delta--good';
-    set('stat-response-delta', avgMs > 600 ? '⚠ High latency' : avgMs > 300 ? 'Moderate' : '✓ Fast');
-    setClass('stat-response-delta', cls);
-  } else {
-    set('stat-response-time', '—');
-    set('stat-response-delta', 'No resource data');
+    msSub = avgMs > 600 ? '⚠ High latency' : avgMs > 300 ? 'Moderate' : '✓ Fast';
+    msMod = avgMs > 600 ? 'bad' : avgMs > 300 ? 'neutral' : 'good';
   }
+  cards.push({ label: 'Avg Response Time', value: avgMs !== null ? `${avgMs}ms` : '—', sub: msSub, subModifier: msMod });
 
   // Page load
+  let loadSub = 'No navigation data', loadMod = 'neutral';
   if (avgPageLoad !== null) {
-    set('stat-page-load', `${avgPageLoad}ms`);
-    const cls = avgPageLoad > 3000
-      ? 'perf-stat-card__delta perf-stat-card__delta--bad'
-      : avgPageLoad > 1500
-        ? 'perf-stat-card__delta perf-stat-card__delta--neutral'
-        : 'perf-stat-card__delta perf-stat-card__delta--good';
-    set('stat-page-load-delta', avgPageLoad > 3000 ? '⚠ Slow page load' : avgPageLoad > 1500 ? 'Moderate' : '✓ Fast load');
-    setClass('stat-page-load-delta', cls);
-  } else {
-    set('stat-page-load', '—');
-    set('stat-page-load-delta', 'No navigation data');
+    loadSub = avgPageLoad > 3000 ? '⚠ Slow page load' : avgPageLoad > 1500 ? 'Moderate' : '✓ Fast load';
+    loadMod = avgPageLoad > 3000 ? 'bad' : avgPageLoad > 1500 ? 'neutral' : 'good';
   }
+  cards.push({ label: 'Page Load Time', value: avgPageLoad !== null ? `${avgPageLoad}ms` : '—', sub: loadSub, subModifier: loadMod });
 
   // Slowest endpoint
+  let slowSub = 'No endpoints tracked', slowMod = 'neutral';
   if (slowest) {
-    set('stat-slowest', `${slowest.duration}ms`);
-    set('stat-slowest-delta', slowest.name);
-    setClass('stat-slowest-delta',
-      slowest.duration > 600
-        ? 'perf-stat-card__delta perf-stat-card__delta--bad'
-        : 'perf-stat-card__delta perf-stat-card__delta--neutral'
-    );
-  } else {
-    set('stat-slowest', '—');
-    set('stat-slowest-delta', 'No endpoints tracked');
+    slowSub = slowest.name;
+    slowMod = slowest.duration > 600 ? 'bad' : 'neutral';
   }
+  cards.push({ label: 'Slowest Endpoint', value: slowest ? `${slowest.duration}ms` : '—', sub: slowSub, subModifier: slowMod });
 
   // Total events
-  set('stat-total-events', total > 0 ? String(total) : '0');
-  set('stat-total-events-delta', total === 1 ? '1 event ingested' : `${total} events ingested`);
-  setClass('stat-total-events-delta', 'perf-stat-card__delta perf-stat-card__delta--neutral');
+  cards.push({
+    label: 'Total Events',
+    value: total > 0 ? String(total) : '0',
+    sub: total === 1 ? '1 event ingested' : `${total} events ingested`,
+    subModifier: 'neutral'
+  });
+
+  container.innerHTML = statCardsHtml(cards);
 }
 
 // ── Render Chart ──────────────────────────────────────────────────────────────
@@ -353,27 +335,37 @@ function renderEndpoints(endpoints) {
 // ── Loading / Error States ────────────────────────────────────────────────────
 
 function renderLoading() {
-  const container = document.getElementById('slow-endpoints');
-  if (container) {
-    container.innerHTML = loadingStateHtml('Loading performance data…');
+  const endpoints = document.getElementById('slow-endpoints');
+  if (endpoints) {
+    endpoints.innerHTML = loadingStateHtml('Loading performance data…');
   }
 
-  ['stat-response-time','stat-page-load','stat-slowest','stat-total-events'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = '…'; }
-  });
+  const container = document.getElementById('perf-stats-container');
+  if (container) {
+    container.innerHTML = statCardsHtml([
+      { label: 'Avg Response Time', value: '…' },
+      { label: 'Page Load Time', value: '…' },
+      { label: 'Slowest Endpoint', value: '…' },
+      { label: 'Total Events', value: '…' }
+    ]);
+  }
 }
 
 function renderFetchError(msg) {
-  const container = document.getElementById('slow-endpoints');
-  if (container) {
-    container.innerHTML = errorStateHtml(msg, 'reloadPerformance');
+  const endpoints = document.getElementById('slow-endpoints');
+  if (endpoints) {
+    endpoints.innerHTML = errorStateHtml(msg, 'reloadPerformance');
   }
 
-  ['stat-response-time','stat-page-load','stat-slowest','stat-total-events'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = '—'; }
-  });
+  const container = document.getElementById('perf-stats-container');
+  if (container) {
+    container.innerHTML = statCardsHtml([
+      { label: 'Avg Response Time', value: '—' },
+      { label: 'Page Load Time', value: '—' },
+      { label: 'Slowest Endpoint', value: '—' },
+      { label: 'Total Events', value: '—' }
+    ]);
+  }
 }
 
 // ── Theme Change Observer ─────────────────────────────────────────────────────

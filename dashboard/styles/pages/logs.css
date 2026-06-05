@@ -59,56 +59,7 @@
 }
 
 /* ── Stat Cards ──────────────────────────────────────────────── */
-.logs-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-md);
-}
-
-.logs-stat-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  transition: box-shadow var(--transition), border-color var(--transition);
-}
-
-.logs-stat-card:hover {
-  box-shadow: var(--shadow-sm);
-  border-color: var(--color-accent-border);
-}
-
-.logs-stat-card--error { border-left: 3px solid var(--color-critical); }
-.logs-stat-card--warn  { border-left: 3px solid #f59e0b; }
-
-.logs-stat-card__label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  letter-spacing: 0.2px;
-}
-
-.logs-stat-card__value {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  color: var(--color-text);
-  line-height: 1;
-}
-
-.logs-stat-card__sub {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  margin-top: 2px;
-}
-
-.logs-stat-card--error .logs-stat-card__value { color: var(--color-critical); }
-.logs-stat-card--warn  .logs-stat-card__value { color: #d97706; }
-[data-theme="dark"] .logs-stat-card--warn .logs-stat-card__value { color: #fbbf24; }
+/* Styles live in components.css under the .stat-cards block. */
 
 /* ── Level Pills ─────────────────────────────────────────────── */
 .logs-level-pills {

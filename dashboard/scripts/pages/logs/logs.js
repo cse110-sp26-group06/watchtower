@@ -9,6 +9,7 @@
 import { renderNavbar }                                       from '../../components/navbar.js';
 import { loadingStateHtml, emptyStateHtml, errorStateHtml }  from '../../components/pageState.js';
 import { skeletonHtml }                                       from '../../components/skeleton.js';
+import { statCardsHtml }                                      from '../../components/statCards.js';
 import { requireAuth }                                        from '../../utils/auth.js';
 import { showToast }                                          from '../../utils/toast.js';
 import { escHtml }                                            from '../../utils/dom.js';
@@ -92,30 +93,27 @@ function deriveStats(logs) {
 function renderStats(logs) {
   const { total, errors, warns, services } = deriveStats(logs);
 
-  const set = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = val; }
-  };
-
-  set('stat-total',        total);
-  set('stat-total-sub',    total === 1 ? '1 entry' : `${total} entries this page`);
-  set('stat-errors',       errors);
-  set('stat-errors-sub',   errors ? `${Math.round((errors / total) * 100)}% error rate` : 'No errors');
-  set('stat-warns',        warns);
-  set('stat-warns-sub',    warns  ? `${Math.round((warns  / total) * 100)}% warn rate`  : 'No warnings');
-  set('stat-services',     services);
-  set('stat-services-sub', services === 1 ? '1 service' : `${services} services`);
+  const container = document.getElementById('logs-stats-container');
+  if (container) {
+    container.innerHTML = statCardsHtml([
+      { label: 'Total Logs', value: total, sub: total === 1 ? '1 entry' : `${total} entries this page` },
+      { label: 'Errors', value: errors, sub: errors ? `${Math.round((errors / total) * 100)}% error rate` : 'No errors', modifier: 'error' },
+      { label: 'Warnings', value: warns, sub: warns ? `${Math.round((warns / total) * 100)}% warn rate` : 'No warnings', modifier: 'warn' },
+      { label: 'Services', value: services, sub: services === 1 ? '1 service' : `${services} services` }
+    ]);
+  }
 }
 
 function renderStatsLoading() {
-  ['stat-total','stat-errors','stat-warns','stat-services'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = '…'; }
-  });
-  ['stat-total-sub','stat-errors-sub','stat-warns-sub','stat-services-sub'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = ''; }
-  });
+  const container = document.getElementById('logs-stats-container');
+  if (container) {
+    container.innerHTML = statCardsHtml([
+      { label: 'Total Logs', value: '…' },
+      { label: 'Errors', value: '…', modifier: 'error' },
+      { label: 'Warnings', value: '…', modifier: 'warn' },
+      { label: 'Services', value: '…' }
+    ]);
+  }
 }
 
 // ── Render Table ──────────────────────────────────────────────────────────────
