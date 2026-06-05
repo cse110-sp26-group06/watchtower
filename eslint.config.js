@@ -19,6 +19,12 @@ const htmlRules = {
   "@html-eslint/no-duplicate-class": "error",
   "@html-eslint/css-no-empty-blocks" : "error",
   "@html-eslint/max-element-depth" : ["error",{ "max" : 10 }],
+  '@html-eslint/indent': 'off',
+  '@html-eslint/attrs-newline': 'off',
+  '@html-eslint/element-newline': 'off',
+  '@html-eslint/require-closing-tags': 'off',
+  '@html-eslint/no-extra-spacing-tags': 'off',
+  '@html-eslint/require-lang' : 'off',
 };
 
 export default [
