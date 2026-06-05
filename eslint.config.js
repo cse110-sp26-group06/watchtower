@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import globals from 'globals';
 import html from "@html-eslint/eslint-plugin";
+import css from "@eslint/css";
 
 // Keep the shared rule set intentionally small and readability-focused.
 const jsRules = {
@@ -27,12 +28,15 @@ const htmlRules = {
   '@html-eslint/require-lang' : 'off',
 };
 
+const cssRules = {
+  "css/no-duplicate-imports": "error",
+};
+
 export default [
   {
     // Ignore generated output files.
     ignores: ['eslint-results.sarif'],
   },
-  js.configs.recommended,
   {
     files: ["**/*.html"],
     ...html.configs['flat/recommended'],
@@ -42,14 +46,26 @@ export default [
     },
   },
   {
+    files: ["**/*.css"],
+    plugins: {
+      css,
+    },
+    language: "css/css",
+    rules: {
+      ...cssRules,
+    },
+  },
+  {
     // Baseline config for all JavaScript files in the repo.
     files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
     },
-    rules: jsRules,
-    
+    rules: {
+      ...js.configs.recommended.rules,
+      ...jsRules,
+    }
   },
   {
     // Browser globals for dashboard code and SDK browser fixtures.

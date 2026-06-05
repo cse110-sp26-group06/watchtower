@@ -5,17 +5,15 @@
   "description": "Agile error and performance monitoring tool",
   "homepage": "https://github.com/cse110-sp26-group06/watchtower#readme",
   "main": "sdk/index.js",
-
   "files": [
-        "sdk/"
-    ],
-   
+    "sdk/"
+  ],
   "repository": {
-        "type": "git",
-        "url": "https://github.com/cse110-sp26-group06/watchtower"
-    },
-
+    "type": "git",
+    "url": "https://github.com/cse110-sp26-group06/watchtower"
+  },
   "devDependencies": {
+    "@eslint/css": "^1.3.0",
     "@eslint/js": "^9.0.0",
     "@html-eslint/eslint-plugin": "0.61.0",
     "@html-eslint/parser": "0.61.0",
