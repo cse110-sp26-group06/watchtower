@@ -32,10 +32,12 @@ The project spec requires using SemVer and maintaining a changelog (manual, auto
 
 **Versioning: unified.** One `v0.x.y` tag per release on the repo. The SDK's `package.json` version mirrors the project tag so external consumers (npm) see a SemVer-meaningful version. Backend and Dashboard don't have external consumers, so independent versions would add bookkeeping for no benefit. The versioning scheme will be as follows:
 
-0.1.0 → error pipeline end-to-end 
-0.2.0 → performance capture
-0.3.0 → feedback widgets
+0.1.0 → error pipeline end-to-end \
+0.2.0 → performance capture \
+0.3.0 → feedback widgets \
 0.4.0 → notifications + build signals
+
+*Note*: The 0.3.0 and 0.4.0 implementation targets above were revised by [ADR 0009](/docs/adr/0009-final-release-scope.md). The guaranteed MVP release scope is 0.1.0 (error pipeline) and 0.2.0 (performance). Features in 0.3.0 and 0.4.0 (notifications, feedback, GitHub Issues integration) will be attempted if time permits. Any incomplete work will be preserved on feature branches and documented in the project Wiki rather than held as a release blocker.
 
 **Changelog: manual.** Entries added to `CHANGELOG.md` at release time, using the Keep a Changelog format already scaffolded in Sprint 1. Releases align with sprint ends, so changelog updates happen roughly once a week.
 
