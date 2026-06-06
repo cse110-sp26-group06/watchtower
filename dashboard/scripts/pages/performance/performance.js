@@ -156,7 +156,9 @@ function endpointSeverity(ms, maxMs) {
 
 function renderStats({ avgMs, avgPageLoad, slowest, total }) {
   const container = document.getElementById('perf-stats-container');
-  if (!container) return;
+  if (!container) {
+    return;
+  }
 
   const cards = [];
 

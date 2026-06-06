@@ -7,8 +7,7 @@
  */
 
 import { renderNavbar }                                       from '../../components/navbar.js';
-import { loadingStateHtml, emptyStateHtml, errorStateHtml }  from '../../components/pageState.js';
-import { skeletonHtml }                                       from '../../components/skeleton.js';
+import { emptyStateHtml, errorStateHtml }                    from '../../components/pageState.js';
 import { statCardsHtml }                                      from '../../components/statCards.js';
 import { requireAuth }                                        from '../../utils/auth.js';
 import { showToast }                                          from '../../utils/toast.js';
