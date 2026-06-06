@@ -429,9 +429,15 @@ async function load() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await load();
-});
+function init() {
+  load();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 window.addEventListener('pageshow', () => {
   load();

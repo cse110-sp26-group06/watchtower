@@ -415,10 +415,16 @@ function bindDrawer() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', async () => {
+function init() {
   bindFilters();
   bindDrawer();
-  await load();
-});
+  load();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 window.addEventListener('pageshow', () => { load(); });

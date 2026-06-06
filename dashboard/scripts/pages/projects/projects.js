@@ -284,4 +284,8 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-window.addEventListener('DOMContentLoaded', loadProjects);
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', loadProjects);
+} else {
+  loadProjects();
+}
