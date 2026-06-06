@@ -1,4 +1,3 @@
-/* global console */
 /**
  * routes/notifications.js
  * Handles notification preference endpoints for Dashboard.
@@ -30,26 +29,26 @@ function jsonResponse(body, status = 200) {
 }
 
 export async function handleGetNotificationSettings(request, env) {
-    const url = new URL(request.url);
-    const user_id = url.searchParams.get('user_id');
-    const project_id = url.searchParams.get('project_id');
+  const url = new URL(request.url);
+  const user_id = url.searchParams.get('user_id');
+  const project_id = url.searchParams.get('project_id');
 
-    if (!user_id || !project_id) {
-        return jsonResponse({ status: 'error', message: 'user_id and project_id required' }, 400);
-    }
+  if (!user_id || !project_id) {
+    return jsonResponse({ status: 'error', message: 'user_id and project_id required' }, 400);
+  }
 
-    const user = await getUserById(env, user_id);
+  const user = await getUserById(env, user_id);
     if (!user) {
-        return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
+      return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
     }
 
-    try {
-        const settings = await getNotificationSettings(env, user_id, project_id);
-        return jsonResponse({
-            status: 'ok',
-            email_enabled: settings ? settings.email_enabled === 1 : false
-        }, 200);
-    } catch (err) {
+  try {
+    const settings = await getNotificationSettings(env, user_id, project_id);
+    return jsonResponse({
+      status: 'ok',
+        email_enabled: settings ? settings.email_enabled === 1 : false
+    }, 200);
+  } catch (err) {
         console.error('Failed to get notification settings:', err);
         return jsonResponse({ status: 'error', message: 'Failed to get settings' }, 500);
     }
@@ -62,23 +61,23 @@ export async function handleGetNotificationSettings(request, env) {
  * @param {object} env
  */
 export async function handleUpdateNotificationSettings(request, env) {
-    let body;
-    try {
-        body = await request.json();
-    } catch {
-        return jsonResponse({ status: 'error', message: 'Invalid JSON' }, 400);
-    }
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ status: 'error', message: 'Invalid JSON' }, 400);
+  }
 
-    const { user_id, project_id, email_enabled } = body;
+  const { user_id, project_id, email_enabled } = body;
 
-    if (!user_id || !project_id) {
-        return jsonResponse({ status: 'error', message: 'user_id and project_id required' }, 400);
-    }
-    if (typeof email_enabled !== 'boolean') {
-        return jsonResponse({ status: 'error', message: 'email_enabled must be a boolean' }, 400);
-    }
+  if (!user_id || !project_id) {
+    return jsonResponse({ status: 'error', message: 'user_id and project_id required' }, 400);
+  }
+  if (typeof email_enabled !== 'boolean') {
+    return jsonResponse({ status: 'error', message: 'email_enabled must be a boolean' }, 400);
+  }
 
-    const user = await getUserById(env, user_id);
+  const user = await getUserById(env, user_id);
     if (!user) {
         return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
     }
