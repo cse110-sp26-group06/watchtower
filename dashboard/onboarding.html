@@ -62,17 +62,33 @@
         </section>
 
         <section class="step-section">
-          <h3 class="step-section__title"><span class="step-number">2</span> Install the SDK</h3>
+          <h3 class="step-section__title"><span class="step-number">2</span> Initialize Your Project</h3>
+          <p class="step-section__hint">If your project does not have a <code>package.json</code> file yet, run this first:</p>
           <div class="code-block">
-            <code>npm install @watchtower/sdk</code>
+            <code>npm init -y</code>
           </div>
         </section>
 
         <section class="step-section">
-          <h3 class="step-section__title"><span class="step-number">3</span> Add to Your Application</h3>
-          <div class="code-block code-block--multiline">
-            <pre><code>import WatchTower from '@watchtower/sdk';
+          <h3 class="step-section__title"><span class="step-number">3</span> Install the SDK</h3>
+          <div class="code-block">
+            <code>npm install https://github.com/cse110-sp26-group06/watchtower</code>
+          </div>
+        </section>
 
+        <section class="step-section">
+          <h3 class="step-section__title"><span class="step-number">4</span> Configure WatchTower</h3>
+          <p class="step-section__hint">Move <code>init-watchtower.js</code> from <code>node_modules</code> into your main project directory. Then paste in your API key and fill in the required fields inside <code>initWatchtower</code>.</p>
+        </section>
+
+        <section class="step-section">
+          <h3 class="step-section__title"><span class="step-number">5</span> Add Imports to Your Files</h3>
+          <p class="step-section__hint">At the top of each file you want to monitor, add the following imports:</p>
+          <div class="code-block code-block--multiline">
+            <pre><code>import { captureError } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";
+        import { captureLog } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";
+        import { capturePerformance } from "./node_modules/watchtower/sdk/watchtower-sdk/src/index.js";
+        
 WatchTower.init({
   apiKey: '<span id="snippet-api-key">your-api-key</span>',
   environment: 'production'

@@ -304,7 +304,7 @@ test('project settings shows the selected project API key', async ({ page }) => 
   expect(response?.ok()).toBeTruthy();
   await expect(page.getByRole('heading', { name: 'Project Settings' })).toBeVisible();
   await expect(page.getByText('Project 2')).toBeVisible();
-  await expect(page.getByText('npm install @watchtower/sdk')).toBeVisible();
+  await expect(page.getByText('npm install https://github.com/cse110-sp26-group06/watchtower')).toBeVisible();
   await expect(page.getByLabel('Your API Key')).toHaveValue('wt_project_two_key');
   await expect(page.getByLabel('Your API Key')).not.toHaveValue('wt_project_one_key');
 });
