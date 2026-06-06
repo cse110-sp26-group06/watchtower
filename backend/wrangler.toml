@@ -10,3 +10,6 @@ enabled = true
 binding = "watchtower_db"
 database_name = "watchtower-db"
 database_id = "3e5cdd94-da48-46c9-971c-7a302a364c66"
+
+[triggers]
+crons = ["53 7 * * *"]
