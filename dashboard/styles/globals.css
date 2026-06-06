@@ -15,8 +15,8 @@
 
   /* Text */
   --color-text:             #1C120A;
-  --color-text-secondary:   #7A5A44;
-  --color-text-muted:       #A89080;
+  --color-text-secondary:   #3a2618;
+  --color-text-muted:       #684d3a;
 
   /* Brand accent#e8732e */ 
   --color-accent:           #F97316;
@@ -66,8 +66,8 @@
 
   /* Text */
   --color-text:             #FAF7F4;
-  --color-text-secondary:   #A8907A;
-  --color-text-muted:       #5C4030;
+  --color-text-secondary:   #f2decf;
+  --color-text-muted:       #c8b29e;
 
   /* Brand accent — unchanged across modes */
   --color-accent:           #e8732e;
