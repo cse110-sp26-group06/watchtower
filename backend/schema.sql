@@ -1,4 +1,3 @@
--- BE-3: D1 schema for WatchTower
 -- Run with: wrangler d1 execute watchtower-db --file=schema.sql
 -- Existing DBs created before owner_id was added should also run:
 -- wrangler d1 execute watchtower-db --file=migrations/20260529_add_projects_owner_id.sql

@@ -5,8 +5,6 @@
  *
  * Current endpoints:
  *   GET /api/errors — returns paginated list of errors for a project
- *
- * Future endpoints (Sprint 3+):
  *   GET /api/errors/:id — single error detail
  *   PATCH /api/errors/:id — mark error as resolved
  */

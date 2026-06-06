@@ -1,4 +1,3 @@
-/* global console */
 /**
  * cron/digest.js
  * Daily digest cron job — runs every day at 9am PST (17:00 UTC)

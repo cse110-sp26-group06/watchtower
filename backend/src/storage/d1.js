@@ -201,7 +201,17 @@ export async function storeLog(env, record) {
   ).run();
 }
 
-
+/**
+ * Reads log events from D1 for a given project
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} api_key - project api key
+ * @param {object} params - optional filters
+ * @param {string} [params.level] - filter by log level (debug/info/warn/error)
+ * @param {string} [params.since] - ISO timestamp, only return logs after this time
+ * @param {number} [params.page=1] - page number for pagination
+ * @param {number} [params.limit=20] - number of results per page
+ * @returns {object[]} array of log records from D1
+ */
 export async function getLogs(env, api_key, params = {}) {
   const { level, since } = params;
 
