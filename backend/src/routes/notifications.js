@@ -46,7 +46,7 @@ export async function handleGetNotificationSettings(request, env) {
     const settings = await getNotificationSettings(env, user_id, project_id);
     return jsonResponse({
       status: 'ok',
-        email_enabled: settings ? settings.email_enabled === 1 : false
+      email_enabled: settings ? settings.email_enabled === 1 : false
     }, 200);
   } 
   catch (err) {
