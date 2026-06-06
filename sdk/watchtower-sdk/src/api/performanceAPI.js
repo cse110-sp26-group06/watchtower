@@ -5,12 +5,12 @@
  * JSON schema used by the backend. It serializes the batch into JSON
  * and posts it to the configured ingestion endpoint.
  *
- * @param batch - A fully validated EventBatch containing one or more span events.
+ * @param batch - A fully validated EventBatch containing one or more performance events.
  * @returns A Promise that resolves when the request completes.
  */
 export async function sendPerformanceBatch(batch) { 
   try {
-    const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/span", {
+    const res = await fetch("https://watchtower-backend.group6.workers.dev/ingest/performance", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
