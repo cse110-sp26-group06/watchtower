@@ -113,14 +113,14 @@ async function sendEmail(to, subject, html, resendApiKey) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-        from: 'WatchTower <onboarding@resend.dev>',
-        to,
-        subject,
-        html
+      from: 'WatchTower <onboarding@resend.dev>',
+      to,
+      subject,
+      html
     })
   });
   if (!res.ok) {
@@ -139,13 +139,13 @@ export async function sendDailyDigests(env) {
 
   for (const setting of settings.results) {
     const countResult = await env.watchtower_db.prepare(
-        "SELECT COUNT(*) as count FROM errors WHERE api_key = ? AND server_timestamp >= datetime('now', '-1 day')"
+      "SELECT COUNT(*) as count FROM errors WHERE api_key = ? AND server_timestamp >= datetime('now', '-1 day')"
     ).bind(setting.api_key).first();
 
     const errorCount = countResult?.count ?? 0;
 
     const topErrors = await env.watchtower_db.prepare(
-        "SELECT message, error_type, COUNT(*) as count FROM errors WHERE api_key = ? AND server_timestamp >= datetime('now', '-1 day') GROUP BY message ORDER BY count DESC LIMIT 3"
+      "SELECT message, error_type, COUNT(*) as count FROM errors WHERE api_key = ? AND server_timestamp >= datetime('now', '-1 day') GROUP BY message ORDER BY count DESC LIMIT 3"
     ).bind(setting.api_key).all();
 
     const html = buildEmailHtml(setting.project_name, errorCount, topErrors.results);
