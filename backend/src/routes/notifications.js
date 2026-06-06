@@ -38,9 +38,9 @@ export async function handleGetNotificationSettings(request, env) {
   }
 
   const user = await getUserById(env, user_id);
-    if (!user) {
-      return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
-    }
+  if (!user) {
+    return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
+  }
 
   try {
     const settings = await getNotificationSettings(env, user_id, project_id);
@@ -48,10 +48,11 @@ export async function handleGetNotificationSettings(request, env) {
       status: 'ok',
         email_enabled: settings ? settings.email_enabled === 1 : false
     }, 200);
-  } catch (err) {
-        console.error('Failed to get notification settings:', err);
-        return jsonResponse({ status: 'error', message: 'Failed to get settings' }, 500);
-    }
+  } 
+  catch (err) {
+    console.error('Failed to get notification settings:', err);
+    return jsonResponse({ status: 'error', message: 'Failed to get settings' }, 500);
+  }
 }
 
 /**
@@ -78,15 +79,15 @@ export async function handleUpdateNotificationSettings(request, env) {
   }
 
   const user = await getUserById(env, user_id);
-    if (!user) {
-        return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
-    }
+  if (!user) {
+    return jsonResponse({ status: 'error', message: 'Unknown user_id' }, 404);
+  }
 
-    try {
-        await upsertNotificationSettings(env, user_id, project_id, email_enabled);
-        return jsonResponse({ status: 'ok', email_enabled }, 200);
-    } catch (err) {
-        console.error('Failed to update notification settings:', err);
-        return jsonResponse({ status: 'error', message: 'Failed to update settings' }, 500);
-    }
+  try {
+    await upsertNotificationSettings(env, user_id, project_id, email_enabled);
+    return jsonResponse({ status: 'ok', email_enabled }, 200);
+  } catch (err) {
+    console.error('Failed to update notification settings:', err);
+    return jsonResponse({ status: 'error', message: 'Failed to update settings' }, 500);
+  }
 }
