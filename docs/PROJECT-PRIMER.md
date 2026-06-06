@@ -216,8 +216,8 @@ If a term in the issue isn't familiar, check the **Glossary** below. If a term *
 - **Wiki / docs site:** *<add link>*
 - [**ADRs**](/docs/adr/index.md)
 - [**Design files (wireframes, etc.)**](/docs/ucd/)
-- [**Meeting notes:**](https://github.com/cse110-sp26-group06/cse110-sp26-group06/tree/main/admin/meetings/Team%20Meetings)
-- [**TA meeting notes:**](https://github.com/cse110-sp26-group06/cse110-sp26-group06/tree/main/admin/meetings/TA%20Meetings)
+- [**Meeting notes**](https://github.com/cse110-sp26-group06/cse110-sp26-group06/tree/main/admin/meetings/Team%20Meetings)
+- [**TA meeting notes**](https://github.com/cse110-sp26-group06/cse110-sp26-group06/tree/main/admin/meetings/TA%20Meetings)
 
 ---
 

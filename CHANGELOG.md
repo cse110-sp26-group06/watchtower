@@ -8,13 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Versioning will be as follows:
 
 0.1.0 → error pipeline end-to-end \
-0.2.0 → performance capture \
-0.3.0 → feedback widgets \
-0.4.0 → notifications + build signals
+0.2.0 → performance capture
 
-NOTE: Versions 0.3.0 and 0.4.0 are no longer part of MVP, they are Post-MVP/Stretch goals for future maintainers
+Stretch goals being pursued time-permitting (not part of confirmed MVP): feedback widgets, notifications, GitHub Issues integration, build signals. See [ADR 0009](docs/adr/0009-final-release-scope.md).
 
 ## [Unreleased]
+
+*(Performance capture and dashboard visibility — target 0.2.0)*
+
+### Added
+- SDK performance capture via `PerformanceObserver` (resource, paint, and navigation entries) with `capturePerformance()` entrypoint.
+- Backend `/ingest/performance` endpoint for receiving performance events from the SDK.
+- Backend `GET /api/performance` read endpoint with filtering by entry type, timestamp, and pagination.
+- Dashboard performance page showing avg response time, page load, slowest endpoint stats, and a per-hour response time chart.
+
+---
+
+## [0.1.0] - 2026-06-05
 
 ### Added
 - Dashboard API client module.
@@ -24,30 +34,14 @@ NOTE: Versions 0.3.0 and 0.4.0 are no longer part of MVP, they are Post-MVP/Stre
   - `PATCH /api/errors/:id`
 - SDK initialization API (`initWatchtower(...)`) and manual error capture entrypoint.
 - SDK batching engine and transport layer for sending error, log, and span batches to the backend.
-- Additional dashboard/API test coverage for the error detail flow.
 - Dashboard onboarding/projects flow for generating API keys and managing project selection.
+- Additional dashboard/API test coverage for the error detail flow.
 
 ### Changed
-- SDK event schemas for errors, logs, and spans were revised during implementation to remove redundant fields and better match accessible runtime data.
-- The SDK pipeline is now structured as: data capture -> data parsing -> batching -> API call.
-- Dashboard authentication direction changed from hardcoded accounts and shared access toward a basic authentication flow that can map users to their own projects.
-- Dashboard error views were expanded from mock-first prototypes toward real backend-backed list/detail flows, including filtering and per-error resolution.
-- Dashboard error detail flow was updated to load individual events by ID through the backend API rather than deriving detail data only from the error list.
-- 
-
-### Deprecated
--
-
-### Removed
--
-
-### Fixed
-- Dashboard can now request a single error's detail view through a dedicated backend endpoint instead of relying only on list data.
-
-### Security
--
+- SDK event schemas for errors, logs, and spans revised to remove redundant fields and better match accessible runtime data.
+- SDK pipeline structured as: data capture → data parsing → batching → API call.
+- Dashboard authentication moved from hardcoded accounts to a basic auth flow mapping users to their own projects.
 
 ---
 
-*Versions will be tagged starting at `0.1.0` once the first MVP-relevant feature (error pipeline) lands.*
 *See [docs/adr/index.md](docs/adr/index.md) for the ADR governing our versioning policy.*
