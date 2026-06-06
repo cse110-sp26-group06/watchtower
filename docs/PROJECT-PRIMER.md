@@ -38,7 +38,7 @@ Think Sentry or LogRocket, but small enough that one person could understand the
                                                    └────────────────┘
 ```
 
-**In words:** An error happens on a customer's site → SDK captures it → SDK POSTs to our Backend → Backend stores it and may trigger integrations (GitHub Issues, notifications) → Developer either logs into the Dashboard or gets pinged through their notification channel of choice.
+**In words:** An error happens on a customer's site → SDK captures it → SDK POSTs to our Backend → Backend stores it → Developer logs into the Dashboard to view errors and performance data. Outbound integrations (GitHub Issues, notifications) are stretch goals being pursued time-permitting; see [ADR 0009](adr/0009-final-release-scope.md).
 
 ---
 
@@ -52,7 +52,6 @@ Think Sentry or LogRocket, but small enough that one person could understand the
 - **Responsible for:**
   - Capturing JavaScript runtime errors (`window.onerror`, unhandled promise rejections)
   - Capturing performance metrics (page load, long tasks)
-  - Rendering feedback widgets / rating prompts
   - Batching events and sending them to the Backend
   - **Failing silently** — never crashing the host site
 - **NOT responsible for:** Storing data. Displaying dashboards. Authentication. Filtering or processing events server-side. Anything heavy or risky. Every byte we add affects the customer's site performance, so the SDK stays minimal.
@@ -67,12 +66,8 @@ Think Sentry or LogRocket, but small enough that one person could understand the
   - Authentication / API keys
   - Storage of events, projects, configuration
   - Read APIs that the Dashboard consumes
-  - GitHub Issues creation when error thresholds are hit
-  - Notification delivery (email / Slack / webhooks)
-  - Build signal handling (tying errors to deployments)
+- **Stretch goals (time-permitting):** GitHub Issues creation when error thresholds are hit, notification delivery (email / Slack / webhooks), build signal handling. These are not part of the confirmed MVP scope. See [ADR 0009](adr/0009-final-release-scope.md). If implemented, they will live in the Backend Workers.
 - **NOT responsible for:** Rendering UI. Running customer-side code.
-
-> The "outbound integrations" half (GitHub Issues, notifications, build signals) is a meaningful logical seam within the Backend. Don't be surprised if it ends up in its own folder or set of modules — but it's still Backend code, deployed and tested together.
 
 ### Dashboard (owned by the Dashboard sub-team)
 
@@ -95,13 +90,13 @@ We have 10 team members organized into 4 sub-teams:
 | Sub-team | Size | Owns | Tech |
 |---|---|---|---|
 | **Client SDK** | 2 | The injectable library | Vanilla JS, hosted as a script and possibly published to npm |
-| **Backend** | 3 | Ingestion API, storage, GitHub Issues + notifications | Cloudflare Workers + D1/KV |
+| **Backend** | 3 | Ingestion API, storage, read APIs | Cloudflare Workers + D1/KV |
 | **Dashboard** | 3 | Developer-facing web app | Vanilla JS, Cloudflare Pages |
 | **Process/Docs** | 2 | ADRs, Wiki, CI/CD config, PR template, retros, this primer | Markdown, GitHub Actions YAML |
 
 A few notes on this structure:
 
-- **Backend is larger because it absorbed Integrations.** GitHub Issues creation, notification delivery, and build signal handling all live inside the Backend Workers, so a separate sub-team would have created coordination overhead without much benefit. The 3-person Backend team will likely have one person focused primarily on the integration code.
+- **Backend is larger because the surface area is larger.** Ingestion, storage, auth, and read APIs cover a lot of ground for 3 people. Outbound integrations (GitHub Issues, notifications) are stretch goals that may be tackled time-permitting.
 
 - **SDK is smaller because the surface area is smaller.** The library itself is intentionally minimal, and 2 people pairing closely on it should have plenty to do.
 
@@ -109,11 +104,7 @@ A few notes on this structure:
 
 ### Stability over rotation
 
-We have roughly 4-5 sprints remaining in the quarter, which is too short a runway for meaningful rotation — switching sub-teams costs context we won't have time to recover.
-
-- **Sub-team membership stays stable for the rest of the quarter.** Land in a sub-team and stay there.
-- **Cross-team exposure happens through pairing, not rotation.** If you want to learn another component, pair with someone from that sub-team on a specific issue for a sprint. You don't have to switch teams to learn.
-- **The week-9 review break is built-in cross-exposure.** Another team will evaluate our code and we'll evaluate theirs, so everyone naturally sees parts of the system they didn't build.
+Sub-team membership mostly stayed stable for the duration of the quarter. Switching teams mid-project costs context there isn't time to recover. Cross-team exposure happened through pairing on specific issues and the week-9 peer code review, where each team evaluated another team's codebase.
 
 ---
 
@@ -157,18 +148,9 @@ Commit messages follow the [Conventional Commits](https://www.conventionalcommit
 
 Consistent commit messages keep history readable and leave the door open for automation if the team ever revisits the changelog/versioning decision.
 
-### Linting and the question of pre-commit hooks
+### Linting
 
-We will run linters (ESLint, Prettier, markdownlint, possibly others) both locally and in CI. CI will reject unlinted code. The question is *how much we automate locally.*
-
-There are two approaches we can take, and we'll decide which in an ADR:
-
-- **Manual:** Each developer runs `npm run lint` (or equivalent) themselves before pushing. Simple, no extra setup, but easy to forget.
-- **Automated via pre-commit hook:** A "pre-commit hook" is a script that runs automatically when you run `git commit`. The standard tooling for this is **Husky** (which manages git hooks across the team) plus **lint-staged** (which runs linters only on the files you're about to commit, so it stays fast). When configured, you literally cannot commit unlinted code without explicitly bypassing the hook.
-
-The automated approach is more reliable but takes some setup time and occasionally annoys developers when it blocks a commit they were trying to make quickly. The manual approach trusts developers to remember. Either way, **CI is the final safety net** — unlinted code never reaches `main`.
-
-For now: run `npm run lint` locally before pushing. We'll revisit pre-commit hooks once the linting tooling itself is in place.
+We will run a linter (ESLint) both locally and in CI. Run `npm run lint` locally before pushing. See [ADR 0004](/docs/adr/0004-linting-framework.md)
 
 ### Changelog
 
@@ -178,7 +160,7 @@ WatchTower uses **unified Semantic Versioning** for the whole repo: one `v0.x.y`
 
 For this project, changelog maintenance is **manual**. At release time, a developer updates `CHANGELOG.md` in the same PR that bumps the version. This keeps the process simple and avoids depending on perfect Conventional Commit discipline or extra release automation.
 
-See [ADR 0005](adr/0005-changelog-and-versioning.md) for the rationale.
+See [ADR 0005](/docs/adr/0005-changelog-and-versioning.md) for the rationale.
 
 ### GenAI usage must be disclosed
 
@@ -229,14 +211,13 @@ If a term in the issue isn't familiar, check the **Glossary** below. If a term *
 
 ## Where to Find Things
 
-- **Repo:** `cse110-sp26-group06/watchtower`
-- **Project board:** *<add link>*
+- [**Repo**](https://github.com/cse110-sp26-group06/watchtower)
+- [**Project board**](https://github.com/orgs/cse110-sp26-group06/projects/1)
 - **Wiki / docs site:** *<add link>*
-- **ADRs:** `/docs/adr/` in the repo
-- **Design files (wireframes, etc.):** *<add link to Figma / Excalidraw>*
-- **Slack channel:** *<add link>*
-- **Meeting notes:** *<add link or repo path>*
-- **TA meeting notes:** *<add link or repo path>*
+- [**ADRs**](/docs/adr/index.md)
+- [**Design files (wireframes, etc.)**](/docs/ucd/)
+- [**Meeting notes**](https://github.com/cse110-sp26-group06/cse110-sp26-group06/tree/main/admin/meetings/Team%20Meetings)
+- [**TA meeting notes**](https://github.com/cse110-sp26-group06/cse110-sp26-group06/tree/main/admin/meetings/TA%20Meetings)
 
 ---
 
@@ -266,7 +247,7 @@ If a term in the issue isn't familiar, check the **Glossary** below. If a term *
 
 **E2E (test)** — End-to-end test. Exercises the system the way a real user would (e.g., loading the Dashboard in a real browser via something like Playwright).
 
-**Husky** — A tool that manages git hooks (like pre-commit hooks) across the team in a shared way. We may or may not use it; see the Linting section.
+**Husky** — A tool that manages git hooks (like pre-commit hooks) across the team in a shared way. The team decided not to use it. Linting is enforced in CI rather than via pre-commit hooks.
 
 **Ingestion endpoint** — A URL on the Backend that receives event data from the SDK.
 
@@ -274,9 +255,7 @@ If a term in the issue isn't familiar, check the **Glossary** below. If a term *
 
 **KV** — Cloudflare Workers KV. A simple key-value store. One of our storage options.
 
-**lint-staged** — A tool that runs linters only on files staged for commit, keeping checks fast. Pairs with Husky if we go the pre-commit hook route.
-
-**Linting** — Automated code quality checks (e.g., ESLint, Prettier, markdownlint). Runs locally and in CI.
+**Linting** — Automated code quality checks via ESLint. Covers `.js`, `.html`, and `.css` files. Runs locally (`npm run lint`) and in CI.
 
 **LoC** — Lines of Code. We use this as the threshold for requiring a PR with human review (>300 LoC).
 

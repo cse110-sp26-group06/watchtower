@@ -1,16 +1,34 @@
 # WatchTower
 
-> A lightweight observability tool for developers. Catch errors, surface performance issues, and collect user feedback — without the noise.
-
 ## About
 
-WatchTower is a small observability platform: developers add an injectable JavaScript SDK to their site, and WatchTower captures runtime errors and performance metrics, surfacing them through a centralized dashboard. Post-MVP goals include user feedback, build signals, and notifications. Think Sentry or LogRocket, but small enough that one person can understand the whole thing end to end.
+WatchTower is a small observability platform: developers add an injectable JavaScript SDK to their site, and WatchTower captures runtime errors and performance metrics, surfacing them through a centralized dashboard. Stretch goals include user feedback, build signals, and notifications. Think Sentry or LogRocket, but small enough that one person can understand the whole thing end to end.
 
-This is a class project for **CSE 110 (Software Engineering)** at UC San Diego, Spring 2026. 
+```
+  [Customer's Website]              [Our Infrastructure]              [External Channels]
 
-## Status
+   ┌──────────────┐    HTTP POST    ┌──────────────────┐    creates    ┌──────────────┐
+   │ WatchTower   │ ─────────────►  │ Backend API      │ ────────────► │ GitHub       │
+   │ SDK          │   event data    │ (Cloudflare      │   issues      │ Issues       │
+   │ (script tag) │                 │  Workers + D1)   │               └──────────────┘
+   └──────────────┘                 └──────┬───────────┘
+                                           │                           ┌──────────────┐
+                                           │ serves data    notifies   │ Email /      │
+                                           ▼               ──────────► │ Slack /      │
+                                    ┌──────────────────┐               │ Webhooks     │
+                                    │ Dashboard        │               └──────┬───────┘
+                                    │ (web app)        │                      │
+                                    └────────┬─────────┘                      │
+                                             ▲                                │
+                                             │ logs in              receives  │
+                                             │                      alerts    │
+                                             │     ┌────────────────┐         │
+                                             └─────┤ Developer using├─────────┘
+                                                   │ WatchTower     │
+                                                   └────────────────┘
+```
 
-🚧 **In active development.** WatchTower is currently in its first design and prototyping sprint. No production functionality is shipped yet.
+*Diagram reflects full intended scope. Notifications, alerts, and external channels are stretch goals*
 
 ## Project Structure
 
@@ -20,10 +38,65 @@ WatchTower has three deliverables:
 - **Backend** (`/backend`) — Cloudflare Workers that ingest events from the SDK, store them, and serve them to the Dashboard.
 - **Dashboard** (`/dashboard`) — the vanilla-JS web app where developers log in to see their data.
 
-Plus shared concerns:
+  ```
+  watchtower/
+  ├── .github/
+  │   └── workflows/                # CI/CD GitHub Actions pipelines
+  ├── backend/                      # Cloudflare Workers API
+  │   ├── src/                      # Worker source (routes, middleware, storage)
+  │   ├── test/                     # Backend unit tests (Vitest)
+  │   ├── migrations/               # D1 database migration SQL files
+  │   ├── schema.sql                # Database schema
+  │   └── wrangler.toml             # Cloudflare deployment config
+  ├── dashboard/                    # Vanilla-JS developer dashboard (Cloudflare Pages)
+  │   ├── *.html                    # Page files (login, errors, performance, etc.)
+  │   ├── scripts/                  # Page logic, API client, shared utilities
+  │   ├── styles/                   # CSS (globals, components, layout, per-page)
+  │   └── tests/                    # Dashboard unit tests (Node test runner)
+  ├── docs/
+  │   ├── adr/                      # Architectural Decision Records (MADR format)
+  │   ├── sprints/                  # Per-sprint goal and deliverable overviews
+  │   ├── ucd/                      # Design brief and UCD artifacts
+  │   └── PROJECT-PRIMER.md         # Start here — architecture, teams, agreements
+  ├── e2e/                          # Playwright end-to-end tests
+  ├── sdk/
+  │   └── watchtower-sdk/src/       # Injectable JS library (error, log, performance capture)
+  ├── eslint.config.js              # Linting rules (JS, HTML, CSS)
+  ├── playwright.config.cjs         # E2E test configuration
+  ├── package.json                  # Root scripts (lint, test, e2e)
+  └── CHANGELOG.md                  # Notable changes per version
 
-- **Documentation** (`/docs`) — design brief, project primer, ADRs, sprint overviews.
-- **Spikes** (`/spikes`) — disposable prototypes for validating architecture. Not production code.
+## How to Run
+
+**1. Create a project and get an API key**
+
+Go to the [WatchTower dashboard](#), sign in, and create a new project. You'll receive an API key.
+
+**2. Install the SDK**
+
+```sh
+npm install github:cse110-sp26-group06/watchtower
+```
+
+**3. Initialize WatchTower in your site**
+
+```js
+import { initWatchtower } from 'watchtower-sdk';
+
+initWatchtower({
+  apiKey: 'your-api-key',
+  service: 'my-app',
+  environment: 'production',
+});
+```
+
+That's it. WatchTower will automatically capture JavaScript errors and performance metrics and send them to your dashboard.
+
+## Issues Running?
+
+**No data showing up on the dashboard** — make sure `initWatchtower()` is called before any other code runs and that the `apiKey` matches the project you created. Errors are batched and sent on a short timer, so allow a few seconds after triggering an event.
+
+**Dashboard won't log in / shows no projects** — try going through the onboarding page to create a fresh project. If you previously saved a project to `localStorage`, clearing site data and starting over usually resolves stale state.
 
 ## Documentation
 
@@ -50,4 +123,4 @@ WatchTower is built by Group 06 of CSE 110, Spring 2026.
 
 ## License
 
-This is a course project and is not currently licensed for external use.
+This is a class project for **CSE 110 (Software Engineering)** at UC San Diego, Spring 2026. 
