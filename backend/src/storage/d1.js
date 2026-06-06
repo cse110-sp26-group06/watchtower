@@ -245,10 +245,10 @@ export async function getLogs(env, api_key, params = {}) {
  * @returns {object|null}
  */
 export async function getNotificationSettings(env, user_id, project_id) {
-    const result = await env.watchtower_db.prepare(
-        'SELECT * FROM notification_settings WHERE user_id = ? AND project_id = ?'
-    ).bind(user_id, project_id).first();
-    return result || null;
+  const result = await env.watchtower_db.prepare(
+    'SELECT * FROM notification_settings WHERE user_id = ? AND project_id = ?'
+  ).bind(user_id, project_id).first();
+  return result || null;
 }
 
 /**
@@ -259,16 +259,16 @@ export async function getNotificationSettings(env, user_id, project_id) {
  * @param {boolean} email_enabled
  */
 export async function upsertNotificationSettings(env, user_id, project_id, email_enabled) {
-    const existing = await getNotificationSettings(env, user_id, project_id);
-    const now = new Date().toISOString();
+  const existing = await getNotificationSettings(env, user_id, project_id);
+  const now = new Date().toISOString();
 
-    if (existing) {
-        await env.watchtower_db.prepare(
-            'UPDATE notification_settings SET email_enabled = ?, updated_at = ? WHERE user_id = ? AND project_id = ?'
-        ).bind(email_enabled ? 1 : 0, now, user_id, project_id).run();
-    } else {
-        await env.watchtower_db.prepare(
-            'INSERT INTO notification_settings (id, user_id, project_id, email_enabled, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
-        ).bind(crypto.randomUUID(), user_id, project_id, email_enabled ? 1 : 0, now, now).run();
-    }
+  if (existing) {
+    await env.watchtower_db.prepare(
+      'UPDATE notification_settings SET email_enabled = ?, updated_at = ? WHERE user_id = ? AND project_id = ?'
+    ).bind(email_enabled ? 1 : 0, now, user_id, project_id).run();
+  } else {
+    await env.watchtower_db.prepare(
+      'INSERT INTO notification_settings (id, user_id, project_id, email_enabled, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(crypto.randomUUID(), user_id, project_id, email_enabled ? 1 : 0, now, now).run();
+  }
 }
