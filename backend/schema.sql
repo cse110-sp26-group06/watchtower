@@ -1,4 +1,3 @@
--- BE-3: D1 schema for WatchTower
 -- Run with: wrangler d1 execute watchtower-db --file=schema.sql
 -- Existing DBs created before owner_id was added should also run:
 -- wrangler d1 execute watchtower-db --file=migrations/20260529_add_projects_owner_id.sql
@@ -107,3 +106,18 @@ ON performance (entry_type);
 
 CREATE INDEX IF NOT EXISTS idx_performance_server_timestamp
 ON performance (server_timestamp);
+
+-- Notification settings — stores whether a user wants daily email digests per project
+CREATE TABLE IF NOT EXISTS notification_settings (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    project_id TEXT NOT NULL,
+    email_enabled INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (project_id) REFERENCES projects(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_settings_user
+ON notification_settings (user_id);

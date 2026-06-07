@@ -4,6 +4,8 @@ import { handleGetErrors, handleGetErrorById, handleResolveError } from './route
 import { handleListProjects } from './routes/projects.js';
 import { handleGetLogs } from './routes/logs.js';
 import { handleGetPerformance } from './routes/performance.js';
+import { handleGetNotificationSettings, handleUpdateNotificationSettings } from './routes/notifications.js';
+import { sendDailyDigests } from './cron/digest.js';
 
 export default {
   async fetch(request, env) {
@@ -94,11 +96,19 @@ export default {
       return handleGetErrors(request, env);
     }
 
+    // Notification settings
+    if (path === '/api/notifications/settings' && request.method === 'GET') {
+      return handleGetNotificationSettings(request, env);
+    }
+    if (path === '/api/notifications/settings' && request.method === 'POST') {
+      return handleUpdateNotificationSettings(request, env);
+    }
+
     // Project list — Dashboard's project-selection flow
     if (path === '/api/projects' && request.method === 'GET') {
       return handleListProjects(request, env);
     }
-    // Read API routes (BE-5 adds these)
+    
     // if (path.startsWith("/api/")) { ... }
     // Read API routes — Dashboard calls these to display errors
     if (path === '/api/errors' && request.method === 'GET') {
@@ -112,7 +122,9 @@ export default {
     }
     return jsonResponse({ status: "error", message: "Not found" }, 404);
   },
-  
+  async scheduled(event, env) {
+    await sendDailyDigests(env);
+  }
 };
 
 export function corsHeaders() {

@@ -201,7 +201,17 @@ export async function storeLog(env, record) {
   ).run();
 }
 
-
+/**
+ * Reads log events from D1 for a given project
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} api_key - project api key
+ * @param {object} params - optional filters
+ * @param {string} [params.level] - filter by log level (debug/info/warn/error)
+ * @param {string} [params.since] - ISO timestamp, only return logs after this time
+ * @param {number} [params.page=1] - page number for pagination
+ * @param {number} [params.limit=20] - number of results per page
+ * @returns {object[]} array of log records from D1
+ */
 export async function getLogs(env, api_key, params = {}) {
   const { level, since } = params;
 
@@ -225,4 +235,40 @@ export async function getLogs(env, api_key, params = {}) {
 
   const result = await env.watchtower_db.prepare(query).bind(...bindings).run();
   return result.results;
+}
+
+/**
+ * Gets notification settings for a user and project
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} user_id
+ * @param {string} project_id
+ * @returns {object|null}
+ */
+export async function getNotificationSettings(env, user_id, project_id) {
+  const result = await env.watchtower_db.prepare(
+    'SELECT * FROM notification_settings WHERE user_id = ? AND project_id = ?'
+  ).bind(user_id, project_id).first();
+  return result || null;
+}
+
+/**
+ * Creates or updates notification settings for a user and project
+ * @param {object} env - Cloudflare env with D1 binding
+ * @param {string} user_id
+ * @param {string} project_id
+ * @param {boolean} email_enabled
+ */
+export async function upsertNotificationSettings(env, user_id, project_id, email_enabled) {
+  const existing = await getNotificationSettings(env, user_id, project_id);
+  const now = new Date().toISOString();
+
+  if (existing) {
+    await env.watchtower_db.prepare(
+      'UPDATE notification_settings SET email_enabled = ?, updated_at = ? WHERE user_id = ? AND project_id = ?'
+    ).bind(email_enabled ? 1 : 0, now, user_id, project_id).run();
+  } else {
+    await env.watchtower_db.prepare(
+      'INSERT INTO notification_settings (id, user_id, project_id, email_enabled, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(crypto.randomUUID(), user_id, project_id, email_enabled ? 1 : 0, now, now).run();
+  }
 }
