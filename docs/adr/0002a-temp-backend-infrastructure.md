@@ -63,7 +63,7 @@ Three tables are in production:
 - **`notification_settings`** — stores email digest preferences per user/project
 
 Indexes are defined on `(service, server_timestamp)`, `(status)`, and
-`(severity)` to support Dashboard filtering and pagination.
+`(severity)` to support Dashboard filtering and pagination
 
 ### Schema Migrations
 

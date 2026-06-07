@@ -249,7 +249,7 @@ The full schema is defined in `schema.sql`.
 
 `schema.sql` defines the base schema and is safe to re-run on a fresh
 environment (`CREATE TABLE IF NOT EXISTS`). It should not be edited to
-reflect changes to an already-deployed database.
+reflect changes to an already-deployed database
 
 For any change to an existing database, create a new migration file:
 
