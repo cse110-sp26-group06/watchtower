@@ -20,6 +20,7 @@ export function parseLog(level, args = []) {
     timestamp: new Date().toISOString(),
     payload: {
       level,
+      timestamp: new Date().toISOString(),
       message,
       ...(sourceLocation.file !== undefined ? { file: sourceLocation.file } : {}),
       ...(sourceLocation.lineno !== undefined ? { lineno: sourceLocation.lineno } : {}),
