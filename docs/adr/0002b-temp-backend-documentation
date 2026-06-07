@@ -43,19 +43,24 @@ At a high level, the backend must do three things:
 ```
 backend/
 ├── src/
-│   ├── index.js              # Entry point 
+│   ├── index.js              # Entry point — routing and CORS
 │   ├── middleware/
 │   │   └── auth.js           # API key validation, user and project creation
 │   ├── routes/
-│   │   ├── ingest.js         # Handles /ingest/* (error, log, performance)
-│   │   ├── errors.js         # Handles /api/errors (list, detail, resolve)
-│   │   └── projects.js       # Handles /api/projects (list projects for a user)
-│   └── storage/
-│       └── d1.js             # All database that are read and written
-├── migrations/               # SQL files for schema changes
+│   │   ├── ingest.js         # POST /ingest/* — error, log, performance
+│   │   ├── errors.js         # GET/PATCH /api/errors
+│   │   ├── logs.js           # GET /api/logs
+│   │   ├── performance.js    # GET /api/performance
+│   │   ├── projects.js       # GET /api/projects
+│   │   └── notifications.js  # GET/POST /api/notifications/settings
+│   ├── storage/
+│   │   └── d1.js             # All D1 SQL operations
+│   └── cron/
+│       └── digest.js         # Daily email digest cron job
+├── migrations/               # SQL migration files
 ├── schema.sql                # Base database schema
 ├── wrangler.toml             # Cloudflare Worker configuration
-└── test/                     # testing methods
+└── test/                     # Vitest integration tests
 ```plaintext
 
 ### Network Requests
@@ -196,6 +201,36 @@ All three ingest endpoints share the same request envelope:
 
 ---
 
+### Notifications
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/notifications/settings` | Get email toggle state for a project |
+| `POST` | `/api/notifications/settings` | Update email toggle state |
+
+`GET /api/notifications/settings` requires `user_id` and `project_id` query params.
+
+`POST /api/notifications/settings` body:
+\```json
+{ "user_id": "...", "project_id": "...", "email_enabled": true }
+\```
+
+### Performance API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/performance` | Paginated performance events for a project |
+
+`GET /api/performance` supports:
+
+| Param | Default | Notes |
+|-------|---------|-------|
+| `api_key` | required | — |
+| `entry_type` | all | `resource`, `paint`, or `navigation` |
+| `since` | — | ISO timestamp lower bound |
+| `page` | `1` | — |
+| `limit` | `20` | — |
+
 ## Database
 
 ### Tables
@@ -204,6 +239,9 @@ All three ingest endpoints share the same request envelope:
 - **`projects`** — one row per project, holds the API key and owner reference
 - **`errors`** — one row per ingested error event, includes full payload,
   timestamps, severity, and resolution status
+- **`logs`** — one row per ingested log event
+- **`performance`** — one row per ingested performance event
+- **`notification_settings`** — stores email digest preferences per user/project
 
 The full schema is defined in `schema.sql`.
 
