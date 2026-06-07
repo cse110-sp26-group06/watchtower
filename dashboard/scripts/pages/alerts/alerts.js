@@ -31,7 +31,9 @@ async function getUserId() {
  * Fetches the current email notification status from the backend
  */
 async function fetchNotificationStatus() {
-  if (!session || !project) return;
+  if (!session || !project) {
+    return;
+  }
   
   try {
     const backendUserId = await getUserId();
@@ -57,7 +59,9 @@ async function fetchNotificationStatus() {
  * @param {boolean} enabled 
  */
 async function updateNotificationStatus(enabled) {
-  if (!session || !project) return;
+  if (!session || !project) {
+    return;
+  }
   
   try {
     toggle.disabled = true;
