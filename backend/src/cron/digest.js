@@ -82,7 +82,7 @@ function buildEmailHtml(projectName, errorCount, topErrors) {
 
             <!-- CTA -->
             <div style="text-align: center; margin-bottom: 28px;">
-                <a href="https://cse110-sp26-group06.github.io/watchtower/dashboard"
+                <a href="https://cse110-sp26-group06.github.io/watchtower/dashboard/error-list.html"
                     style="display: inline-block; background: #F97316; color: #ffffff; padding: 13px 40px; font-size: 12px; font-weight: 700; text-decoration: none; letter-spacing: 2px; text-transform: uppercase; font-family: Georgia, serif;">
                     View Dashboard →
                 </a>
