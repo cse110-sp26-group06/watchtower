@@ -1,5 +1,6 @@
 import { renderNavbar }              from '../../components/navbar.js';
 import { renderErrorCard }           from '../../components/errorCard.js';
+import { loadingStateHtml, emptyStateHtml, errorStateHtml } from '../../components/pageState.js';
 import { showToast }                 from '../../utils/toast.js';
 import { PAGE_LIMIT, normalizeError } from '../../utils/constants.js';
 import { requireAuth }               from '../../utils/auth.js';
@@ -50,8 +51,7 @@ function applyClientFilters(errors) {
  * @returns {void}
  */
 function renderLoading() {
-  listEl.innerHTML = `<div class="error-card" style="justify-content:center;gap:12px;">
-    <div class="spinner"></div><span>Fetching errors…</span></div>`;
+  listEl.innerHTML = loadingStateHtml('Fetching errors…');
   if (pagination) { pagination.style.display = 'none'; }
 }
 
@@ -60,8 +60,7 @@ function renderLoading() {
  * @returns {void}
  */
 function renderEmpty() {
-  listEl.innerHTML = `<div class="error-card" style="justify-content:center;">
-    <span style="color:var(--color-text-muted)">No errors match your filters.</span></div>`;
+  listEl.innerHTML = emptyStateHtml('No errors found', 'No errors match your current filters.');
   if (pagination) { pagination.style.display = 'none'; }
 }
 
@@ -71,10 +70,7 @@ function renderEmpty() {
  * @returns {void}
  */
 function renderFetchError(msg) {
-  listEl.innerHTML = `<div class="error-card" style="flex-direction:column;align-items:flex-start;gap:8px;">
-    <span style="font-weight:600;color:var(--color-critical)">⚠ Failed to load errors</span>
-    <span style="font-size:13px;color:var(--color-text-muted)">${msg}</span>
-    <button class="btn btn--outline" onclick="load()" style="margin-top:4px">Try again</button></div>`;
+  listEl.innerHTML = errorStateHtml(msg, 'load');
   if (pagination) { pagination.style.display = 'none'; }
 }
 

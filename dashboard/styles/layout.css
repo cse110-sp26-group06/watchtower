@@ -244,7 +244,7 @@
 
 .navbar__link:hover {
   background-color: var(--color-accent-subtle);
-  color: var(--color-text);
+  color: var(--color-accent);
 }
 
 .navbar__link--active {
@@ -276,7 +276,9 @@
 
 /* Default icon stroke color */
 .navbar__link .navbar__icon path,
-.navbar__link .navbar__icon circle {
+.navbar__link .navbar__icon circle,
+.navbar__link .navbar__icon rect,
+.navbar__link .navbar__icon line {
   stroke: var(--color-text-muted);
   transition: stroke var(--transition);
 }
@@ -284,8 +286,12 @@
 /* Active + hover icon stroke color */
 .navbar__link--active .navbar__icon path,
 .navbar__link--active .navbar__icon circle,
+.navbar__link--active .navbar__icon rect,
+.navbar__link--active .navbar__icon line,
 .navbar__link:hover .navbar__icon path,
-.navbar__link:hover .navbar__icon circle {
+.navbar__link:hover .navbar__icon circle,
+.navbar__link:hover .navbar__icon rect,
+.navbar__link:hover .navbar__icon line {
   stroke: var(--color-accent);
 }
 

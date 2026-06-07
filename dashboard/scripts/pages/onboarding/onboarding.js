@@ -117,10 +117,16 @@ async function generateProject(projectName) {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+function init() {
   projectNameInput.value = getNextProjectName(getStoredProjects());
   projectNameInput.focus();
-});
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 projectForm.addEventListener('submit', async (event) => {
   event.preventDefault();

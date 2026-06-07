@@ -3,54 +3,7 @@
    ================================================================ */
 
 /* ── Stat Cards ──────────────────────────────────────────────── */
-.perf-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-md);
-  }
-  
-  .perf-stat-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    transition: box-shadow var(--transition), border-color var(--transition);
-  }
-  
-  .perf-stat-card:hover {
-    box-shadow: var(--shadow-sm);
-    border-color: var(--color-accent-border);
-  }
-  
-  .perf-stat-card__label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    letter-spacing: 0.2px;
-  }
-  
-  .perf-stat-card__value {
-    font-size: 32px;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    color: var(--color-text);
-    line-height: 1;
-  }
-  
-  .perf-stat-card__delta {
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 2px;
-  }
-  
-  .perf-stat-card__delta--good    { color: #16a34a; }
-  .perf-stat-card__delta--bad     { color: var(--color-critical); }
-  .perf-stat-card__delta--neutral { color: var(--color-text-muted); }
-  
-  [data-theme="dark"] .perf-stat-card__delta--good { color: #4ade80; }
+/* Styles live in components.css under the .stat-cards block. */
   
   /* ── Chart Card ──────────────────────────────────────────────── */
   .perf-card {

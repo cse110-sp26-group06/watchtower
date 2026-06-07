@@ -8,6 +8,7 @@ const ALLOWED_TARGETS = new Set([
   'error-list.html',
   'error-detail.html',
   'performance.html',
+  'logs.html',
   'feedback.html',
   'alerts.html',
   'settings.html',
