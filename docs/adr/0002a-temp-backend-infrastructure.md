@@ -58,9 +58,12 @@ Three tables are in production:
   owner (`id`, `name`, `api_key`, `created_at`, `owner_id`)
 - **`errors`** — stores ingested error events with full payload,
   timestamps, severity, and resolution status
+- **`logs`** — stores log events (`level`, `message`, `payload_json`, timestamps)
+- **`performance`** — stores performance events (`name`, `entry_type`, `time`, `duration`, `payload_json`)
+- **`notification_settings`** — stores email digest preferences per user/project
 
 Indexes are defined on `(service, server_timestamp)`, `(status)`, and
-`(severity)` to support Dashboard filtering and pagination.
+`(severity)` to support Dashboard filtering and pagination
 
 ### Schema Migrations
 
@@ -77,6 +80,7 @@ wrangler d1 execute watchtower-db --file=migrations/<filename>.sql
 | Date       | File                                         | Change                              |
 |------------|----------------------------------------------|-------------------------------------|
 | 2026-05-29 | `20260529_add_projects_owner_id.sql`         | Added `owner_id TEXT` to `projects` |
+| 2026-05-31 | `schema.sql` | Added `performance`, `logs`, `notification_settings` tables |
 
 ---
 
