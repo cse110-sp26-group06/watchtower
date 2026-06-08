@@ -1,4 +1,7 @@
 /**
+ * cron/digest.js
+ * Daily digest cron job — runs every day at 9am PST (17:00 UTC)
+ * Sends email notifications to users with email_enabled = 1
  * @fileoverview Sends daily email digests for projects with notifications enabled.
  */
 
