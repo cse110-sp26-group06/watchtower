@@ -1,4 +1,15 @@
 
+/**
+ * @fileoverview D1 persistence helpers for backend routes and cron jobs.
+ */
+
+/**
+ * Stores an error record in D1.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {object} record - Fully prepared error record from `routes/ingest.js`.
+ * @returns {Promise<void>} Resolves when the record has been inserted.
+ */
 export async function storeError(env, record) {
   await env.watchtower_db.prepare(`
     INSERT INTO errors (id, api_key, service, environment, message, error_type, severity, stack_trace, file, lineno, colno, payload_json, client_timestamp, server_timestamp, status)
@@ -23,20 +34,17 @@ export async function storeError(env, record) {
 }
 
 /**
- * Reads errors from D1 for a given project (identified by api_key).
- * Called by handleGetErrors() in routes/errors.js.
- * Supports filtering by time range, severity, and status.
- * Results are paginated and sorted newest first.
+ * Reads paginated errors from D1 for a project.
  *
- * @param {object} env - Cloudflare Worker environment, contains D1 binding
- * @param {string} api_key - the project's API key to filter errors by
- * @param {object} params - optional query parameters for filtering
- * @param {string} [params.since] - ISO timestamp, only return errors after this time
- * @param {string} [params.severity] - filter by severity
- * @param {string} [params.status] - filter by status (resolved/unresolved)
- * @param {number} [params.page=1] - page number for pagination
- * @param {number} [params.limit=20] - number of results per page
- * @returns {object[]} array of error records from D1
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} api_key - Project API key used to scope results.
+ * @param {object} [params={}] - Optional query parameters for filtering.
+ * @param {string} [params.since] - ISO timestamp; only returns errors after this time.
+ * @param {string} [params.severity] - Severity filter.
+ * @param {string} [params.status] - Status filter such as `resolved` or `unresolved`.
+ * @param {number} [params.page=1] - Page number for pagination.
+ * @param {number} [params.limit=20] - Number of results per page.
+ * @returns {Promise<object[]>} Matching error records.
  */
 export async function getErrors(env, api_key, params = {}) {
   const { since, severity, status, page = 1, limit = 20 } = params;
@@ -71,14 +79,12 @@ export async function getErrors(env, api_key, params = {}) {
 }
 
 /**
- * Reads a single error from D1 by its id, scoped to the calling project's api_key.
- * Returns null if the error doesn't exist OR belongs to a different project —
- * the two cases are indistinguishable so cross-project access can't enumerate ids.
+ * Reads a single error by identifier, scoped to the calling project.
  *
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} id - the error's unique id
- * @param {string} api_key - the calling project's api_key
- * @returns {object|null} - error record or null if not found / not owned
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} id - Error identifier.
+ * @param {string} api_key - Calling project's API key.
+ * @returns {Promise<object|null>} Matching error record, or `null` if not found or not owned.
  */
 export async function getErrorById(env, id, api_key) {
   const result = await env.watchtower_db.prepare(
@@ -88,13 +94,12 @@ export async function getErrorById(env, id, api_key) {
 }
 
 /**
- * Updates an error's status to 'resolved' in D1, scoped to the calling project's api_key.
- * Returns false if the error doesn't exist OR belongs to a different project.
+ * Marks an error as resolved, scoped to the calling project.
  *
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} id - the error's unique id
- * @param {string} api_key - the calling project's api_key
- * @returns {boolean} - true if updated, false if not found / not owned
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} id - Error identifier.
+ * @param {string} api_key - Calling project's API key.
+ * @returns {Promise<boolean>} `true` when a row was updated; otherwise `false`.
  */
 export async function resolveError(env, id, api_key) {
   const result = await env.watchtower_db.prepare(
@@ -105,12 +110,11 @@ export async function resolveError(env, id, api_key) {
 }
 
 /**
- * Lists all projects owned by a given user, newest first.
- * Used by GET /api/projects to back the Dashboard's project-selection flow.
+ * Lists projects owned by a user, newest first.
  *
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} owner_id - the user id
- * @returns {object[]} - array of project records
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} owner_id - User identifier.
+ * @returns {Promise<object[]>} Project records for the user.
  */
 export async function listProjectsByOwner(env, owner_id) {
   const result = await env.watchtower_db.prepare(
@@ -121,9 +125,11 @@ export async function listProjectsByOwner(env, owner_id) {
 }
 
 /**
- * Stores a performance event in D1
- * @param {object} env - Cloudflare env with D1 binding
- * @param {object} record - fully prepared record from ingest.js
+ * Stores a performance record in D1.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {object} record - Fully prepared performance record from `routes/ingest.js`.
+ * @returns {Promise<void>} Resolves when the record has been inserted.
  */
 export async function storePerformance(env, record) {
   await env.watchtower_db.prepare(`
@@ -145,15 +151,16 @@ export async function storePerformance(env, record) {
 }
 
 /**
- * Reads performance events from D1 for a given project
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} api_key - project api key
- * @param {object} params - optional filters
- * @param {string} [params.entry_type] - filter by resource/paint/navigation
- * @param {string} [params.since] - ISO timestamp
- * @param {number} [params.page=1]
- * @param {number} [params.limit=20]
- * @returns {object[]}
+ * Reads paginated performance events for a project.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} api_key - Project API key used to scope results.
+ * @param {object} [params={}] - Optional filters.
+ * @param {string} [params.entry_type] - Entry type filter such as `resource` or `navigation`.
+ * @param {string} [params.since] - ISO timestamp; only returns events after this time.
+ * @param {number} [params.page=1] - Page number for pagination.
+ * @param {number} [params.limit=20] - Number of results per page.
+ * @returns {Promise<object[]>} Matching performance records.
  */
 export async function getPerformance(env, api_key, params = {}) {
   const { entry_type, since, page = 1, limit = 20 } = params;
@@ -179,9 +186,11 @@ export async function getPerformance(env, api_key, params = {}) {
 }
 
 /**
- * 
- * @param {object} env - Cloudflare env with D1 binding
- * @param {object} record - fully prepared record from ingest.js
+ * Stores a log record in D1.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {object} record - Fully prepared log record from `routes/ingest.js`.
+ * @returns {Promise<void>} Resolves when the record has been inserted.
  */
 export async function storeLog(env, record) {
   await env.watchtower_db.prepare(`
@@ -202,15 +211,16 @@ export async function storeLog(env, record) {
 }
 
 /**
- * Reads log events from D1 for a given project
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} api_key - project api key
- * @param {object} params - optional filters
- * @param {string} [params.level] - filter by log level (debug/info/warn/error)
- * @param {string} [params.since] - ISO timestamp, only return logs after this time
- * @param {number} [params.page=1] - page number for pagination
- * @param {number} [params.limit=20] - number of results per page
- * @returns {object[]} array of log records from D1
+ * Reads paginated log events for a project.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} api_key - Project API key used to scope results.
+ * @param {object} [params={}] - Optional filters.
+ * @param {string} [params.level] - Log level filter such as `debug`, `info`, `warn`, or `error`.
+ * @param {string} [params.since] - ISO timestamp; only returns logs after this time.
+ * @param {number} [params.page=1] - Page number for pagination.
+ * @param {number} [params.limit=20] - Number of results per page.
+ * @returns {Promise<object[]>} Matching log records.
  */
 export async function getLogs(env, api_key, params = {}) {
   const { level, since } = params;
@@ -238,11 +248,12 @@ export async function getLogs(env, api_key, params = {}) {
 }
 
 /**
- * Gets notification settings for a user and project
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} user_id
- * @param {string} project_id
- * @returns {object|null}
+ * Gets notification settings for a user and project.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} user_id - User identifier.
+ * @param {string} project_id - Project identifier.
+ * @returns {Promise<object|null>} Notification settings, or `null` if none exist.
  */
 export async function getNotificationSettings(env, user_id, project_id) {
   const result = await env.watchtower_db.prepare(
@@ -252,11 +263,13 @@ export async function getNotificationSettings(env, user_id, project_id) {
 }
 
 /**
- * Creates or updates notification settings for a user and project
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} user_id
- * @param {string} project_id
- * @param {boolean} email_enabled
+ * Creates or updates notification settings for a user and project.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} user_id - User identifier.
+ * @param {string} project_id - Project identifier.
+ * @param {boolean} email_enabled - Whether email notifications are enabled.
+ * @returns {Promise<void>} Resolves after the notification settings are persisted.
  */
 export async function upsertNotificationSettings(env, user_id, project_id, email_enabled) {
   const existing = await getNotificationSettings(env, user_id, project_id);

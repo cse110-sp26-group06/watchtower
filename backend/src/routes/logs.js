@@ -1,8 +1,19 @@
+/**
+ * @fileoverview Handles dashboard routes for reading log events.
+ */
+
 import { jsonResponse } from '../index.js';
 import { getLogs } from '../storage/d1.js';
 import { validateApiKey } from '../middleware/auth.js';
 
-export async function handleGetLogs(request,env) {
+/**
+ * Returns paginated log events for a project.
+ *
+ * @param {Request} request - Incoming dashboard request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @returns {Promise<Response>} JSON response containing log data or an error message.
+ */
+export async function handleGetLogs(request, env) {
   const url = new URL(request.url);
   const api_key = url.searchParams.get('api_key');
   const project = await validateApiKey(env, api_key);
@@ -28,5 +39,4 @@ export async function handleGetLogs(request,env) {
     return jsonResponse({ status: 'error', message: 'Failed to fetch logs' }, 500);
   }
 }
-
 

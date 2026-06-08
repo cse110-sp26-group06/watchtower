@@ -1,22 +1,26 @@
-import { jsonResponse } from '../index.js'; // imported function which is convenient for consistent response return
+/**
+ * @fileoverview Handles SDK ingestion endpoints for error, log, and performance events.
+ */
+
+import { jsonResponse } from '../index.js';
 import { validateApiKey } from '../middleware/auth.js';
-import { storeError,storeLog, storePerformance } from '../storage/d1.js'; // import functions from storage and link with it
+import { storeError, storeLog, storePerformance } from '../storage/d1.js';
+
 const VALID_ENDPOINTS = ['/ingest/error', '/ingest/log', '/ingest/performance'];
 const REQUIRED_PAYLOAD_FIELDS = {
-  // added all properties in event except for severity, will add it after sdk implements it
+  // Severity is optional until the SDK sends it consistently.
   '/ingest/error': ['message', 'type', 'stack_trace', 'file', 'lineno', 'colno'],
   '/ingest/log': ['message', 'level', 'timestamp'],
   '/ingest/performance': ['name', 'entryType', 'time', 'duration'],
 };
 
-// Hardcoded keys for now — BE-4 replaces with D1 lookup
-
-
 /**
- * Handles all ingest POST requests from the SDK
- * @param {Request} request - incoming request
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} path - the endpoint path
+ * Handles ingest POST requests from the SDK.
+ *
+ * @param {Request} request - Incoming request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} path - Endpoint pathname.
+ * @returns {Promise<Response>} JSON response describing the ingestion result.
  */
 export async function handleIngest(request, env, path) {
   // Validate endpoint
@@ -69,23 +73,22 @@ export async function handleIngest(request, env, path) {
     try {
       if (path === '/ingest/error') {
         const record = {
-          id: crypto.randomUUID(), // generates random and unique id for the event
+          id: crypto.randomUUID(),
           api_key: data.api_key,
           service: data.service,
           environment: data.environment,
           message: event.payload.message,
           error_type: event.payload.type || null,
-          severity: event.payload.severity || 'error', // set to error for null case as it is not implemented yet
+          severity: event.payload.severity || 'error',
           stack_trace: event.payload.stack_trace,
-          file: event.payload.file,        
-          lineno: event.payload.lineno,    
-          colno: event.payload.colno,      
+          file: event.payload.file,
+          lineno: event.payload.lineno,
+          colno: event.payload.colno,
           payload_json: JSON.stringify(event.payload),
           client_timestamp: event.timestamp,
           server_timestamp,
           status: 'unresolved',
         };
-        // we send this bounded data to
         await storeError(env, record);
       } else if (path === '/ingest/performance') {
         const record = {
@@ -117,7 +120,6 @@ export async function handleIngest(request, env, path) {
         };
         await storeLog(env, record);
       }
-          
     } catch (err) {
       console.error('D1 write failed:', err);
       return jsonResponse({ status: 'error', message: 'Storage error' }, 500);

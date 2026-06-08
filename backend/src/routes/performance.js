@@ -1,27 +1,16 @@
 /**
- * routes/performance.js
- * Handles read API requests for performance data.
- *
- * Current endpoints:
- *   GET /api/performance — returns paginated performance events for a project
+ * @fileoverview Handles dashboard routes for reading performance events.
  */
 import { jsonResponse } from '../index.js';
 import { getPerformance } from '../storage/d1.js';
 import { validateApiKey } from '../middleware/auth.js';
 
 /**
- * Handles GET /api/performance
- * Returns performance events for a project
+ * Returns paginated performance events for a project.
  *
- * Query parameters:
- *   api_key    — required
- *   entry_type — filter by resource/paint/navigation
- *   since      — ISO timestamp
- *   page       — defaults to 1
- *   limit      — defaults to 20
- *
- * @param {Request} request
- * @param {object} env
+ * @param {Request} request - Incoming dashboard request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @returns {Promise<Response>} JSON response containing performance data or an error message.
  */
 export async function handleGetPerformance(request, env) {
   const url = new URL(request.url);

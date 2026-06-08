@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Entrypoint for the WatchTower backend Worker.
+ */
+
 import { handleIngest } from "./routes/ingest.js";
 import { generateApiKey, createUser, getUserById } from './middleware/auth.js';
 import { handleGetErrors, handleGetErrorById, handleResolveError } from './routes/errors.js';
@@ -20,7 +24,7 @@ export default {
       });
     }
 
-    // User creation — sprint 4 stub: no password, identity is the returned user_id
+    // Create a user record for dashboard flows that still rely on a raw user ID.
     if (path === '/api/users' && request.method === 'POST') {
       let body;
       try {
@@ -37,7 +41,7 @@ export default {
         const user = await createUser(env, body.email);
         return jsonResponse({ status: 'ok', user_id: user.id, email: user.email }, 201);
       } catch (err) {
-        // D1 UNIQUE constraint on email
+        // Surface duplicate-email conflicts as a client error.
         if (String(err.message || '').includes('UNIQUE')) {
           return jsonResponse({ status: 'error', message: 'Email already in use' }, 409);
         }
@@ -46,7 +50,7 @@ export default {
       }
     }
 
-    // Project creation — generates and stores a new API key for a given owner
+    // Create a project and issue a new API key for the owning user.
     if (path === '/api/key_generate' && request.method === 'POST') {
       let body;
       try {
@@ -80,7 +84,7 @@ export default {
       return handleIngest(request, env, path);
     }
 
-    // Single error detail — must be before /api/errors route
+    // Match the detail route before the collection route.
     if (path.startsWith('/api/errors/') && request.method === 'GET') {
       const id = path.replace('/api/errors/', '');
       return handleGetErrorById(request, env, id);
@@ -104,13 +108,11 @@ export default {
       return handleUpdateNotificationSettings(request, env);
     }
 
-    // Project list — Dashboard's project-selection flow
+    // Project list backing the dashboard's project-selection flow.
     if (path === '/api/projects' && request.method === 'GET') {
       return handleListProjects(request, env);
     }
-    
-    // if (path.startsWith("/api/")) { ... }
-    // Read API routes — Dashboard calls these to display errors
+
     if (path === '/api/errors' && request.method === 'GET') {
       return handleGetErrors(request, env);
     }
@@ -127,6 +129,11 @@ export default {
   }
 };
 
+/**
+ * Returns CORS headers shared by all backend responses.
+ *
+ * @returns {Record<string, string>} Headers for permissive CORS access.
+ */
 export function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
@@ -135,6 +142,13 @@ export function corsHeaders() {
   };
 }
 
+/**
+ * Serializes a JSON response with shared CORS headers.
+ *
+ * @param {unknown} body - Response payload to serialize.
+ * @param {number} [status=200] - HTTP status code.
+ * @returns {Response} JSON response with CORS headers.
+ */
 export function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,

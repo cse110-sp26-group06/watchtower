@@ -1,21 +1,17 @@
 /**
- * routes/notifications.js
- * Handles notification preference endpoints for Dashboard.
- *
- * Current endpoints:
- *   GET  /api/notifications/settings — get current email notification setting
- *   POST /api/notifications/settings — update email notification setting
+ * @fileoverview Handles dashboard routes for notification preferences.
  */
+
 import { getNotificationSettings, upsertNotificationSettings } from '../storage/d1.js';
 import { getUserById } from '../middleware/auth.js';
 
 /**
- * Handles GET /api/notifications/settings
- * Returns current notification settings for a user and project
- * @param {Request} request
- * @param {object} env
+ * Creates a JSON response with the CORS headers required by the dashboard.
+ *
+ * @param {unknown} body - Response body to serialize.
+ * @param {number} [status=200] - HTTP status code.
+ * @returns {Response} Serialized JSON response.
  */
-
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -28,6 +24,13 @@ function jsonResponse(body, status = 200) {
   });
 }
 
+/**
+ * Returns the notification settings for a user and project.
+ *
+ * @param {Request} request - Incoming dashboard request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @returns {Promise<Response>} JSON response containing the current notification settings.
+ */
 export async function handleGetNotificationSettings(request, env) {
   const url = new URL(request.url);
   const user_id = url.searchParams.get('user_id');
@@ -56,10 +59,11 @@ export async function handleGetNotificationSettings(request, env) {
 }
 
 /**
- * Handles POST /api/notifications/settings
- * Creates or updates notification settings for a user and project
- * @param {Request} request
- * @param {object} env
+ * Creates or updates notification settings for a user and project.
+ *
+ * @param {Request} request - Incoming dashboard request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @returns {Promise<Response>} JSON response confirming the stored notification settings.
  */
 export async function handleUpdateNotificationSettings(request, env) {
   let body;

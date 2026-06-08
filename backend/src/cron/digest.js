@@ -1,15 +1,14 @@
 /**
- * cron/digest.js
- * Daily digest cron job — runs every day at 9am PST (17:00 UTC)
- * Sends email notifications to users with email_enabled = 1
+ * @fileoverview Sends daily email digests for projects with notifications enabled.
  */
 
 /**
- * Builds the HTML email body for the daily digest
- * @param {string} projectName
- * @param {number} errorCount
- * @param {object[]} topErrors
- * @returns {string}
+ * Builds the daily digest email body.
+ *
+ * @param {string} projectName - Project name displayed in the digest.
+ * @param {number} errorCount - Number of errors detected in the last 24 hours.
+ * @param {object[]} topErrors - Most frequent recent errors for the project.
+ * @returns {string} Rendered HTML email body.
  */
 function buildEmailHtml(projectName, errorCount, topErrors) {
   const rowColors = ['#A32D2D', '#185FA5', '#3B6D11'];
@@ -103,11 +102,13 @@ function buildEmailHtml(projectName, errorCount, topErrors) {
 }
 
 /**
- * Sends a daily digest email via Resend
- * @param {string} to - recipient email
- * @param {string} subject
- * @param {string} html
- * @param {string} resendApiKey
+ * Sends a daily digest email via Resend.
+ *
+ * @param {string} to - Recipient email address.
+ * @param {string} subject - Email subject line.
+ * @param {string} html - Email HTML body.
+ * @param {string} resendApiKey - Resend API key.
+ * @returns {Promise<void>} Resolves after the send attempt completes.
  */
 async function sendEmail(to, subject, html, resendApiKey) {
   const res = await fetch('https://api.resend.com/emails', {
@@ -129,8 +130,10 @@ async function sendEmail(to, subject, html, resendApiKey) {
 }
 
 /**
- * Main cron handler — queries D1 and sends daily digests
- * @param {object} env - Cloudflare env with D1 binding and RESEND_API_KEY
+ * Sends daily digests for every project with email notifications enabled.
+ *
+ * @param {object} env - Cloudflare Worker environment with D1 and `RESEND_API_KEY`.
+ * @returns {Promise<void>} Resolves after all digest emails are processed.
  */
 export async function sendDailyDigests(env) {
   const settings = await env.watchtower_db.prepare(

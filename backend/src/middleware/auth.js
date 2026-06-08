@@ -1,14 +1,14 @@
 /**
- * Authentication middleware for WatchTower Backend
- * Handles API key generation and validation
+ * @fileoverview Authentication and ownership helpers for backend routes.
  */
 
 /**
- * Generates a unique API key and stores it in D1 projects table
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} name - project name
- * @param {string} owner_id - the ID of the user who owns the project
- * @returns {object} - project record with generated api_key
+ * Generates a project API key and stores it in the `projects` table.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} name - Project name.
+ * @param {string} owner_id - Identifier of the user who owns the project.
+ * @returns {Promise<object>} Created project record with its generated API key.
  */
 export async function generateApiKey(env, name, owner_id) {
   const id = crypto.randomUUID();
@@ -23,10 +23,11 @@ export async function generateApiKey(env, name, owner_id) {
 }
 
 /**
- * Validates an API key against the projects table in D1
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} api_key - the API key to validate
- * @returns {object|null} - project record if valid, null if invalid
+ * Looks up a project by API key.
+ *
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} api_key - API key to validate.
+ * @returns {Promise<object|null>} Matching project record, or `null` when not found.
  */
 export async function validateApiKey(env, api_key) {
   if (!api_key) {return null;}
@@ -39,14 +40,12 @@ export async function validateApiKey(env, api_key) {
 }
 
 /**
- * Creates a new user row keyed by email.
- * Sprint 4 stub: no password — identity is the user_id returned here.
- * Real auth (password, sessions) deferred.
+ * Creates a user record keyed by email.
  *
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} email - the user's email (must be unique)
- * @returns {object} - { id, email, created_at }
- * @throws if email is already taken (D1 UNIQUE constraint violation)
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} email - User email address. Must be unique.
+ * @returns {Promise<object>} Created user record.
+ * @throws {Error} Thrown when the insert fails, including uniqueness violations.
  */
 export async function createUser(env, email) {
   const id = crypto.randomUUID();
@@ -60,12 +59,11 @@ export async function createUser(env, email) {
 }
 
 /**
- * Looks up a user by id. Used to verify a user_id query param refers to a real user
- * before treating it as a project owner. Returns null if not found.
+ * Looks up a user by identifier.
  *
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} user_id - the user's id
- * @returns {object|null} - user record or null
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} user_id - User identifier.
+ * @returns {Promise<object|null>} Matching user record, or `null` when not found.
  */
 export async function getUserById(env, user_id) {
   if (!user_id) {return null;}

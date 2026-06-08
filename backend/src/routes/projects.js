@@ -1,13 +1,5 @@
 /**
- * routes/projects.js
- * Handles project management requests from the Dashboard's onboarding /
- * project-selection flow.
- *
- * Current endpoints:
- *   GET /api/projects (+ x-user-id header) — list projects owned by the given user
- *
- * Sprint 4 stub: caller identity is a user_id header. Real auth (sessions)
- * deferred to next sprint.
+ * @fileoverview Handles dashboard routes for listing projects owned by a user.
  */
 
 import { jsonResponse } from '../index.js';
@@ -15,12 +7,11 @@ import { getUserById } from '../middleware/auth.js';
 import { listProjectsByOwner } from '../storage/d1.js';
 
 /**
- * Handles GET /api/projects with x-user-id header.
- * Returns the projects owned by the given user.
+ * Returns the projects owned by the user identified by the `x-user-id` header.
  *
- * @param {Request} request
- * @param {object} env - Cloudflare env with D1 binding
- * @returns {Response}
+ * @param {Request} request - Incoming dashboard request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @returns {Promise<Response>} JSON response containing owned projects or an error message.
  */
 export async function handleListProjects(request, env) {
   const user_id = request.headers.get('x-user-id');

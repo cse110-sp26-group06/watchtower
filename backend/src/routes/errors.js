@@ -1,12 +1,5 @@
 /**
- * routes/errors.js
- * Handles all read API requests for the Dashboard.
- * Dashboard calls these endpoints to display errors to the developer.
- *
- * Current endpoints:
- *   GET /api/errors — returns paginated list of errors for a project
- *   GET /api/errors/:id — single error detail
- *   PATCH /api/errors/:id — mark error as resolved
+ * @fileoverview Handles dashboard routes for reading and resolving error events.
  */
 
 import { jsonResponse } from '../index.js';
@@ -14,23 +7,11 @@ import { getErrors, getErrorById, resolveError } from '../storage/d1.js';
 import { validateApiKey } from '../middleware/auth.js';
 
 /**
- * Handles GET /api/errors
- * Returns a paginated list of errors for a project identified by api_key.
+ * Returns a paginated list of errors for the project identified by `api_key`.
  *
- * Query parameters:
- *   api_key  — required, identifies which project's errors to return
- *   since    — ISO timestamp, only return errors after this time
- *   severity — filter by severity (critical/high/medium/low/error)
- *   status   — filter by status (resolved/unresolved)
- *   page     — page number, defaults to 1
- *   limit    — results per page, defaults to 20
- *
- * Example:
- *   GET /api/errors?api_key=wt_abc123&status=unresolved&page=1
- *
- * @param {Request} request - incoming GET request from Dashboard
- * @param {object} env - Cloudflare Worker environment, contains D1 binding
- * @returns {Response} JSON response with errors array or error message
+ * @param {Request} request - Incoming dashboard request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @returns {Promise<Response>} JSON response containing the error list or an error message.
  */
 export async function handleGetErrors(request, env) {
   const url = new URL(request.url);
@@ -66,12 +47,12 @@ export async function handleGetErrors(request, env) {
 }
 
 /**
- * Handles GET /api/errors/:id
- * Returns a single error by id for the Dashboard error detail page
- * @param {Request} request - incoming GET request
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} id - error id from URL
- * @returns {Response} JSON response with single error or error message
+ * Returns a single error for the dashboard error detail page.
+ *
+ * @param {Request} request - Incoming GET request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} id - Error identifier from the URL.
+ * @returns {Promise<Response>} JSON response containing the error or an error message.
  */
 export async function handleGetErrorById(request, env, id) {
   const url = new URL(request.url);
@@ -97,14 +78,12 @@ export async function handleGetErrorById(request, env, id) {
 }
 
 /**
- * Handles PATCH /api/errors/:id
- * Marks a single error as resolved in D1
- * Called when developer clicks "Mark Resolved" on Dashboard
+ * Marks a single error as resolved.
  *
- * @param {Request} request - incoming PATCH request
- * @param {object} env - Cloudflare env with D1 binding
- * @param {string} id - error id from URL
- * @returns {Response} JSON response confirming update or error message
+ * @param {Request} request - Incoming PATCH request.
+ * @param {object} env - Cloudflare Worker environment with the D1 binding.
+ * @param {string} id - Error identifier from the URL.
+ * @returns {Promise<Response>} JSON response confirming the update or describing the failure.
  */
 export async function handleResolveError(request, env, id) {
   const url = new URL(request.url);
