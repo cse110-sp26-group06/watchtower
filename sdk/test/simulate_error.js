@@ -1,4 +1,4 @@
-import { send } from "../transport/send.js";
+import { send } from "../src/transport/send.js";
 import { API_KEY } from '../secret.js';
 
 const error = {
