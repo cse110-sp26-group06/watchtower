@@ -70,7 +70,7 @@ WatchTower has three deliverables:
 
 **1. Create a project and get an API key**
 
-Go to the [WatchTower dashboard](#), sign in, and create a new project. You'll receive an API key.
+Go to the [WatchTower dashboard](https://cse110-sp26-group06.github.io/watchtower/dashboard/index.html), sign in, and create a new project. You'll receive an API key.
 
 **2. Install the SDK**
 
