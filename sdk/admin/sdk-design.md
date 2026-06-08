@@ -4,8 +4,6 @@
 - Extension SDK that    can be added to a program; not required 
 - Lightweight, configurable
 
-
-
 ### High Level Structure
 1. Signal Capture Layer
 2. Event Normalization and Enrichment
