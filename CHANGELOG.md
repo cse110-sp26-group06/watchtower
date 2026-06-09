@@ -10,11 +10,18 @@ Versioning will be as follows:
 0.1.0 → error pipeline end-to-end \
 0.2.0 → performance capture
 
-Stretch goals being pursued time-permitting (not part of confirmed MVP): feedback widgets, notifications, GitHub Issues integration, build signals. See [ADR 0009](docs/adr/0009-final-release-scope.md).
+Stretch goals being pursued time-permitting (not part of confirmed MVP): notifications, feedback widgets, GitHub Issues integration, build signals. See [ADR 0009](docs/adr/0009-final-release-scope.md).
 
 ## [Unreleased]
 
-*(Performance capture and dashboard visibility — target 0.2.0)*
+### Added
+- Backend `GET /api/notifications/settings` and `POST /api/notifications/settings` endpoints for storing per-user, per-project email notification preferences.
+- Daily email digest cron job (9am PST) that sends a styled HTML summary of the last 24 hours of errors to users with email notifications enabled.
+- Dashboard alerts page with a toggle to enable or disable email notifications per project.
+
+---
+
+## [0.2.0] - 2026-06-07
 
 ### Added
 - SDK performance capture via `PerformanceObserver` (resource, paint, and navigation entries) with `capturePerformance()` entrypoint.
