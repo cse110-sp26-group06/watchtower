@@ -76,7 +76,7 @@ Go to the [WatchTower dashboard](https://cse110-sp26-group06.github.io/watchtowe
 **2. Install the SDK**
 
 ```sh
-npm install github:cse110-sp26-group06/watchtower
+npm install https://github.com/cse110-sp26-group06/watchtower
 ```
 
 **3. Initialize WatchTower in your site**
