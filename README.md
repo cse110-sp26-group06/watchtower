@@ -108,7 +108,7 @@ That's it. WatchTower will automatically capture JavaScript errors and performan
 | [Sprint Overviews](docs/sprints/) | Per-sprint goals and sub-team deliverables. |
 | [Changelog](CHANGELOG.md) | Notable changes per version. |
 
-For deeper docs, see the project [Wiki](#) *(https://github.com/cse110-sp26-group06/watchtower/wiki)*.
+For deeper docs, see the project [Wiki](https://github.com/cse110-sp26-group06/watchtower/wiki).
 
 ## Team
 
