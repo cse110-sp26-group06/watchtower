@@ -65,6 +65,7 @@ WatchTower has three deliverables:
   ├── playwright.config.cjs         # E2E test configuration
   ├── package.json                  # Root scripts (lint, test, e2e)
   └── CHANGELOG.md                  # Notable changes per version
+  ```
 
 ## How to Run
 
