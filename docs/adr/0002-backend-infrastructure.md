@@ -1,4 +1,4 @@
-# ADR-001: Use Cloudflare D1 as the Primary Database
+# Use Cloudflare D1 as the primary database
 
 ## Status
 
