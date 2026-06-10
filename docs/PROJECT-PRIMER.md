@@ -214,6 +214,7 @@ If a term in the issue isn't familiar, check the **Glossary** below. If a term *
 - [**Repo**](https://github.com/cse110-sp26-group06/watchtower)
 - [**Project board**](https://github.com/orgs/cse110-sp26-group06/projects/1)
 - [**Wiki / docs site**](https://github.com/cse110-sp26-group06/watchtower/wiki)
+- [**Testing app**](https://github.com/cse110-sp26-group06/watchtower-testing)
 - [**ADRs**](/docs/adr/index.md)
 - [**Design files (wireframes, etc.)**](/docs/ucd/)
 - [**Meeting notes**](https://github.com/cse110-sp26-group06/cse110-sp26-group06/tree/main/admin/meetings/Team%20Meetings)
